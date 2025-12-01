@@ -1,0 +1,98 @@
+.full-calendar-wrapper {
+  display: grid;
+  grid-template-columns: 1fr 1fr; /* Adjust column ratio if needed */
+  gap: 1.5rem;
+  height: 350px; /* Give the wrapper a fixed height */
+}
+
+.calendar-component-container,
+.time-slots-container {
+  overflow-y: auto;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  padding: 1rem;
+}
+
+/* Specific styling for react-day-picker container */
+.calendar-component-container {
+  display: flex;
+  justify-content: center;
+}
+
+.calendar-footer {
+  text-align: center;
+  font-size: 0.85rem;
+  color: #888;
+  padding-top: 0.5rem;
+}
+
+.slots-header {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 1rem;
+  position: sticky;
+  top: -1rem;
+  background: white;
+  padding: 0.5rem 0;
+  z-index: 10;
+}
+
+.time-slots-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(75px, 1fr));
+  gap: 0.5rem;
+}
+
+.time-slot {
+  padding: 0.75rem;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  background-color: #f8f8f8;
+  color: #aaa;
+  cursor: not-allowed;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.time-slot.available {
+  background-color: #e8f5e9;
+  color: #388e3c;
+  cursor: pointer;
+  border-color: #a5d6a7;
+}
+
+.time-slot.available:hover {
+  background-color: #c8e6c9;
+  border-color: #81c784;
+}
+
+.time-slot.selected {
+  background-color: #1976d2;
+  color: #fff;
+  border-color: #1565c0;
+  transform: scale(1.05);
+  font-weight: 700;
+}
+
+.time-slot.editable {
+  cursor: pointer;
+  background-color: #f0f2f5;
+  color: #333;
+  border-color: #ddd;
+}
+
+.time-slot.editable:hover {
+  background-color: #e0e4e8;
+}
+
+.time-slot.editable.selected {
+  background-color: #4caf50;
+  border-color: #388e3c;
+  color: #fff;
+  font-weight: 700;
+}
+
+.custom-day-picker .rdp-caption_label {
+  color: #1976d2;
+}

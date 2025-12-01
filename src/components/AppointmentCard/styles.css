@@ -1,0 +1,118 @@
+.appointment-card {
+  display: grid;
+  /* Updated to include a 4th column for the delete button */
+  grid-template-columns: 2fr 1fr auto;
+  align-items: center;
+  padding: 1.25rem;
+  background: #fdfdfd;
+  border-radius: 10px;
+  border-left: 5px solid #ccc;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+  transition: box-shadow 0.2s ease-in-out;
+  gap: 1rem; /* Added gap for better spacing */
+}
+
+/* Only apply hover effect and cursor if the card is clickable */
+.appointment-card.clickable {
+  cursor: pointer;
+}
+
+.appointment-card.clickable:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+/* --- Status Colors --- */
+.appointment-card.status-confirmed {
+  border-left-color: #4caf50; /* Green */
+}
+.appointment-card.status-pending,
+.appointment-card.status-upcoming {
+  border-left-color: #ff9800; /* Orange */
+}
+.appointment-card.status-completed {
+  border-left-color: #4db5ff; /* Blue */
+}
+.appointment-card.status-cancelled {
+  border-left-color: #e26d6d; /* Red */
+}
+
+/* --- Card Content --- */
+.appointment-details .primary-name {
+  font-weight: 700;
+  font-size: 1.2rem;
+  color: #333;
+}
+
+.appointment-time {
+  display: flex;
+  flex-direction: column;
+  color: #555;
+  font-weight: 500;
+  font-size: 0.95rem;
+}
+
+/* --- Status and Delete Button Wrapper --- */
+.appointment-status-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 1rem;
+}
+
+.appointment-status {
+  font-weight: 700;
+  font-size: 1rem;
+  text-align: right;
+  min-width: 90px; /* Ensures alignment */
+}
+
+/* Adding text colors to statuses for better visual cues */
+.status-confirmed .appointment-status {
+  color: #4caf50;
+}
+.status-pending .appointment-status,
+.status-upcoming .appointment-status {
+  color: #ff9800;
+}
+.status-completed .appointment-status {
+  color: #4db5ff;
+}
+.status-cancelled .appointment-status {
+  color: #e26d6d;
+}
+
+/* --- Delete Button Styling --- */
+.delete-appointment-btn {
+  background: none;
+  border: none;
+  color: #aaa;
+  font-size: 1.6rem;
+  font-weight: 700;
+  line-height: 1;
+  cursor: pointer;
+  padding: 0 0.25rem;
+  transition: color 0.2s ease;
+}
+
+.delete-appointment-btn:hover {
+  color: #e26d6d; /* Red on hover */
+}
+
+/* ... existing styles for .appointment-card, etc. ... */
+
+.appointment-details {
+  display: flex;
+  flex-direction: column; /* Stack the names vertically */
+  gap: 0.25rem; /* Add a small gap between the names */
+  flex-grow: 1;
+}
+
+.primary-name {
+  font-weight: 600;
+  color: #333;
+}
+
+.secondary-name {
+  font-size: 0.875rem; /* Make the pet's name slightly smaller */
+  color: #666;
+}

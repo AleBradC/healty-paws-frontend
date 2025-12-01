@@ -1,0 +1,25 @@
+.textarea-wrapper {
+  display: grid;
+  gap: 0.5rem;
+}
+
+.textarea-label {
+  font-weight: 600;
+  color: #343a40;
+}
+
+.textarea-field {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  border: 1px solid #ced4da;
+  border-radius: 8px;
+  font-size: 1rem;
+  line-height: 1.5;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.textarea-field:focus {
+  outline: none;
+  border-color: #007bff;
+  box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
+}

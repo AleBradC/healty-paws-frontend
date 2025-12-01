@@ -1,0 +1,65 @@
+/* --- Main Page Layout --- */
+.summary-page-wrapper {
+  max-width: 960px;
+  margin: 2rem auto;
+  padding: 2rem;
+  background-color: #f8f9fa;
+}
+
+.page-main-title {
+  font-size: 2.5rem;
+  font-weight: 800;
+  color: #212529;
+  text-align: center;
+  margin-bottom: 2.5rem;
+}
+
+.details-section {
+  background: #fff;
+  padding: 2rem;
+  border-radius: 12px;
+  box-shadow: 0 4px_20px rgba(0, 0, 0, 0.05);
+  margin-bottom: 2rem;
+}
+
+.section-title {
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: #343a40;
+  margin-bottom: 1.5rem;
+  border-bottom: 2px solid #e9ecef;
+  padding-bottom: 0.75rem;
+}
+
+.section-actions {
+  margin-top: 1.5rem;
+  display: flex;
+  justify-content: flex-end;
+}
+
+/* --- Summary Grid & Info Blocks --- */
+.summary-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 1.5rem;
+}
+
+/* --- Diagnostic Summary Section --- */
+.diagnostic-summary {
+  margin-bottom: 2rem;
+}
+
+.diagnostic-summary h4 {
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: #007bff;
+  margin-bottom: 1rem;
+}
+
+.no-record-note {
+  color: #888;
+  font-style: italic;
+  padding: 1rem;
+  background-color: #f8f9fa;
+  border-radius: 6px;
+}

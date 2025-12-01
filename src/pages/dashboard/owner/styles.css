@@ -1,0 +1,189 @@
+/* General Dashboard Layout */
+.dashboard-wrapper {
+  max-width: 900px;
+  margin: 2rem auto;
+  padding: 2rem;
+  background-color: #f9f9f9;
+}
+
+.dashboard-title {
+  font-size: 2.2rem;
+  font-weight: 800;
+  color: #2c2c2c;
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+/* Tabs */
+.dashboard-tabs {
+  display: flex;
+  border-bottom: 2px solid #e0e0e0;
+  margin-bottom: 2rem;
+}
+
+.tab-button {
+  padding: 1rem 1.5rem;
+  border: none;
+  background: none;
+  cursor: pointer;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #888;
+  transition: color 0.2s ease;
+}
+
+.tab-button:hover {
+  color: #333;
+}
+
+.tab-button.active {
+  color: #2c2c2c;
+  border-bottom: 3px solid #4db5ff;
+}
+
+/* Form & Profile Styling */
+.profile-form {
+  display: grid;
+  gap: 1.25rem;
+  background: #fff;
+  padding: 2rem;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+.section-title {
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: #333;
+  margin-bottom: 1.5rem;
+}
+
+.section-title.no-border {
+  border-bottom: none;
+  margin-bottom: 0;
+}
+
+/* .form-actions {
+  justify-self: end;
+  margin-top: 1rem;
+} */
+
+.form-actions {
+  display: flex;
+  gap: 1rem;
+}
+
+.aligned-end {
+  justify-content: flex-end;
+}
+
+/* Image Upload Component */
+.image-upload-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  padding-bottom: 1rem;
+}
+
+.profile-image-preview {
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 3px solid #f0f0f0;
+}
+
+.upload-button {
+  display: inline-block;
+  padding: 0.7rem 1.4rem;
+  border-radius: 8px;
+  background-color: #333;
+  color: #fff;
+  font-weight: 600;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.upload-button:hover {
+  background-color: #555;
+}
+
+.image-upload-wrapper input[type="file"] {
+  display: none;
+}
+
+/* Appointments Section */
+.appointments-section {
+  display: grid;
+  gap: 1.5rem;
+}
+
+.appointments-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 2px solid #e0e0e0;
+  padding-bottom: 1rem;
+}
+
+.appointments-list {
+  display: grid;
+  gap: 1rem;
+}
+
+.pet-details-grid {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 2rem;
+  align-items: flex-start;
+  margin-bottom: 2rem;
+}
+
+.general-details-inputs {
+  display: grid;
+  gap: 1.25rem;
+}
+
+.health-section {
+  border-top: 1px solid #e0e0e0;
+  padding-top: 1.5rem;
+}
+
+.sub-section-title {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 1rem;
+}
+
+.health-category {
+  margin-bottom: 1.5rem;
+}
+
+.health-category h4 {
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: #555;
+  border-bottom: 1px solid #eee;
+  padding-bottom: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.no-record-note {
+  color: #888;
+  font-style: italic;
+}
+
+.global-error {
+  color: #d93025;
+  font-weight: 600;
+  text-align: center;
+  background-color: #f8d7da;
+  border: 1px solid #f5c6cb;
+  border-radius: 8px;
+  padding: 0.8rem;
+  width: 100%;
+  box-sizing: border-box;
+}

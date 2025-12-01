@@ -1,0 +1,24 @@
+.condition-summary-card {
+  background-color: #f8f9fa;
+  border-left: 4px solid #6c757d;
+  padding: 1rem;
+  border-radius: 6px;
+  margin-bottom: 0.75rem;
+}
+
+.condition-summary-card.active {
+  border-left-color: #28a745;
+  background-color: #e9f7ef;
+}
+
+.condition-summary-card strong {
+  display: block;
+  margin-bottom: 0.25rem;
+  color: #333;
+  font-size: 1.1rem;
+}
+
+.condition-summary-card p {
+  margin: 0;
+  color: #555;
+}

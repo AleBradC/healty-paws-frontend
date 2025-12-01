@@ -1,0 +1,118 @@
+:root {
+  /* Core Colors */
+  --color-primary: #4db5ff; /* Soft Sky Blue */
+  --color-secondary: #a3e4d7; /* Pastel Green */
+  --color-background: #fafafa; /* Off White */
+  --color-text: #2c2c2c; /* Dark Gray */
+  --color-accent: #ff8e72; /* Peach */
+
+  /* Extended palette (lighter / darker variations) */
+  --color-primary-light: #80ccff;
+  --color-primary-dark: #2a91d6;
+
+  --color-secondary-light: #cff2eb;
+  --color-secondary-dark: #73cfc0;
+
+  --color-accent-light: #ffb09b;
+  --color-accent-dark: #e66a52;
+
+  /* Optional semantic tokens */
+  --color-success: var(--color-secondary);
+  --color-warning: var(--color-accent);
+  --color-info: var(--color-primary);
+  --color-error: #e57373;
+
+  /* Base UI elements */
+  --font-body: "Inter", "Segoe UI", sans-serif;
+  --border-radius: 8px;
+  --shadow-soft: 0 2px 5px rgba(0, 0, 0, 0.07);
+
+  --container-w: 1100px;
+  --radius: 10px;
+  --shadow-soft: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+:root {
+  /* Core Colors */
+  --color-primary: #4db5ff; /* Soft Sky Blue */
+  --color-secondary: #a3e4d7; /* Pastel Green */
+  --color-background: #fafafa; /* Off White */
+  --color-text: #2c2c2c; /* Dark Gray */
+  --color-accent: #ff8e72; /* Peach */
+
+  /* Extended palette (lighter / darker variations) */
+  --color-primary-light: #80ccff;
+  --color-primary-dark: #2a91d6;
+
+  --color-secondary-light: #cff2eb;
+  --color-secondary-dark: #73cfc0;
+
+  --color-accent-light: #ffb09b;
+  --color-accent-dark: #e66a52;
+
+  /* Optional semantic tokens */
+  --color-success: var(--color-secondary);
+  --color-warning: var(--color-accent);
+  --color-info: var(--color-primary);
+  --color-error: #e57373;
+
+  /* Base UI elements */
+  --font-body: "Inter", "Segoe UI", sans-serif;
+  --border-radius: 8px;
+
+  --container-w: 1100px;
+  --radius: 10px;
+  --shadow-soft: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+html,
+body {
+  height: 100%;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  overflow-x: hidden;
+}
+
+body {
+  background-color: var(--color-background);
+  color: var(--color-text);
+  font-family: var(--font-body);
+  line-height: 1.5;
+}
+
+* {
+  box-sizing: border-box;
+  padding: 0;
+  margin: 0;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+#root {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+main {
+  flex: 1;
+  width: 100%;
+  max-width: var(--container-w);
+  margin: 0 auto;
+  padding: 2rem 1rem;
+}
+
+footer {
+  margin-top: auto;
+  width: 100%;
+}
+
+@media (prefers-color-scheme: dark) {
+  html {
+    color-scheme: dark;
+  }
+}

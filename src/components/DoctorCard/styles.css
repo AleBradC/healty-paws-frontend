@@ -1,0 +1,74 @@
+.doctor-card {
+  display: grid;
+  grid-template-columns: 150px 1fr;
+  gap: 1.5rem;
+  background: #fff;
+  border-radius: 12px;
+  padding: 1.5rem;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  align-items: center;
+}
+
+.doctor-photo {
+  width: 150px;
+  height: 150px;
+}
+
+.doctor-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 50%; /* Makes the image circular */
+}
+
+.doctor-details {
+  display: grid;
+  gap: 0.5rem;
+}
+
+.doctor-name {
+  margin: 0;
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #2c2c2c;
+}
+
+.doctor-specialization {
+  margin: 0;
+  font-size: 1.1rem;
+  font-weight: 500;
+  color: #4db5ff; /* Or your primary theme color */
+}
+
+.doctor-location {
+  margin-top: 0.5rem;
+  font-size: 1rem;
+  color: rgba(0, 0, 0, 0.7);
+}
+
+.doctor-clinic,
+.doctor-address {
+  margin: 0;
+}
+
+.doctor-actions {
+  margin-top: 1rem;
+  justify-self: start;
+}
+
+/* Responsive adjustments for smaller screens */
+@media (max-width: 600px) {
+  .doctor-card {
+    grid-template-columns: 1fr;
+    text-align: center;
+  }
+
+  .doctor-photo {
+    margin: 0 auto;
+  }
+
+  .doctor-actions {
+    justify-self: center;
+  }
+}

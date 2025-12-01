@@ -1,0 +1,178 @@
+/* General Page Layout */
+.details-page-wrapper {
+  max-width: 900px;
+  margin: 2rem auto;
+  padding: 2rem;
+  background-color: #ffffff;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+.page-main-title {
+  text-align: center;
+  margin-bottom: 2rem;
+  color: #333;
+}
+
+.details-section {
+  margin-bottom: 2.5rem;
+  border-top: 1px solid #eee;
+  padding-top: 1.5rem;
+}
+
+.section-title {
+  margin-bottom: 1.5rem;
+  color: #1a73e8;
+  font-size: 1.5rem;
+  border-bottom: 2px solid #1a73e8;
+  padding-bottom: 0.5rem;
+  display: inline-block;
+}
+
+/* Forms and Grids */
+.patient-details-form,
+.details-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1.5rem;
+}
+
+.appointment-details-form .appointment-date {
+  font-size: 1.1rem;
+  margin-bottom: 1rem;
+  color: #5f6368;
+}
+
+.labeled-input {
+  display: flex;
+  flex-direction: column;
+}
+
+.labeled-input label {
+  margin-bottom: 0.5rem;
+  font-weight: 500;
+  color: #3c4043;
+}
+
+/* Diagnostic Section */
+.diagnostic-category {
+  margin-top: 2rem;
+  padding: 1.5rem;
+  background-color: #f8f9fa;
+  border-radius: 8px;
+  margin-bottom: 1.5rem;
+}
+
+.diagnostic-category h4 {
+  font-size: 1.2rem;
+  color: #333;
+  margin-top: 0;
+  margin-bottom: 1rem;
+}
+
+.diagnostic-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.diagnostic-row {
+  display: grid;
+  gap: 1rem;
+  padding: 1rem;
+  border: 1px solid #e0e0e0;
+  border-radius: 6px;
+  position: relative;
+}
+
+.diagnostic-row.readonly {
+  background-color: #fff;
+  grid-template-columns: 1fr 1fr;
+}
+
+.diagnostic-row.readonly.active-treatment {
+  grid-template-columns: repeat(4, 1fr);
+}
+
+.diagnostic-row.editable {
+  background-color: #e8f0fe;
+  border-color: #1a73e8;
+  align-items: flex-end;
+}
+
+.diagnostic-row.editable.active-treatment-edit {
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.readonly-info-block .readonly-label {
+  font-size: 0.8rem;
+  color: #5f6368;
+  text-transform: uppercase;
+  margin-bottom: 0.25rem;
+}
+
+.readonly-info-block .readonly-value {
+  font-size: 1rem;
+  color: #202124;
+}
+
+.delete-diagnostic-row-btn {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  background-color: #f44336;
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 24px;
+  height: 24px;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+  transition: background-color 0.2s;
+}
+
+.delete-diagnostic-row-btn:hover {
+  background-color: #d32f2f;
+}
+
+.edit-row-actions {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+/* Page Actions */
+.page-actions {
+  margin-top: 2rem;
+  display: flex;
+  justify-content: flex-end;
+  border-top: 1px solid #eee;
+  padding-top: 1.5rem;
+}
+
+.consultation-notes-section .consultation-type-wrapper {
+  margin-bottom: 1.5rem;
+}
+
+.consultation-notes-section .consultation-type-wrapper input,
+.consultation-notes-section .consultation-type-wrapper input.fullWidth {
+  width: 100%;
+}
+
+.consultation-notes-section .consultation-textareas-row {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.consultation-notes-section .consultation-textareas-row .textarea-wrapper {
+  flex: 1 1 0;
+  margin-bottom: 0;
+}

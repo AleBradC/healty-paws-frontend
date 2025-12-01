@@ -1,0 +1,107 @@
+/* --- Main Page Layout --- */
+.summary-page-wrapper {
+  max-width: 960px;
+  margin: 2rem auto;
+  padding: 2rem;
+  background-color: #f8f9fa;
+}
+
+.page-main-title {
+  font-size: 2.5rem;
+  font-weight: 800;
+  color: #212529;
+  text-align: center;
+  margin-bottom: 2.5rem;
+}
+
+.details-section {
+  background: #fff;
+  padding: 2rem;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+  margin-bottom: 2rem;
+}
+
+.section-title {
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: #343a40;
+  margin-bottom: 1.5rem;
+  border-bottom: 2px solid #e9ecef;
+  padding-bottom: 0.75rem;
+}
+
+/* --- Summary Grid & Info Blocks (Used for Patient Details) --- */
+.summary-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1.5rem;
+}
+
+.info-block {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.info-label {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #6c757d;
+  text-transform: uppercase;
+}
+
+.info-value {
+  font-size: 1.1rem;
+  color: #212529;
+}
+
+/* --- Health Record Section --- */
+.diagnostic-summary {
+  margin-bottom: 2rem;
+}
+
+.diagnostic-summary:last-child {
+  margin-bottom: 0;
+}
+
+.diagnostic-summary h4 {
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: #007bff;
+  margin-bottom: 1rem;
+}
+
+/* --- Appointment History Table --- */
+.appointment-history-list table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 1rem;
+}
+
+.appointment-history-list th,
+.appointment-history-list td {
+  text-align: left;
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid #dee2e6;
+}
+
+.appointment-history-list th {
+  background-color: #f8f9fa;
+  font-weight: 600;
+  color: #495057;
+}
+
+.appointment-history-list tr:last-child td {
+  border-bottom: none;
+}
+
+/* --- General Note for empty sections --- */
+.no-record-note {
+  color: #888;
+  font-style: italic;
+  padding: 1rem;
+  background-color: #f8f9fa;
+  border-radius: 6px;
+  text-align: center;
+}

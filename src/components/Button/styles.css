@@ -1,0 +1,74 @@
+.btn {
+  border: 0;
+  border-radius: var(--radius);
+  font-weight: 400;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+  white-space: nowrap;
+  text-decoration: none;
+  transition: background-color 0.2s ease, color 0.2s ease, transform 0.05s ease;
+}
+
+.btn:active {
+  transform: translateY(1px);
+}
+
+/* Sizes */
+.btn--sm {
+  padding: 0.45rem 0.85rem;
+  font-size: 1rem;
+}
+.btn--md {
+  padding: 0.8rem 1.2rem;
+  font-size: 1.2rem;
+}
+.btn--lg {
+  padding: 0.8rem 1.25rem;
+  font-size: 1.4rem;
+  width: 100%;
+}
+
+/* Variants (with simple hover) */
+.btn--default {
+  background: var(--color-default);
+  color: var(--color-text);
+}
+.btn--default:hover {
+  background: grey;
+}
+
+.btn--primary {
+  background: var(--color-primary);
+  color: var(--color-text);
+}
+.btn--primary:hover {
+  filter: brightness(0.92);
+}
+
+.btn--secondary {
+  background: var(--color-secondary);
+  color: var(--color-text);
+}
+.btn--secondary:hover {
+  filter: brightness(0.92);
+}
+
+.btn--accent {
+  background: var(--color-accent);
+  color: var(--color-text);
+}
+.btn--accent:hover {
+  filter: brightness(0.92);
+}
+
+.btn--neutral {
+  background: #fff;
+  color: var(--color-text);
+  border: 1px solid rgba(0, 0, 0, 0.1);
+}
+.btn--neutral:hover {
+  background: #f4f4f4;
+}

@@ -1,0 +1,109 @@
+.input-field {
+  display: grid;
+  gap: 0.4rem;
+}
+
+.input-field.full-width {
+  width: 100%;
+}
+
+.input-label {
+  font-weight: 700;
+  color: #2b3442;
+  font-size: 0.95rem;
+}
+
+.input-control {
+  position: relative;
+  display: grid;
+  align-items: center;
+  background: #fff;
+  border: 1px solid rgba(0, 0, 0, 0.14);
+  border-radius: 12px;
+  transition: box-shadow 0.15s ease, border-color 0.15s ease;
+}
+
+.input-control:focus-within {
+  border-color: #4db5ff; /* Use your theme's primary color */
+  box-shadow: 0 0 0 3px rgba(77, 181, 255, 0.18);
+}
+
+.input-native {
+  width: 100%;
+  border: 0;
+  outline: none;
+  background: transparent;
+  color: #223041;
+  font-size: 1rem;
+  padding: 0.85rem 1rem;
+  padding-right: 2.5rem; /* Room for toggle icon */
+}
+
+/* Sizing */
+.input-control.size-sm {
+  border-radius: 10px;
+}
+.input-control.size-sm .input-native {
+  padding: 0.6rem 0.9rem;
+  font-size: 0.95rem;
+}
+
+.input-control.size-md {
+  border-radius: 12px;
+}
+.input-control.size-md .input-native {
+  padding: 0.85rem 1rem;
+}
+
+.input-control.size-lg {
+  border-radius: 14px;
+}
+.input-control.size-lg .input-native {
+  padding: 1rem 1.1rem;
+  font-size: 1.05rem;
+}
+
+/* Icons */
+.input-left-icon,
+.input-right-icon,
+.input-toggle {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  color: rgba(0, 0, 0, 0.55);
+  display: flex;
+  align-items: center;
+}
+
+.input-left-icon {
+  left: 12px;
+}
+
+.input-right-icon {
+  right: 12px;
+}
+
+.input-toggle {
+  right: 12px;
+  background: none;
+  border: 0;
+  cursor: pointer;
+  padding: 0;
+}
+
+/* Error State */
+.input-control.has-error {
+  border-color: #e26d6d;
+  box-shadow: none;
+}
+
+.input-hint {
+  color: rgba(0, 0, 0, 0.6);
+  font-size: 0.9rem;
+}
+
+.input-error-text {
+  color: #c24444;
+  font-weight: 600;
+  font-size: 0.9rem;
+}
