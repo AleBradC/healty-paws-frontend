@@ -1,17 +1,17 @@
-import React, {
+import {
   useState,
   useEffect,
   type ChangeEvent,
   type FormEvent,
 } from "react";
 import { useNavigate } from "react-router-dom";
-import { AppointmentCard } from "../../../components/AppointmentCard/AppointmentCard";
-import { BookingModal } from "../../../components/BookingModal/BookingModal";
-import { ConditionSummaryCard } from "../../../components/ConditionSummaryCard/ConditionSummaryCard";
-import { Input } from "../../../components/Input/Input";
-import { Modal } from "../../../components/Modal/Modal";
-import { ProtectedRoute } from "../../../components/ProtectedRoute/ProtectedRoute";
-import { Tabs } from "../../../components/Tabs/Tabs";
+import { AppointmentCard } from "../../../components/features/AppointmentCard/AppointmentCard";
+import { BookingModal } from "../../../components/features/BookingModal/BookingModal";
+import { ConditionSummaryCard } from "../../../components/features/ConditionSummaryCard/ConditionSummaryCard";
+import { Input } from "../../../components/ui/Input/Input";
+import { Modal } from "../../../components/ui/Modal/Modal";
+import { ProtectedRoute } from "../../../router/ProtectedRoute/ProtectedRoute";
+import { Tabs } from "../../../components/ui/Tabs/Tabs";
 import {
   useCreateAppointment,
   type queryInput,
@@ -24,8 +24,8 @@ import { useUpdateOwner } from "../../../lib/graphql/owner/useUpdateOwner";
 import type { Pet } from "../../../types";
 import { appointmentSummaryPath } from "../../../utils/path";
 import { useAuthentication } from "../../../context/AuthenticationContext";
-import { Button } from "../../../components/Button/Button";
-import { Loading } from "../../../components/Loading/Loading";
+import { Button } from "../../../components/ui/Button/Button";
+import { Loading } from "../../../components/ui/Loading/Loading";
 import { useOwner } from "../../../lib/graphql/owner/useOwner";
 import "./styles.css";
 
@@ -151,7 +151,7 @@ export default function PatientDashboardPage() {
   const petsForBookingModal = pets.map((pet) => ({
     id: pet.id,
     name: pet.name,
-  })) as Pet[];
+  })) as unknown as Pet[];
 
   // --- Handlers ---
 
@@ -341,7 +341,7 @@ export default function PatientDashboardPage() {
               <Input
                 name="email"
                 label="My Email"
-                defaultValue={owner.email}
+                defaultValue={owner.email ?? ""}
                 readOnly
               />
               <div className="form-actions aligned-end">
@@ -518,7 +518,7 @@ export default function PatientDashboardPage() {
         {isBookingModalOpen && (
           <BookingModal
             pets={petsForBookingModal}
-            doctor={detailedDoctor}
+            doctor={detailedDoctor as any}
             isLoading={detailedDoctorLoading}
             onDoctorSelect={(doctor) => setSelectedDoctorId(doctor.id)}
             onClose={handleCloseBookingModal}

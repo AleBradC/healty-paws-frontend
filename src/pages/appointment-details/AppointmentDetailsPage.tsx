@@ -1,11 +1,11 @@
-import React, { useState, useEffect, type ChangeEvent } from "react";
+import { useState, useEffect, type ChangeEvent } from "react";
 import { useParams } from "react-router-dom";
-import { Input } from "../../components/Input/Input";
-import { ProtectedRoute } from "../../components/ProtectedRoute/ProtectedRoute";
-import { Textarea } from "../../components/Textarea/Textarea";
+import { Input } from "../../components/ui/Input/Input";
+import { ProtectedRoute } from "../../router/ProtectedRoute/ProtectedRoute";
+import { Textarea } from "../../components/ui/Textarea/Textarea";
 import { useAppointment } from "../../lib/graphql/appointments/useAppointment";
-import type { queryInput } from "../../lib/graphql/appointments/useUpdateAppointment";
 import { useUpdateAppointment } from "../../lib/graphql/appointments/useUpdateAppointment";
+import type { UpdateAppointmentInput } from "../../generated/graphql";
 import type { LifelongCondition, ActiveTreatment } from "../../types";
 import LabeledInput from "./components/LabeledInput";
 import ReadOnlyInfoBlock from "./components/ReadOnlyInfoBlock";
@@ -13,7 +13,7 @@ import type {
   EditablePatientDetails,
   EditableAppointmentDetails,
 } from "./types";
-import { Button } from "../../components/Button/Button";
+import { Button } from "../../components/ui/Button/Button";
 import "./styles.css";
 
 export default function AppointmentDetailsPage() {
@@ -66,19 +66,19 @@ export default function AppointmentDetailsPage() {
       };
 
       const newLifelongConditions =
-        fetchedAppointment.patient.lifelong_conditions?.map((lc) => ({
+        fetchedAppointment.patient?.lifelong_conditions?.map((lc) => ({
           ...lc,
         })) ?? [];
 
       const newActiveTreatments =
-        fetchedAppointment.patient.active_treatments?.map((at) => ({
+        fetchedAppointment.patient?.active_treatments?.map((at) => ({
           ...at,
         })) ?? [];
 
-      setPatientDetails(newPatientDetails);
+      setPatientDetails(newPatientDetails as unknown as EditablePatientDetails);
       setAppointmentDetails(newAppointmentDetails);
       setLifelongConditions(newLifelongConditions);
-      setActiveTreatments(newActiveTreatments);
+      setActiveTreatments(newActiveTreatments as unknown as ActiveTreatment[]);
       setInitialSnapshot({
         patientDetails: JSON.stringify(newPatientDetails),
         appointmentDetails: JSON.stringify(newAppointmentDetails),
@@ -222,7 +222,7 @@ export default function AppointmentDetailsPage() {
       },
       lifelongConditions: lifelongConditionsToUpsert,
       activeTreatments: activeTreatmentsToUpsert,
-    } as unknown as queryInput;
+    } as unknown as UpdateAppointmentInput;
 
     try {
       await updateAppointmentDetails(input);
@@ -273,7 +273,7 @@ export default function AppointmentDetailsPage() {
             <Input
               name="ownerName"
               label="Owner"
-              value={fetchedAppointment.patient.owner.name ?? ""}
+              value={fetchedAppointment.patient?.owner?.name ?? ""}
               readOnly
             />
             <Input

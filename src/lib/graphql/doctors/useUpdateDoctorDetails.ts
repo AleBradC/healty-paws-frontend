@@ -1,41 +1,23 @@
 import { useMutation } from "@apollo/client/react";
-import { updateDoctorDetailsMutation } from "../queries";
-import type { Doctor } from "../../../types";
-
-interface queryInput {
-  doctorId: string;
-  name?: string;
-  clinicName?: string;
-  clinicAddress?: string;
-}
-
-interface queryResponse {
-  updateDoctorProfile: Doctor;
-}
+import {
+  UpdateDoctorProfileDocument,
+  type UpdateDoctorProfileMutationVariables,
+} from "../../../generated/graphql";
 
 export const useUpdateDoctorDetails = () => {
-  const [mutate, { loading, error }] = useMutation<
-    queryResponse,
-    { input: queryInput }
-  >(updateDoctorDetailsMutation);
+  const [mutate, { loading, error }] = useMutation(UpdateDoctorProfileDocument);
 
   const updateDoctorDetails = async (
-    input: queryInput
-  ): Promise<Doctor | null> => {
+    input: UpdateDoctorProfileMutationVariables["input"]
+  ) => {
     try {
-      const { data } = await mutate({
-        variables: { input },
-      });
-      return data?.updateDoctorProfile || null;
+      const { data } = await mutate({ variables: { input } });
+      return data?.updateDoctorProfile ?? null;
     } catch (e) {
       console.error("Error updating doctor details:", e);
       throw e;
     }
   };
 
-  return {
-    updateDoctorDetails,
-    loading,
-    error,
-  };
+  return { updateDoctorDetails, loading, error };
 };

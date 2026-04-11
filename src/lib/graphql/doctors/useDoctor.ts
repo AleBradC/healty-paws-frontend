@@ -1,29 +1,16 @@
 import { useQuery } from "@apollo/client/react";
-import { doctorQuery } from "../queries";
-import type { Doctor } from "../../../types";
-
-interface queryResponse {
-  doctor: Doctor;
-}
-
-interface queryInput {
-  id: string | null;
-}
+import {
+  GetDoctorDocument,
+  type GetDoctorQueryVariables,
+} from "../../../generated/graphql";
 
 export const useDoctor = (id: string | null) => {
-  const { data, loading, error, refetch } = useQuery<queryResponse, queryInput>(
-    doctorQuery,
-    {
-      variables: { id },
-      skip: !id,
-      fetchPolicy: "network-only",
-    }
-  );
+  const variables: GetDoctorQueryVariables = { id: id ?? "" };
+  const { data, loading, error, refetch } = useQuery(GetDoctorDocument, {
+    variables,
+    skip: !id,
+    fetchPolicy: "network-only",
+  });
 
-  return {
-    doctor: data?.doctor,
-    loading,
-    error: Boolean(error),
-    refetch,
-  };
+  return { doctor: data?.doctor, loading, error: Boolean(error), refetch };
 };

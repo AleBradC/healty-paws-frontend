@@ -1,10 +1,10 @@
-import React, { useState, type FormEvent } from "react";
+import { useState, type FormEvent } from "react";
 import { useNavigate } from "react-router-dom";
 import { API_BASE_URL } from "../../../api/endpoint";
-import { Input } from "../../../components/Input/Input";
-import { PublicRoute } from "../../../components/PublicRoute/PublicRoute";
+import { Input } from "../../../components/ui/Input/Input";
+import { PublicRoute } from "../../../router/PublicRoute/PublicRoute";
 import { authLoginPath } from "../../../utils/path";
-import { Button } from "../../../components/Button/Button";
+import { Button } from "../../../components/ui/Button/Button";
 import "../styles.css";
 
 type ResetStep = "email" | "code" | "password" | "success";

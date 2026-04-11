@@ -1,11 +1,11 @@
-import React, { useState, type FormEvent } from "react";
+import { useState, type FormEvent } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import { API_BASE_URL, loginEndpoint } from "../../../api/endpoint";
-import { Input } from "../../../components/Input/Input";
-import { PublicRoute } from "../../../components/PublicRoute/PublicRoute";
+import { Input } from "../../../components/ui/Input/Input";
+import { PublicRoute } from "../../../router/PublicRoute/PublicRoute";
 import { useAuthentication } from "../../../context/AuthenticationContext";
-import { Button } from "../../../components/Button/Button";
+import { Button } from "../../../components/ui/Button/Button";
 import {
   authResetPasswordPath,
   authRegisterPath,

@@ -1,7 +1,7 @@
-import React, { type FC } from "react";
+import { type FC } from "react";
 import { useNavigate } from "react-router-dom";
-import { PublicRoute } from "../../../components/PublicRoute/PublicRoute";
-import { Button } from "../../../components/Button/Button";
+import { PublicRoute } from "../../../router/PublicRoute/PublicRoute";
+import { Button } from "../../../components/ui/Button/Button";
 import {
   authLoginPath,
   authRegisterDoctorPath,

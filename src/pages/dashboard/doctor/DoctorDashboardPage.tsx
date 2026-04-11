@@ -1,4 +1,4 @@
-import React, {
+import {
   useState,
   useEffect,
   type ChangeEvent,
@@ -6,17 +6,15 @@ import React, {
 } from "react";
 import { useNavigate } from "react-router-dom";
 import { format } from "date-fns";
-import { AppointmentCard } from "../../../components/AppointmentCard/AppointmentCard";
-import { AvailabilityModal } from "../../../components/AvailabilityModal/AvailabilityModal";
-import { Input } from "../../../components/Input/Input";
-import { ProtectedRoute } from "../../../components/ProtectedRoute/ProtectedRoute";
-import { Tabs } from "../../../components/Tabs/Tabs";
+import { AppointmentCard } from "../../../components/features/AppointmentCard/AppointmentCard";
+import { AvailabilityModal } from "../../../components/features/AvailabilityModal/AvailabilityModal";
+import { Input } from "../../../components/ui/Input/Input";
+import { ProtectedRoute } from "../../../router/ProtectedRoute/ProtectedRoute";
+import { Tabs } from "../../../components/ui/Tabs/Tabs";
 import { specializationsData } from "../../../data/specialization";
 import { useRemoveAppointment } from "../../../lib/graphql/appointments/useRemoveAppointment";
-import {
-  useAddDoctorAvailability,
-  type queryInput,
-} from "../../../lib/graphql/doctors/useAddDoctorAvailability";
+import { useAddDoctorAvailability } from "../../../lib/graphql/doctors/useAddDoctorAvailability";
+import type { AddDoctorAvailabilityInput } from "../../../generated/graphql";
 import { useAddDoctorSpecialization } from "../../../lib/graphql/doctors/useAddDoctorSpecialization";
 import { useDoctor } from "../../../lib/graphql/doctors/useDoctor";
 import { useRemoveDoctorAvailability } from "../../../lib/graphql/doctors/useRemoveDoctorAvailability";
@@ -30,9 +28,9 @@ import {
 } from "../../../utils/path";
 import { useAuthentication } from "../../../context/AuthenticationContext";
 import { SpecializationEditor } from "./components/SpecializationEditor";
-import { Button } from "../../../components/Button/Button";
-import { Select } from "../../../components/Select/Select";
-import { Loading } from "../../../components/Loading/Loading";
+import { Button } from "../../../components/ui/Button/Button";
+import { Select } from "../../../components/ui/Select/Select";
+import { Loading } from "../../../components/ui/Loading/Loading";
 import "./styles.css";
 
 const doctorTabs = [
@@ -66,7 +64,7 @@ export default function DoctorDashboardPage() {
 
   const [activeTab, setActiveTab] = useState("profile");
   const [isAvailabilityModalOpen, setIsAvailabilityModalOpen] = useState(false);
-  const [imagePreview, setImagePreview] = useState<string | null>(null);
+
 
   // --- STATE: Profile Details ---
   const [profileDetails, setProfileDetails] = useState({
@@ -110,10 +108,10 @@ export default function DoctorDashboardPage() {
 
   // --- EFFECTS ---
   useEffect(() => {
-    setImagePreview(doctor?.imageUrl || null);
+
 
     const availabilityMap: Record<string, string[]> = {};
-    (doctor?.availabilities || []).forEach((avail) => {
+    (doctor?.availabilities ?? []).forEach((avail: { available_datetime: string }) => {
       const dateObj = new Date(avail.available_datetime);
       const date = format(dateObj, "yyyy-MM-dd");
       const time = format(dateObj, "HH:mm");
@@ -334,7 +332,7 @@ export default function DoctorDashboardPage() {
         times.map((time) => new Date(`${date}T${time}:00`).toISOString())
     );
 
-    const input: queryInput = {
+    const input: AddDoctorAvailabilityInput = {
       doctorId: doctor.id,
       availabilities: availabilitiesAsISOStrings,
     };
@@ -384,14 +382,7 @@ export default function DoctorDashboardPage() {
     navigate(`${patientSummaryPath}/${patientId}`);
   };
 
-  const handleChangeImg = (e: ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => setImagePreview(reader.result as string);
-      reader.readAsDataURL(file);
-    }
-  };
+
 
   return (
     <ProtectedRoute allowedRoles={["doctor"]}>
@@ -418,17 +409,6 @@ export default function DoctorDashboardPage() {
                   className="profile-image-preview"
                   style={{ objectFit: "cover", borderRadius: "50%" }}
                 />
-                <label htmlFor="profileImage" className="upload-button">
-                  Change Photo
-                </label>
-                <input
-                  id="profileImage"
-                  name="profileImage"
-                  type="file"
-                  accept="image/*"
-                  onChange={(e) => handleChangeImg(e)}
-                  style={{ display: "none" }}
-                />
               </div>
               <Input
                 name="name"
@@ -439,20 +419,20 @@ export default function DoctorDashboardPage() {
               <Input
                 name="email"
                 label="Email Address"
-                value={doctor.email}
+                value={doctor.email ?? ""}
                 readOnly
                 disabled
               />
               <Input
                 name="clinicName"
                 label="Clinic Name"
-                value={profileDetails.clinicName}
+                value={profileDetails.clinicName ?? ""}
                 onChange={handleProfileChange}
               />
               <Input
                 name="clinicAddress"
                 label="Clinic Address"
-                value={profileDetails.clinicAddress}
+                value={profileDetails.clinicAddress ?? ""}
                 onChange={handleProfileChange}
               />
               <div className="form-actions">
@@ -592,9 +572,9 @@ export default function DoctorDashboardPage() {
                     <AppointmentCard
                       key={app.id}
                       id={app.id}
-                      status={app.status}
-                      doctorName={app.patient.owner?.name}
-                      petName={app.patient.name}
+                      status={app.status ?? "Upcoming"}
+                      doctorName={app.patient?.owner?.name ?? "Unknown Owner"}
+                      petName={app.patient?.name ?? "Unknown Pet"}
                       date={new Date(app.datetime).toLocaleDateString()}
                       time={new Date(app.datetime).toLocaleTimeString([], {
                         hour: "2-digit",
@@ -615,7 +595,7 @@ export default function DoctorDashboardPage() {
             <div className="patients-list-section">
               <h2 className="section-title">My Patients</h2>
               <div className="patient-list">
-                {doctor?.patients?.map((patient) => (
+                {doctor?.patients?.map((patient: { id: string; name: string; owner?: { name: string } | null }) => (
                   <div
                     key={patient.id}
                     className="patient-card"
