@@ -2,30 +2,35 @@
 .modal-overlay {
   position: fixed;
   inset: 0;
-  background-color: rgba(0, 0, 0, 0.6);
+  background-color: rgba(15, 23, 42, 0.4);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
   display: grid;
   place-items: center;
   z-index: 1000;
   padding: 1rem;
+  animation: fadeIn 0.2s ease-out;
 }
 
 .modal-content {
-  background: #fff;
-  padding: 1.5rem 2rem;
-  border-radius: 14px;
+  background: var(--color-secondary-light);
+  padding: 2rem;
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--color-secondary-dark);
   width: 100%;
-  max-width: 700px;
+  max-width: 760px;
   display: flex;
   flex-direction: column;
   max-height: 90vh;
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+  box-shadow: var(--shadow-soft);
+  animation: slideUpFade 0.3s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .modal-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  border-bottom: 1px solid #e5e7eb;
+  border-bottom: 1px solid var(--color-secondary-dark);
   padding-bottom: 1rem;
   margin-bottom: 1.5rem;
 }
@@ -33,36 +38,66 @@
 .modal-header h2 {
   font-size: 1.5rem;
   font-weight: 700;
-  color: #111827;
+  color: var(--color-text);
   margin: 0;
 }
 
 .close-button {
-  background: none;
+  background: var(--color-secondary);
   border: none;
-  font-size: 2.5rem;
+  font-size: 1.5rem;
   line-height: 1;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   cursor: pointer;
-  color: #9ca3af;
-  transition: color 0.2s ease;
+  color: var(--color-text-muted);
+  transition: all 0.2s ease;
 }
 
 .close-button:hover {
-  color: #374151;
+  background: var(--color-error-bg);
+  color: var(--color-error);
 }
 
 .modal-body {
   overflow-y: auto;
-  min-height: 300px;
+  min-height: 200px;
   padding-right: 0.5rem; /* Space for scrollbar */
   margin-right: -0.5rem;
+  color: var(--color-text-muted);
 }
 
 .modal-footer {
   display: flex;
-  justify-content: space-between;
+  justify-content: flex-end;
+  gap: 1rem;
   align-items: center;
-  border-top: 1px solid #e5e7eb;
+  border-top: 1px solid var(--color-secondary-dark);
   padding-top: 1.5rem;
   margin-top: auto;
+}
+
+/* Animations */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideUpFade {
+  from {
+    opacity: 0;
+    transform: translateY(20px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
 }

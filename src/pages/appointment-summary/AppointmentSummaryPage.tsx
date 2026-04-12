@@ -31,6 +31,27 @@ export default function AppointmentSummaryPage() {
         <h1 className="page-main-title">Appointment Summary</h1>
 
         <div className="details-section">
+          <h2 className="section-title">Visit Information</h2>
+          <div className="summary-grid">
+            <InfoBlock label="Doctor" value={appointment?.doctor?.name} />
+            <InfoBlock
+              label="Clinic"
+              value={appointment?.doctor?.clinic_name}
+            />
+            <InfoBlock
+              label="Appointment Date"
+              value={new Date(appointment?.datetime).toLocaleDateString(undefined, {
+                weekday: 'long',
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
+              })}
+            />
+          </div>
+        </div>
+
+        <div className="details-section">
+          <h2 className="section-title">Patient Details</h2>
           <div className="summary-grid">
             <InfoBlock
               label="Patient Name"
@@ -40,30 +61,54 @@ export default function AppointmentSummaryPage() {
               label="Owner"
               value={appointment?.patient?.owner?.name}
             />
-            <InfoBlock label="Doctor" value={appointment?.doctor?.name} />
             <InfoBlock
-              label="Appointment Date"
-              value={new Date(appointment?.datetime).toLocaleDateString()}
+              label="Pet Type"
+              value={appointment?.patient?.type}
+            />
+            <InfoBlock
+              label="Breed"
+              value={appointment?.patient?.breed}
+            />
+            <InfoBlock
+              label="Age"
+              value={`${appointment?.patient?.age} years`}
+            />
+            <InfoBlock
+              label="Weight"
+              value={`${appointment?.patient?.weight} kg`}
             />
           </div>
         </div>
 
         <div className="details-section">
           <h2 className="section-title">Consultation Details</h2>
-          <div className="summary-grid">
-            <InfoBlock label="Reason for Visit" value={appointment?.reason} />
-            <InfoBlock
-              label="Type of Consult"
-              value={appointment?.consultation_type}
-            />
-            <InfoBlock
-              label="Investigation"
-              value={appointment?.investigation}
-            />
-            <InfoBlock
-              label="Investigation Result"
-              value={appointment?.investigation_result}
-            />
+          
+          <div className="diagnostic-summary">
+            <h4>Type of Consultation</h4>
+            <p className="detailed-note-text">
+              {appointment?.consultation_type || "General Clinic Visit"}
+            </p>
+          </div>
+
+          <div className="diagnostic-summary">
+            <h4>Reason for Visit</h4>
+            <p className="detailed-note-text">
+              {appointment?.reason || "No reason specified."}
+            </p>
+          </div>
+
+          <div className="diagnostic-summary">
+            <h4>Investigation</h4>
+            <p className="detailed-note-text">
+              {appointment?.investigation || "No investigation details recorded."}
+            </p>
+          </div>
+
+          <div className="diagnostic-summary">
+            <h4>Investigation Result</h4>
+            <p className="detailed-note-text">
+              {appointment?.investigation_result || "No results available."}
+            </p>
           </div>
         </div>
 

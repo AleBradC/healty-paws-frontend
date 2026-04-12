@@ -9,9 +9,10 @@ import { useNavigate } from "react-router-dom";
 import { API_BASE_URL, registerEndpoint } from "../../../api/endpoint";
 import { Input } from "../../../components/ui/Input/Input";
 import { specializationsData } from "../../../data/specialization";
-import { successPagePath } from "../../../utils/path";
+import { successPagePath, homePath } from "../../../utils/path";
 import { Select } from "../../../components/ui/Select/Select";
 import { Button } from "../../../components/ui/Button/Button";
+import { Link } from "react-router-dom";
 import "../styles.css";
 
 interface ServicePrice {
@@ -202,6 +203,9 @@ export default function RegisterDoctorPage() {
   return (
     <div className="auth-page">
       <div className="auth-card">
+        <Link to={homePath} className="auth-close-button" aria-label="Close">
+          ×
+        </Link>
         <h1 className="auth-title">Doctor Registration</h1>
         {error && <p className="global-error">{error}</p>}
         <form className="auth-form" onSubmit={handleSubmit}>
@@ -278,9 +282,7 @@ export default function RegisterDoctorPage() {
               <h2 className="auth-subtitle">Services & Pricing</h2>
               <section className="form-section">
                 <p className="auth-note">
-                  Based on your specialization{" "}
-                  <strong>"{formData.specialization}"</strong>, please set
-                  prices.
+                  Please select the prices for the services you offer.
                 </p>
                 <div className="services-list">
                   {services.map((service) => (

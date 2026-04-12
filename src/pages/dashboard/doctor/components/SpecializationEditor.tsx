@@ -58,6 +58,7 @@ export function SpecializationEditor({
         <Button
           text="Remove Specialization"
           size="sm"
+          color="danger"
           onClick={() => onDelete(specialization.id)}
         />
       </div>
@@ -75,6 +76,7 @@ export function SpecializationEditor({
               type="button"
               className="delete-service-btn"
               onClick={() => handleDeleteService(service.id)}
+              aria-label="Remove service"
             >
               &times;
             </button>
@@ -100,7 +102,7 @@ export function SpecializationEditor({
             placeholder="Price ($)"
             required
           />
-          <Button text="Add Service to Draft" type="submit" size="sm" />
+          <Button text="+ Add Service" type="submit" size="sm" color="primary" />
         </div>
       </form>
     </div>

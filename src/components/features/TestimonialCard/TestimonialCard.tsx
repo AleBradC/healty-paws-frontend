@@ -9,6 +9,6 @@ interface TestimonialCardProps {
 export const TestimonialCard: FC<TestimonialCardProps> = ({ text, author }) => (
   <article className="testimonial-card">
     <p className="testimonial-text">{text}</p>
-    <p className="testimonial-author">— {author}</p>
+    <p className="testimonial-author">{author}</p>
   </article>
 );

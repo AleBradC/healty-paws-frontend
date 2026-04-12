@@ -51,11 +51,11 @@ export default function AppointmentDetailsPage() {
   useEffect(() => {
     if (fetchedAppointment) {
       const newPatientDetails = {
-        name: fetchedAppointment?.patient?.name,
-        type: fetchedAppointment?.patient?.type,
-        breed: fetchedAppointment.patient?.breed,
-        age: fetchedAppointment.patient?.age,
-        weight: fetchedAppointment.patient?.weight,
+        name: fetchedAppointment?.patient?.name || "",
+        type: fetchedAppointment?.patient?.type || "",
+        breed: fetchedAppointment.patient?.breed || "",
+        age: String(fetchedAppointment.patient?.age ?? ""),
+        weight: String(fetchedAppointment.patient?.weight ?? ""),
       };
 
       const newAppointmentDetails = {
@@ -253,13 +253,28 @@ export default function AppointmentDetailsPage() {
   return (
     <ProtectedRoute allowedRoles={["doctor"]}>
       <div className="details-page-wrapper">
-        <h1 className="page-main-title">Consultation & Health Record</h1>
-        <p className="appointment-date">
-          For appointment on:
-          <strong>
-            {new Date(fetchedAppointment.datetime).toLocaleDateString()}
-          </strong>
-        </p>
+        <h1 className="page-main-title">Appointment details</h1>
+        <div className="page-header-bar">
+          <p className="appointment-date">
+            For appointment on:
+            <strong>
+              {" "}{new Date(fetchedAppointment.datetime).toLocaleDateString()}
+            </strong>
+          </p>
+          <Button
+            text={
+              isSavingAppointmentDetailsLoading
+                ? "Saving..."
+                : changesDetected
+                ? "Save All Changes"
+                : "Saved ✓"
+            }
+            color="primary"
+            size="sm"
+            onClick={handleSaveAll}
+            disabled={!changesDetected || isSavingAppointmentDetailsLoading}
+          />
+        </div>
 
         <div className="details-section">
           <h2 className="section-title">Patient Details</h2>
@@ -309,42 +324,64 @@ export default function AppointmentDetailsPage() {
         <div className="details-section consultation-notes-section">
           <h2 className="section-title">Consultation Notes</h2>
 
-          <div className="consultation-type-wrapper">
-            <Input
-              name="consultation_type"
-              label="Type of Consultation"
-              placeholder="e.g. In-Person, Telehealth"
-              value={appointmentDetails.consultation_type ?? ""}
-              onChange={handleAppointmentDetailChange}
-              fullWidth
-            />
+          <div className="diagnostic-category">
+            <h4>Type of Consultation</h4>
+            <div className="diagnostic-list">
+              <div className="diagnostic-row editable">
+                <Input
+                  name="consultation_type"
+                  placeholder="e.g. In-Person, Telehealth"
+                  value={appointmentDetails.consultation_type ?? ""}
+                  onChange={handleAppointmentDetailChange}
+                  fullWidth
+                />
+              </div>
+            </div>
           </div>
 
-          <div className="consultation-textareas-row">
-            <Textarea
-              name="reason"
-              label="Reason for Visit"
-              placeholder="Enter reason for today's visit..."
-              value={appointmentDetails.reason ?? ""}
-              onChange={handleAppointmentDetailChange}
-              rows={5}
-            />
-            <Textarea
-              name="investigation"
-              label="Investigation"
-              placeholder="Describe investigation details..."
-              value={appointmentDetails.investigation ?? ""}
-              onChange={handleAppointmentDetailChange}
-              rows={5}
-            />
-            <Textarea
-              name="investigation_result"
-              label="Investigation Result"
-              placeholder="Provide investigation results..."
-              value={appointmentDetails.investigation_result ?? ""}
-              onChange={handleAppointmentDetailChange}
-              rows={5}
-            />
+          <div className="diagnostic-category">
+            <h4>Reason for Visit</h4>
+            <div className="diagnostic-list">
+              <div className="diagnostic-row editable">
+                <Textarea
+                  name="reason"
+                  placeholder="Enter reason for today's visit..."
+                  value={appointmentDetails.reason ?? ""}
+                  onChange={handleAppointmentDetailChange}
+                  rows={4}
+                />
+              </div>
+            </div>
+          </div>
+
+          <div className="diagnostic-category">
+            <h4>Investigation</h4>
+            <div className="diagnostic-list">
+              <div className="diagnostic-row editable">
+                <Textarea
+                  name="investigation"
+                  placeholder="Describe investigation details..."
+                  value={appointmentDetails.investigation ?? ""}
+                  onChange={handleAppointmentDetailChange}
+                  rows={4}
+                />
+              </div>
+            </div>
+          </div>
+
+          <div className="diagnostic-category">
+            <h4>Investigation Result</h4>
+            <div className="diagnostic-list">
+              <div className="diagnostic-row editable">
+                <Textarea
+                  name="investigation_result"
+                  placeholder="Provide investigation results..."
+                  value={appointmentDetails.investigation_result ?? ""}
+                  onChange={handleAppointmentDetailChange}
+                  rows={4}
+                />
+              </div>
+            </div>
           </div>
         </div>
 
@@ -391,6 +428,7 @@ export default function AppointmentDetailsPage() {
                   <Button
                     text="Save"
                     size="sm"
+                    color="accent"
                     onClick={() => handleCommitNewDiagnostic("lifelong")}
                   />
                   <Button
@@ -483,6 +521,7 @@ export default function AppointmentDetailsPage() {
                   <Button
                     text="Save"
                     size="sm"
+                    color="accent"
                     onClick={() => handleCommitNewDiagnostic("active")}
                   />
                   <Button
@@ -505,20 +544,6 @@ export default function AppointmentDetailsPage() {
         </div>
 
         {saveError && <div className="error-banner">{saveError}</div>}
-
-        <div className="page-actions">
-          <Button
-            text={
-              isSavingAppointmentDetailsLoading
-                ? "Saving..."
-                : "Save All Changes"
-            }
-            color="primary"
-            size="lg"
-            onClick={handleSaveAll}
-            disabled={!changesDetected || isSavingAppointmentDetailsLoading}
-          />
-        </div>
       </div>
     </ProtectedRoute>
   );

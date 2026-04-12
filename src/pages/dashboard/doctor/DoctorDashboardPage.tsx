@@ -395,61 +395,82 @@ export default function DoctorDashboardPage() {
         />
         <div className="dashboard-content">
           {activeTab === "profile" && (
-            <form className="profile-form" onSubmit={handleSaveDetails}>
-              <h2 className="section-title">My details</h2>
+            <form className="profile-form dashboard-section" onSubmit={handleSaveDetails}>
+              <div className="section-header-row">
+                <h2 className="section-title">My details</h2>
+              </div>
 
               {profileError && <p className="global-error">{profileError}</p>}
 
-              <div className="image-upload-wrapper">
-                <img
-                  src={"/profile-placeholder.jpg"}
-                  alt="Profile Preview"
-                  width={120}
-                  height={120}
-                  className="profile-image-preview"
-                  style={{ objectFit: "cover", borderRadius: "50%" }}
-                />
-              </div>
-              <Input
-                name="name"
-                label="My full name"
-                value={profileDetails.name}
-                onChange={handleProfileChange}
-              />
-              <Input
-                name="email"
-                label="Email Address"
-                value={doctor.email ?? ""}
-                readOnly
-                disabled
-              />
-              <Input
-                name="clinicName"
-                label="Clinic Name"
-                value={profileDetails.clinicName ?? ""}
-                onChange={handleProfileChange}
-              />
-              <Input
-                name="clinicAddress"
-                label="Clinic Address"
-                value={profileDetails.clinicAddress ?? ""}
-                onChange={handleProfileChange}
-              />
-              <div className="form-actions">
-                <Button
-                  text="Save details"
-                  type="submit"
-                  color="primary"
-                  size="lg"
-                  disabled={isUpdatingProfile || !profileHasChanges}
-                />
+              <div className="profile-layout-grid">
+                <div className="profile-sidebar">
+                  <div className="image-upload-wrapper">
+                    <img
+                      src={"/profile-placeholder.jpg"}
+                      alt="Profile Preview"
+                      width={160}
+                      height={160}
+                      className="profile-image-preview"
+                    />
+                    <div className="image-overlay">
+                      <span>Change Photo</span>
+                    </div>
+                  </div>
+                  <p className="profile-info-text">Update your professional profile picture for your clinic profile.</p>
+                </div>
+
+                <div className="profile-main-info">
+                  <div className="inputs-grid">
+                    <Input
+                      name="name"
+                      label="My full name"
+                      value={profileDetails.name}
+                      onChange={handleProfileChange}
+                    />
+                    <Input
+                      name="email"
+                      label="Email Address"
+                      value={doctor.email ?? ""}
+                      readOnly
+                      disabled
+                    />
+                    <div className="full-width-input">
+                      <Input
+                        name="clinicName"
+                        label="Clinic Name"
+                        value={profileDetails.clinicName ?? ""}
+                        onChange={handleProfileChange}
+                      />
+                    </div>
+                    <div className="full-width-input">
+                      <Input
+                        name="clinicAddress"
+                        label="Clinic Address"
+                        value={profileDetails.clinicAddress ?? ""}
+                        onChange={handleProfileChange}
+                      />
+                    </div>
+                  </div>
+                  
+                  <div className="profile-actions">
+                    <Button
+                      text="Save changes"
+                      type="submit"
+                      color="primary"
+                      size="md"
+                      disabled={isUpdatingProfile || !profileHasChanges}
+                    />
+                  </div>
+                </div>
               </div>
             </form>
           )}
 
           {activeTab === "services" && (
-            <div className="services-section-wrapper">
-              <h2 className="section-title">My Specializations & Services</h2>
+            <div className="services-section-wrapper dashboard-section">
+              <div className="section-header-row">
+                <h2 className="section-title">My Specializations & Services</h2>
+              </div>
 
               {servicesError && <p className="global-error">{servicesError}</p>}
 
@@ -473,6 +494,7 @@ export default function DoctorDashboardPage() {
                     <Button
                       text="Add to Draft"
                       size="sm"
+                      color="primary"
                       onClick={handleAddToDraft}
                       disabled={!newSpecializationSelectionId}
                     />
@@ -521,9 +543,12 @@ export default function DoctorDashboardPage() {
           )}
 
           {activeTab === "availability" && (
-            <div className="availability-section">
-              <div className="section-header">
+            <div className="availability-section-wrapper dashboard-section">
+              <div className="section-header-row">
                 <h2 className="section-title">My Availability</h2>
+              </div>
+
+              <div className="availability-controls">
                 <Button
                   text="Manage Availability"
                   color="primary"
@@ -564,8 +589,10 @@ export default function DoctorDashboardPage() {
           )}
 
           {activeTab === "appointments" && (
-            <div className="appointments-section">
-              <h2 className="section-title">My Appointments</h2>
+            <div className="appointments-section dashboard-section">
+              <div className="section-header-row">
+                <h2 className="section-title">My Appointments</h2>
+              </div>
               <div className="appointments-list">
                 {appointments?.length > 0 ? (
                   appointments?.map((app) => (
@@ -592,8 +619,10 @@ export default function DoctorDashboardPage() {
           )}
 
           {activeTab === "patients" && (
-            <div className="patients-list-section">
-              <h2 className="section-title">My Patients</h2>
+            <div className="patients-list-section dashboard-section">
+              <div className="section-header-row">
+                <h2 className="section-title">My Patients</h2>
+              </div>
               <div className="patient-list">
                 {doctor?.patients?.map((patient: { id: string; name: string; owner?: { name: string } | null }) => (
                   <div

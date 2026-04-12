@@ -2,33 +2,34 @@
 .summary-page-wrapper {
   max-width: 960px;
   margin: 2rem auto;
-  padding: 2rem;
-  background-color: #f8f9fa;
+  padding: 1rem 2rem 3rem;
 }
 
 .page-main-title {
-  font-size: 2.5rem;
+  font-size: clamp(1.75rem, 4vw, 2.5rem);
   font-weight: 800;
-  color: #212529;
+  color: var(--color-text);
   text-align: center;
   margin-bottom: 2.5rem;
+  letter-spacing: -0.02em;
 }
 
+/* --- Section Cards --- */
 .details-section {
-  background: #fff;
+  background: var(--color-secondary-light);
   padding: 2rem;
-  border-radius: 12px;
-  box-shadow: 0 4px_20px rgba(0, 0, 0, 0.05);
-  margin-bottom: 2rem;
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-soft);
+  margin-bottom: 1.5rem;
 }
 
 .section-title {
-  font-size: 1.8rem;
+  font-size: 1.25rem;
   font-weight: 700;
-  color: #343a40;
+  color: var(--color-text);
   margin-bottom: 1.5rem;
-  border-bottom: 2px solid #e9ecef;
   padding-bottom: 0.75rem;
+  border-bottom: 1px solid var(--color-secondary-dark);
 }
 
 .section-actions {
@@ -40,8 +41,8 @@
 /* --- Summary Grid & Info Blocks --- */
 .summary-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-  gap: 1.5rem;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1.25rem;
 }
 
 /* --- Diagnostic Summary Section --- */
@@ -49,17 +50,32 @@
   margin-bottom: 2rem;
 }
 
+.diagnostic-summary:last-child {
+  margin-bottom: 0;
+}
+
 .diagnostic-summary h4 {
-  font-size: 1.2rem;
-  font-weight: 600;
-  color: #007bff;
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--color-primary-light);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
   margin-bottom: 1rem;
 }
 
+.no-record-note,
+.detailed-note-text {
+  color: #ffffff;
+  line-height: 1.6;
+  padding: 1rem 1.25rem;
+  background-color: var(--color-background);
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--color-secondary-dark);
+}
+
 .no-record-note {
-  color: #888;
+  color: var(--color-text-muted);
   font-style: italic;
-  padding: 1rem;
-  background-color: #f8f9fa;
-  border-radius: 6px;
+  border-style: dashed;
+  text-align: center;
 }

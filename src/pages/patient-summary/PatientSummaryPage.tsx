@@ -39,7 +39,9 @@ export default function PatientSummaryPage() {
         <h1 className="page-main-title">Patient Summary</h1>
 
         <div className="details-section">
-          <h2 className="section-title">Patient Details</h2>
+          <div className="section-header-flex">
+            <h2 className="section-title">Patient Details</h2>
+          </div>
           <div className="summary-grid">
             <InfoBlock label="Pet Name" value={pet.name} />
             <InfoBlock label="Owner" value={pet.owner?.name ?? "Unknown"} />
@@ -51,7 +53,9 @@ export default function PatientSummaryPage() {
         </div>
 
         <div className="details-section">
-          <h2 className="section-title">Health Record</h2>
+          <div className="section-header-flex">
+            <h2 className="section-title">Health Record</h2>
+          </div>
           <div className="diagnostic-summary">
             <h4>Lifelong Conditions</h4>
             {lifelongConditions.length > 0 ? (
@@ -84,7 +88,12 @@ export default function PatientSummaryPage() {
         </div>
 
         <div className="details-section">
-          <h2 className="section-title">Appointment History</h2>
+          <div className="section-header-flex">
+            <h2 className="section-title">Appointment History</h2>
+            {appointments.length > 0 && (
+              <span className="count-badge">{appointments.length} Visits</span>
+            )}
+          </div>
           <div className="appointment-history-list">
             {appointments.length > 0 ? (
               <table>
@@ -99,9 +108,17 @@ export default function PatientSummaryPage() {
                 <tbody>
                   {appointments.map((app) => (
                     <tr key={app.id}>
-                      <td>{app.datetime}</td>
-                      <td>{app.consultation_type ?? "General"}</td>
-                      <td>{app.doctor?.name ?? "Unknown"}</td>
+                      <td>
+                        <strong>
+                          {new Date(app.datetime).toLocaleDateString(undefined, {
+                            year: "numeric",
+                            month: "short",
+                            day: "numeric",
+                          })}
+                        </strong>
+                      </td>
+                      <td>{app.consultation_type ?? "General Checkup"}</td>
+                      <td>Dr. {app.doctor?.name ?? "Unknown"}</td>
                       <td>
                         <Button
                           text="View Details"

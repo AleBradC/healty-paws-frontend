@@ -4,8 +4,9 @@ import { useNavigate } from "react-router-dom";
 import { API_BASE_URL, registerEndpoint } from "../../../api/endpoint";
 import { Input } from "../../../components/ui/Input/Input";
 import type { RegisterOwnerPayload } from "../../../types";
-import { successPagePath } from "../../../utils/path";
+import { successPagePath, homePath } from "../../../utils/path";
 import { Button } from "../../../components/ui/Button/Button";
+import { Link } from "react-router-dom";
 import "../styles.css";
 
 export default function RegisterOwnerPage() {
@@ -148,6 +149,9 @@ export default function RegisterOwnerPage() {
   return (
     <div className="auth-page">
       <div className="auth-card">
+        <Link to={homePath} className="auth-close-button" aria-label="Close">
+          ×
+        </Link>
         <h1 className="auth-title">Registration</h1>
         {error && <p className="global-error">{error}</p>}
         <form className="auth-form" onSubmit={handleSubmit}>

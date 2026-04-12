@@ -3,7 +3,7 @@ import "./styles.css";
 
 interface TextareaProps {
   name: string;
-  label: string;
+  label?: string;
   value: string;
   onChange: (e: ChangeEvent<HTMLTextAreaElement>) => void;
   rows?: number;
@@ -19,9 +19,11 @@ export const Textarea: FC<TextareaProps> = ({
   placeholder,
 }) => (
   <div className="textarea-wrapper">
-    <label htmlFor={name} className="textarea-label">
-      {label}
-    </label>
+    {label && (
+      <label htmlFor={name} className="textarea-label">
+        {label}
+      </label>
+    )}
     <textarea
       id={name}
       name={name}

@@ -1,70 +1,66 @@
 :root {
-  /* Core Colors */
-  --color-primary: #4db5ff; /* Soft Sky Blue */
-  --color-secondary: #a3e4d7; /* Pastel Green */
-  --color-background: #fafafa; /* Off White */
-  --color-text: #2c2c2c; /* Dark Gray */
-  --color-accent: #ff8e72; /* Peach */
+  /* Core Colors - Modern Teal & Indigo Palette */
+  --color-primary: #0f766e; /* Deep Teal */
+  --color-primary-light: #14b8a6; /* Vibrant Teal */
+  --color-primary-dark: #115e59; /* Very Dark Teal */
 
-  /* Extended palette (lighter / darker variations) */
-  --color-primary-light: #80ccff;
-  --color-primary-dark: #2a91d6;
+  --color-secondary: #f8fafc; /* Slate 50 - Backgrounds */
+  --color-secondary-light: #ffffff; /* Surface cards */
+  --color-secondary-dark: #e2e8f0; /* Slate 200 - Borders */
 
-  --color-secondary-light: #cff2eb;
-  --color-secondary-dark: #73cfc0;
+  --color-accent: #6366f1; /* Indigo 500 */
+  --color-accent-light: #818cf8; /* Indigo 400 */
+  --color-accent-dark: #4f46e5; /* Indigo 600 */
 
-  --color-accent-light: #ffb09b;
-  --color-accent-dark: #e66a52;
+  /* Text Colors */
+  --color-text: #0f172a; /* Slate 900 - Headings */
+  --color-text-muted: #64748b; /* Slate 500 - Body */
+  --color-background: #f1f5f9; /* Slate 100 - Main App Background */
 
-  /* Optional semantic tokens */
-  --color-success: var(--color-secondary);
-  --color-warning: var(--color-accent);
-  --color-info: var(--color-primary);
-  --color-error: #e57373;
+  /* Semantic tokens */
+  --color-success: #10b981; /* Emerald 500 */
+  --color-success-bg: #ecfdf5;
+  --color-warning: #f59e0b; /* Amber 500 */
+  --color-warning-bg: #fffbeb;
+  --color-info: #3b82f6; /* Blue 500 */
+  --color-info-bg: #eff6ff;
+  --color-error: #ef4444; /* Red 500 */
+  --color-error-bg: #fef2f2;
 
-  /* Base UI elements */
-  --font-body: "Inter", "Segoe UI", sans-serif;
-  --border-radius: 8px;
-  --shadow-soft: 0 2px 5px rgba(0, 0, 0, 0.07);
+  /* Typography */
+  --font-body: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
 
-  --container-w: 1100px;
-  --radius: 10px;
-  --shadow-soft: 0 2px 8px rgba(0, 0, 0, 0.08);
+  /* Structure & Geometry */
+  --container-w: 1280px; /* Wider for modern screens */
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 20px;
+  --radius: var(--radius-md); /* Default legacy fallback */
+
+  /* Shadows for depth */
+  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+  --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+  --shadow-soft: 0 20px 25px -5px rgb(0 0 0 / 0.05), 0 8px 10px -6px rgb(0 0 0 / 0.02); /* Very soft premium shadow */
+
+  /* Gradients */
+  --gradient-primary: linear-gradient(135deg, var(--color-primary-light) 0%, var(--color-primary-dark) 100%);
+  --gradient-accent: linear-gradient(135deg, var(--color-accent-light) 0%, var(--color-accent-dark) 100%);
 }
 
-:root {
-  /* Core Colors */
-  --color-primary: #4db5ff; /* Soft Sky Blue */
-  --color-secondary: #a3e4d7; /* Pastel Green */
-  --color-background: #fafafa; /* Off White */
-  --color-text: #2c2c2c; /* Dark Gray */
-  --color-accent: #ff8e72; /* Peach */
-
-  /* Extended palette (lighter / darker variations) */
-  --color-primary-light: #80ccff;
-  --color-primary-dark: #2a91d6;
-
-  --color-secondary-light: #cff2eb;
-  --color-secondary-dark: #73cfc0;
-
-  --color-accent-light: #ffb09b;
-  --color-accent-dark: #e66a52;
-
-  /* Optional semantic tokens */
-  --color-success: var(--color-secondary);
-  --color-warning: var(--color-accent);
-  --color-info: var(--color-primary);
-  --color-error: #e57373;
-
-  /* Base UI elements */
-  --font-body: "Inter", "Segoe UI", sans-serif;
-  --border-radius: 8px;
-
-  --container-w: 1100px;
-  --radius: 10px;
-  --shadow-soft: 0 2px 8px rgba(0, 0, 0, 0.08);
+/* Dark Mode Fallback / Adjustments */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-background: #0f172a;
+    --color-secondary: #0f172a;
+    --color-secondary-light: #1e293b;
+    --color-secondary-dark: #334155;
+    --color-text: #f8fafc;
+    --color-text-muted: #94a3b8;
+  }
 }
 
+/* Reset & Scaffolding */
 html,
 body {
   height: 100%;
@@ -72,26 +68,40 @@ body {
   margin: 0;
   padding: 0;
   overflow-x: hidden;
+  box-sizing: border-box;
+}
+
+*, *::before, *::after {
+  box-sizing: inherit;
 }
 
 body {
   background-color: var(--color-background);
   color: var(--color-text);
   font-family: var(--font-body);
-  line-height: 1.5;
-}
-
-* {
-  box-sizing: border-box;
-  padding: 0;
-  margin: 0;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  line-height: 1.6;
 }
 
 a {
-  color: inherit;
+  color: var(--color-primary-light);
   text-decoration: none;
+  transition: color 0.2s ease-in-out;
 }
 
+a:hover {
+  color: var(--color-primary-dark);
+}
+
+h1, h2, h3, h4, h5, h6 {
+  color: var(--color-text);
+  font-weight: 700;
+  line-height: 1.2;
+  letter-spacing: -0.02em;
+}
+
+/* Layout */
 #root {
   display: flex;
   flex-direction: column;
@@ -103,7 +113,7 @@ main {
   width: 100%;
   max-width: var(--container-w);
   margin: 0 auto;
-  padding: 2rem 1rem;
+  padding: 3rem 2rem;
 }
 
 footer {
@@ -111,8 +121,25 @@ footer {
   width: 100%;
 }
 
+/* Modern Utility Classes */
+.glassmorphism {
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  box-shadow: var(--shadow-soft);
+}
+
 @media (prefers-color-scheme: dark) {
-  html {
-    color-scheme: dark;
+  .glassmorphism {
+    background: rgba(30, 41, 59, 0.7);
+    border: 1px solid rgba(255, 255, 255, 0.1);
   }
+}
+
+.text-gradient {
+  background: var(--gradient-primary);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
 }

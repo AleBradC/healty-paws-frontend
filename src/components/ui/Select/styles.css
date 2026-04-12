@@ -6,9 +6,10 @@
 }
 
 .select-label {
-  font-size: 0.9rem;
+  font-size: 0.875rem;
   font-weight: 600;
-  color: #343a40;
+  color: var(--color-text);
+  margin-left: 0.25rem;
 }
 
 .select-wrapper {
@@ -18,41 +19,54 @@
 
 .select-input {
   width: 100%;
-  padding: 0.8rem 1rem;
+  padding: 0.875rem 1rem;
   font-size: 1rem;
-  color: black;
-  background-color: #f8f9fa;
-  border: 1px solid #dee2e6;
-  border-radius: 8px;
+  color: var(--color-text);
+  background-color: var(--color-secondary-light);
+  border: 1.5px solid var(--color-secondary-dark);
+  border-radius: var(--radius-md);
   -webkit-appearance: none;
   -moz-appearance: none;
   appearance: none;
   cursor: pointer;
-  transition: border-color 0.2s, box-shadow 0.2s;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  font-family: inherit;
 }
 
 .select-arrow {
   position: absolute;
   top: 50%;
-  right: 1rem;
+  right: 1.25rem;
   transform: translateY(-50%);
   width: 0;
   height: 0;
   border-left: 5px solid transparent;
   border-right: 5px solid transparent;
-  border-top: 6px solid #888;
+  border-top: 6px solid var(--color-text-muted);
   pointer-events: none;
+  transition: transform 0.2s ease;
 }
 
 /* Focus and disabled states */
 .select-input:focus {
   outline: none;
-  border-color: #007bff;
-  box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.2);
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 1px var(--color-primary);
+  background-color: var(--color-background);
+}
+
+.select-input:focus + .select-arrow {
+  border-top-color: var(--color-primary);
+  transform: translateY(-50%) rotate(180deg);
 }
 
 .select-input:disabled {
-  background-color: #e9ecef;
+  background-color: var(--color-secondary);
   cursor: not-allowed;
   opacity: 0.7;
+}
+
+.select-input option {
+  color: initial;
+  background-color: initial;
 }

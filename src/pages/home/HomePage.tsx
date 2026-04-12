@@ -43,23 +43,32 @@ export default function HomePage() {
     <div className="home-wrapper">
       <section className="home-hero">
         <div className="home-hero-left">
+          <p className="home-kicker">Next-Gen Veterinary Care</p>
           <h1 className="home-title">
-            Caring for your pets, anytime, anywhere
+            Caring for your pets, anytime, anywhere.
           </h1>
-          <p className="home-kicker">About the App</p>
           <ul className="home-features">
-            <li>Manage appointments</li>
-            <li>Connect patients with doctors</li>
-            <li>Store medical history</li>
-            <li>24/7 support</li>
+            <li>Manage appointments seamlessly</li>
+            <li>Connect patients with top doctors</li>
+            <li>Securely store medical histories</li>
+            <li>Access 24/7 emergency support</li>
           </ul>
+          
+          {showCta && (
+            <div className="home-hero-cta">
+              <Button
+                onClick={() => handleRedirect(authRegisterPatientPath)}
+                text="Join as a Pet Parent"
+                color="primary"
+                size="lg"
+              />
+            </div>
+          )}
         </div>
         <div className="home-hero-right">
           <img
             src="/doctor-cat.png"
             alt="Veterinarian with cats illustration"
-            width={360}
-            height={420}
             className="home-hero-image"
           />
         </div>
@@ -67,26 +76,23 @@ export default function HomePage() {
 
       {showCta && (
         <section className="home-cta-section">
-          <h2 className="home-section-title">Get Started</h2>
+          <h2 className="home-section-title">Are you a Veterinary Professional?</h2>
+          <p style={{ color: 'var(--color-text-muted)', fontSize: '1.125rem', maxWidth: '600px', margin: '0 auto' }}>
+            Join our network of top-rated vet clinics and manage your schedule, patient records, and appointments in one place.
+          </p>
           <div className="home-cta-buttons">
             <Button
               onClick={() => handleRedirect(authRegisterDoctorPath)}
               text="Register as Doctor"
-              color="primary"
-              size="md"
-            />
-            <Button
-              onClick={() => handleRedirect(authRegisterPatientPath)}
-              text="Register as Patient"
               color="accent"
-              size="md"
+              size="lg"
             />
           </div>
         </section>
       )}
 
       <section className="home-testimonials">
-        <h2 className="home-section-title">What our users say</h2>
+        <h2 className="home-section-title">What our community says</h2>
         <div className="home-testimonial-grid">
           {testimonials.map(({ text, author }, i) => (
             <TestimonialCard key={i} text={text} author={author} />
