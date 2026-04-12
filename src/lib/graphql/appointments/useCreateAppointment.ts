@@ -1,49 +1,20 @@
 import { useMutation } from "@apollo/client/react";
-import { createAppointmentMutation } from "../queries";
+import {
+  CreateAppointmentDocument,
+  type CreateAppointmentMutationVariables,
+  type CreateAppointmentInput,
+} from "../../../generated/graphql";
 
-export interface queryInput {
-  petId: string;
-  doctorId: string;
-  appointmentDatetime: string;
-  status: string;
-  consultationType: string;
-}
-
-export interface queryResponse {
-  createAppointment: {
-    id: string;
-    datetime: string;
-    status: string;
-    consultation_type: string;
-    doctor: {
-      id: string;
-      name: string;
-    };
-    patient: {
-      id: string;
-      name: string;
-      owner: {
-        id: string;
-        name: string;
-      };
-    };
-  };
-}
+export type { CreateAppointmentInput as queryInput };
 
 export const useCreateAppointment = () => {
-  const [mutate, { loading, error }] = useMutation<queryResponse>(
-    createAppointmentMutation
-  );
+  const [mutate, { loading, error }] = useMutation(CreateAppointmentDocument);
 
   const createAppointment = async (
-    input: queryInput
-  ): Promise<queryResponse["createAppointment"] | null> => {
+    input: CreateAppointmentMutationVariables["input"]
+  ) => {
     try {
-      const { data } = await mutate({
-        variables: {
-          input,
-        },
-      });
+      const { data } = await mutate({ variables: { input } });
       return data?.createAppointment ?? null;
     } catch (e) {
       console.error("Error creating appointment:", e);
@@ -51,9 +22,5 @@ export const useCreateAppointment = () => {
     }
   };
 
-  return {
-    createAppointment,
-    loading,
-    error,
-  };
+  return { createAppointment, loading, error };
 };

@@ -1,10 +1,10 @@
-import React, { Suspense, lazy } from "react";
+import { Suspense, lazy } from "react";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { ApolloProviderWrapper } from "./ApolloProviderWrapper";
-import { Header } from "./components/Header/Header";
+import { Header } from "./components/features/Header/Header";
 import { AuthenticationProvider } from "./context/AuthenticationContext";
-import { Loading } from "./components/Loading/Loading";
-import { Footer } from "./components/Footer/Footer";
+import { Loading } from "./components/ui/Loading/Loading";
+import { Footer } from "./components/features/Footer/Footer";
 
 const HomePage = lazy(() => import("./pages/home/HomePage"));
 const DoctorsPage = lazy(() => import("./pages/doctors/DoctorsPage"));

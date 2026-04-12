@@ -1,34 +1,21 @@
 import { useMutation } from "@apollo/client/react";
-import { removeDoctorAvailabilityMutation } from "../queries";
-import type { Doctor } from "../../../types";
-
-interface queryInput {
-  doctorId: string;
-  availabilityId: string;
-}
-
-interface queryResponse {
-  removeDoctorAvailability: Doctor;
-}
+import {
+  RemoveDoctorAvailabilityDocument,
+  type RemoveDoctorAvailabilityMutationVariables,
+} from "../../../generated/graphql";
 
 export const useRemoveDoctorAvailability = () => {
-  const [mutate, { loading, error }] = useMutation<
-    queryResponse,
-    { input: queryInput }
-  >(removeDoctorAvailabilityMutation);
+  const [mutate, { loading, error }] = useMutation(RemoveDoctorAvailabilityDocument);
 
   const removeDoctorAvailability = async (
-    input: queryInput
-  ): Promise<Doctor | null> => {
+    input: RemoveDoctorAvailabilityMutationVariables["input"]
+  ) => {
     try {
-      const { data } = await mutate({
-        variables: { input },
-      });
-
-      return data?.removeDoctorAvailability || null;
-    } catch (error) {
-      console.error("Error removing doctor specialization:", error);
-      throw error;
+      const { data } = await mutate({ variables: { input } });
+      return data?.removeDoctorAvailability ?? null;
+    } catch (e) {
+      console.error("Error removing doctor availability:", e);
+      throw e;
     }
   };
 

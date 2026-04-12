@@ -1,0 +1,375 @@
+query GetOwner($id: ID!) {
+  owner(id: $id) {
+    id
+    name
+    email
+    pets {
+      id
+      name
+      type
+      breed
+      age
+      weight
+      lifelong_conditions {
+        id
+        condition
+        treatment
+      }
+      active_treatments {
+        id
+        start_date
+        end_date
+        condition
+        treatment
+      }
+      appointments {
+        id
+        datetime
+        status
+        doctor {
+          id
+          name
+        }
+        patient {
+          id
+          name
+        }
+      }
+    }
+  }
+}
+
+query GetDoctors($limit: Int, $skip: Int) {
+  doctors(limit: $limit, skip: $skip) {
+    items {
+      id
+      name
+      clinic_address
+      clinic_name
+      email
+      specializations {
+        id
+        name
+      }
+    }
+    totalCount
+  }
+}
+
+query GetDoctor($id: ID!) {
+  doctor(id: $id) {
+    id
+    name
+    email
+    clinic_name
+    clinic_address
+    specializations {
+      id
+      name
+      services {
+        id
+        name
+        price
+      }
+    }
+    availabilities {
+      id
+      available_datetime
+    }
+    appointments {
+      id
+      datetime
+      status
+      patient {
+        id
+        name
+        owner {
+          id
+          name
+        }
+      }
+    }
+    patients {
+      id
+      name
+      owner {
+        id
+        name
+      }
+    }
+  }
+}
+
+query GetAppointment($id: ID!) {
+  appointment(id: $id) {
+    id
+    datetime
+    status
+    reason
+    consultation_type
+    investigation
+    investigation_result
+    doctor {
+      id
+      name
+      clinic_name
+    }
+    patient {
+      id
+      name
+      type
+      breed
+      age
+      weight
+      owner {
+        id
+        name
+      }
+      lifelong_conditions {
+        id
+        condition
+        treatment
+      }
+      active_treatments {
+        id
+        start_date
+        end_date
+        treatment
+        condition
+      }
+    }
+  }
+}
+
+query GetPet($id: ID!) {
+  pet(id: $id) {
+    id
+    name
+    type
+    breed
+    age
+    weight
+    owner {
+      id
+      name
+      email
+    }
+    lifelong_conditions {
+      id
+      condition
+      treatment
+    }
+    active_treatments {
+      id
+      condition
+      treatment
+      start_date
+    }
+    appointments {
+      id
+      datetime
+      consultation_type
+      doctor {
+        id
+        name
+      }
+    }
+  }
+}
+
+mutation UpdateDoctorProfile($input: UpdateDoctorProfileInput!) {
+  updateDoctorProfile(input: $input) {
+    id
+    name
+    clinic_name
+    clinic_address
+  }
+}
+
+mutation AddDoctorSpecialization($input: AddDoctorSpecializationInput!) {
+  addDoctorSpecialization(input: $input) {
+    id
+    name
+    specializations {
+      id
+      name
+      services {
+        id
+        name
+        price
+      }
+    }
+  }
+}
+
+mutation UpdateDoctorSpecialization($input: UpdateDoctorSpecializationInput!) {
+  updateDoctorSpecialization(input: $input) {
+    id
+    name
+    specializations {
+      id
+      name
+      services {
+        id
+        name
+        price
+      }
+    }
+  }
+}
+
+mutation RemoveDoctorSpecialization($input: RemoveDoctorSpecializationInput!) {
+  removeDoctorSpecialization(input: $input) {
+    specializations {
+      id
+      name
+      services {
+        id
+        name
+        price
+        specialization_id
+      }
+    }
+  }
+}
+
+mutation AddDoctorAvailability($input: AddDoctorAvailabilityInput!) {
+  addDoctorAvailability(input: $input) {
+    id
+    name
+    availabilities {
+      id
+      available_datetime
+    }
+  }
+}
+
+mutation RemoveDoctorAvailability($input: RemoveDoctorAvailabilityInput!) {
+  removeDoctorAvailability(input: $input) {
+    id
+    name
+    availabilities {
+      id
+      available_datetime
+    }
+  }
+}
+
+mutation CreateAppointment($input: CreateAppointmentInput!) {
+  createAppointment(input: $input) {
+    id
+    datetime
+    status
+    consultation_type
+    doctor {
+      id
+      name
+    }
+    patient {
+      id
+      name
+      owner {
+        id
+        name
+      }
+    }
+  }
+}
+
+mutation UpdateAppointment($input: UpdateAppointmentInput!) {
+  updateAppointment(input: $input) {
+    id
+    status
+    reason
+    consultation_type
+    investigation
+    investigation_result
+    patient {
+      id
+      name
+      weight
+      age
+      lifelong_conditions {
+        id
+        condition
+        treatment
+      }
+      active_treatments {
+        id
+        condition
+        treatment
+        start_date
+        end_date
+      }
+    }
+  }
+}
+
+mutation RemoveAppointment($input: RemoveAppointmentInput!) {
+  removeAppointment(input: $input) {
+    id
+    datetime
+    status
+    doctor {
+      id
+      name
+    }
+    patient {
+      id
+      name
+    }
+  }
+}
+
+mutation CreatePet($input: CreatePetInput!) {
+  createPet(input: $input) {
+    id
+    name
+    age
+    weight
+    type
+    breed
+    lifelong_conditions {
+      id
+      condition
+      treatment
+    }
+    active_treatments {
+      id
+      condition
+      treatment
+      start_date
+      end_date
+    }
+  }
+}
+
+mutation UpdatePet($input: UpdatePetInput!) {
+  updatePet(input: $input) {
+    id
+    name
+    age
+    weight
+    type
+    breed
+    lifelong_conditions {
+      id
+      condition
+      treatment
+    }
+    active_treatments {
+      id
+      condition
+      treatment
+      end_date
+      start_date
+    }
+  }
+}
+
+mutation UpdateOwnerProfile($input: UpdateOwnerProfileInput!) {
+  updateOwnerProfile(input: $input) {
+    id
+    name
+  }
+}

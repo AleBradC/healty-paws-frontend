@@ -1,4 +1,4 @@
-import { Input } from "../../../components/Input/Input";
+import { Input } from "../../../components/ui/Input/Input";
 
 const LabeledInput = ({
   label,

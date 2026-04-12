@@ -1,4 +1,4 @@
-import React, {
+import {
   useState,
   type FormEvent,
   type ChangeEvent,
@@ -7,11 +7,11 @@ import React, {
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import { API_BASE_URL, registerEndpoint } from "../../../api/endpoint";
-import { Input } from "../../../components/Input/Input";
+import { Input } from "../../../components/ui/Input/Input";
 import { specializationsData } from "../../../data/specialization";
 import { successPagePath } from "../../../utils/path";
-import { Select } from "../../../components/Select/Select";
-import { Button } from "../../../components/Button/Button";
+import { Select } from "../../../components/ui/Select/Select";
+import { Button } from "../../../components/ui/Button/Button";
 import "../styles.css";
 
 interface ServicePrice {

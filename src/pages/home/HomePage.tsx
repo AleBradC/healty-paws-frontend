@@ -1,8 +1,8 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuthentication } from "../../context/AuthenticationContext";
-import { Button } from "../../components/Button/Button";
-import { TestimonialCard } from "../../components/TestimonialCard/TestimonialCard";
+import { Button } from "../../components/ui/Button/Button";
+import { TestimonialCard } from "../../components/features/TestimonialCard/TestimonialCard";
 import {
   authRegisterDoctorPath,
   authRegisterPatientPath,

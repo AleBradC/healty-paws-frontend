@@ -1,8 +1,8 @@
-import React from "react";
+
 import { useParams } from "react-router-dom";
-import { ConditionSummaryCard } from "../../components/ConditionSummaryCard/ConditionSummaryCard";
-import InfoBlock from "../../components/InfoBlock/InfoBlock";
-import { ProtectedRoute } from "../../components/ProtectedRoute/ProtectedRoute";
+import { ConditionSummaryCard } from "../../components/features/ConditionSummaryCard/ConditionSummaryCard";
+import InfoBlock from "../../components/features/InfoBlock/InfoBlock";
+import { ProtectedRoute } from "../../router/ProtectedRoute/ProtectedRoute";
 import { useAppointment } from "../../lib/graphql/appointments/useAppointment";
 import "./styles.css";
 

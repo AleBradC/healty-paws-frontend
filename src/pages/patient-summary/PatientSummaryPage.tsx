@@ -1,16 +1,11 @@
-import React from "react";
+
 import { useParams, useNavigate } from "react-router-dom";
-import InfoBlock from "../../components/InfoBlock/InfoBlock";
-import { ConditionSummaryCard } from "../../components/ConditionSummaryCard/ConditionSummaryCard";
-import { ProtectedRoute } from "../../components/ProtectedRoute/ProtectedRoute";
+import InfoBlock from "../../components/features/InfoBlock/InfoBlock";
+import { ConditionSummaryCard } from "../../components/features/ConditionSummaryCard/ConditionSummaryCard";
+import { ProtectedRoute } from "../../router/ProtectedRoute/ProtectedRoute";
 import { usePet } from "../../lib/graphql/patients/usePet";
-import type {
-  LifelongCondition,
-  ActiveTreatment,
-  Appointment,
-} from "../../types";
 import { appointmentSummaryPath } from "../../utils/path";
-import { Button } from "../../components/Button/Button";
+import { Button } from "../../components/ui/Button/Button";
 import "./styles.css";
 
 export default function PatientSummaryPage() {
@@ -30,10 +25,9 @@ export default function PatientSummaryPage() {
     );
   }
 
-  const lifelongConditions: LifelongCondition[] =
-    pet?.lifelong_conditions ?? [];
-  const activeTreatments: ActiveTreatment[] = pet?.active_treatments ?? [];
-  const appointments: Appointment[] = pet?.appointments ?? [];
+  const lifelongConditions = pet?.lifelong_conditions ?? [];
+  const activeTreatments = pet?.active_treatments ?? [];
+  const appointments = pet?.appointments ?? [];
 
   const handleAppointmentClick = (appointmentId: string | number) => {
     navigate(`${appointmentSummaryPath}/${appointmentId}`);
@@ -48,11 +42,11 @@ export default function PatientSummaryPage() {
           <h2 className="section-title">Patient Details</h2>
           <div className="summary-grid">
             <InfoBlock label="Pet Name" value={pet.name} />
-            <InfoBlock label="Owner" value={pet.owner?.name} />
-            <InfoBlock label="Pet Type" value={pet.type} />
-            <InfoBlock label="Breed" value={pet.breed} />
-            <InfoBlock label="Age (years)" value={pet.age} />
-            <InfoBlock label="Weight (kg)" value={pet.weight} />
+            <InfoBlock label="Owner" value={pet.owner?.name ?? "Unknown"} />
+            <InfoBlock label="Pet Type" value={pet.type ?? "Unknown"} />
+            <InfoBlock label="Breed" value={pet.breed ?? "Unknown"} />
+            <InfoBlock label="Age (years)" value={String(pet.age ?? "")} />
+            <InfoBlock label="Weight (kg)" value={String(pet.weight ?? "")} />
           </div>
         </div>
 
@@ -106,8 +100,8 @@ export default function PatientSummaryPage() {
                   {appointments.map((app) => (
                     <tr key={app.id}>
                       <td>{app.datetime}</td>
-                      <td>{app.consultation_type}</td>
-                      <td>{app.doctor.name}</td>
+                      <td>{app.consultation_type ?? "General"}</td>
+                      <td>{app.doctor?.name ?? "Unknown"}</td>
                       <td>
                         <Button
                           text="View Details"

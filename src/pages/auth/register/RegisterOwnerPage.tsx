@@ -1,11 +1,11 @@
-import React, { useState, type FormEvent, type ChangeEvent } from "react";
+import { useState, type FormEvent, type ChangeEvent } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import { API_BASE_URL, registerEndpoint } from "../../../api/endpoint";
-import { Input } from "../../../components/Input/Input";
+import { Input } from "../../../components/ui/Input/Input";
 import type { RegisterOwnerPayload } from "../../../types";
 import { successPagePath } from "../../../utils/path";
-import { Button } from "../../../components/Button/Button";
+import { Button } from "../../../components/ui/Button/Button";
 import "../styles.css";
 
 export default function RegisterOwnerPage() {

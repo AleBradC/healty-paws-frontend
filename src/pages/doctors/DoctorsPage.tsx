@@ -1,7 +1,7 @@
-import React, { useState } from "react";
-import { BookingModal } from "../../components/BookingModal/BookingModal";
-import { DoctorCard } from "../../components/DoctorCard/DoctorCard";
-import { ProtectedRoute } from "../../components/ProtectedRoute/ProtectedRoute";
+import { useState } from "react";
+import { BookingModal } from "../../components/features/BookingModal/BookingModal";
+import { DoctorCard } from "../../components/features/DoctorCard/DoctorCard";
+import { ProtectedRoute } from "../../router/ProtectedRoute/ProtectedRoute";
 import { useCreateAppointment } from "../../lib/graphql/appointments/useCreateAppointment";
 import type { queryInput } from "../../lib/graphql/appointments/useCreateAppointment";
 import { useDoctor } from "../../lib/graphql/doctors/useDoctor";
@@ -10,7 +10,7 @@ import { useOwner } from "../../lib/graphql/owner/useOwner";
 import type { Pet } from "../../types";
 import { DOCTORS_PER_PAGE } from "../../utils/constants";
 import { useAuthentication } from "../../context/AuthenticationContext";
-import { Button } from "../../components/Button/Button";
+import { Button } from "../../components/ui/Button/Button";
 import "./styles.css";
 
 interface DoctorSummary {
@@ -46,7 +46,7 @@ const DoctorsPage = () => {
   const { doctor: detailedDoctor, loading: detailedDoctorLoading } =
     useDoctor(selectedDoctorId);
 
-  const { owner, loading: ownerLoading } = useOwner(user?.id ?? null);
+  const { owner } = useOwner(user?.id ?? null);
   const { createAppointment } = useCreateAppointment();
 
   const petsForBookingModal = owner?.pets ?? [];
@@ -91,8 +91,8 @@ const DoctorsPage = () => {
                 specializations={formatSpecializationsForDisplay(
                   doctor as DoctorSummary
                 )}
-                clinic={doctor.clinic_name}
-                address={doctor.clinic_address}
+                clinic={doctor.clinic_name ?? ""}
+                address={doctor.clinic_address ?? ""}
                 imageUrl={"/profile-placeholder.jpg"}
                 onSelect={() => handleSelectDoctor(doctor.id)}
               />
@@ -120,8 +120,8 @@ const DoctorsPage = () => {
 
         {isModalOpen && (
           <BookingModal
-            pets={petsForBookingModal as Pet[]}
-            doctor={detailedDoctor}
+            pets={petsForBookingModal as unknown as Pet[]}
+            doctor={detailedDoctor as any}
             isLoading={detailedDoctorLoading}
             onClose={handleCloseModal}
             showStepSelectDoctor={false}

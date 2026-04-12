@@ -1,26 +1,18 @@
 import { useMutation } from "@apollo/client/react";
-import { updateOwnerDetailsMutation } from "../queries";
+import {
+  UpdateOwnerProfileDocument,
+  type UpdateOwnerProfileMutation,
+  type UpdateOwnerProfileMutationVariables,
+} from "../../../generated/graphql";
 
-export interface QueryInput {
-  ownerId: string;
-  name: string;
-}
-
-export interface QueryResponse {
-  updateOwnerProfile: {
-    id: string;
-    name: string;
-  };
-}
+export type { UpdateOwnerProfileInput as queryInput } from "../../../generated/graphql";
 
 export const useUpdateOwner = () => {
-  const [mutate, { loading, error }] = useMutation<QueryResponse>(
-    updateOwnerDetailsMutation
-  );
+  const [mutate, { loading, error }] = useMutation(UpdateOwnerProfileDocument);
 
   const updateOwner = async (
-    input: QueryInput
-  ): Promise<QueryResponse["updateOwnerProfile"] | null> => {
+    input: UpdateOwnerProfileMutationVariables["input"]
+  ): Promise<UpdateOwnerProfileMutation["updateOwnerProfile"] | null> => {
     try {
       const { data } = await mutate({ variables: { input } });
       return data?.updateOwnerProfile ?? null;

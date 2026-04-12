@@ -9,7 +9,7 @@ const cache = new InMemoryCache({
     Doctor: {
       fields: {
         availabilities: {
-          merge(existing = [], incoming) {
+          merge(_, incoming) {
             return incoming;
           },
         },

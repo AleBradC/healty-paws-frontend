@@ -1,7 +1,7 @@
-import React, { type FC } from "react";
+import { type FC } from "react";
 import { useNavigate } from "react-router-dom";
 import { authLoginPath } from "../../../utils/path";
-import { Button } from "../../../components/Button/Button";
+import { Button } from "../../../components/ui/Button/Button";
 import "../styles.css";
 
 export const RegistrationSuccessPage: FC = () => {
