@@ -96,10 +96,23 @@ export default function DoctorDashboardPage() {
     doctor?.name !== profileDetails.name ||
     doctor?.clinic_name !== profileDetails.clinicName ||
     doctor?.clinic_address !== profileDetails.clinicAddress;
+  const isProfileValid =
+    profileDetails.name.trim().length > 0 &&
+    profileDetails.clinicName.trim().length > 0 &&
+    profileDetails.clinicAddress.trim().length > 0;
+  const canSaveProfile = profileHasChanges && isProfileValid;
 
   const servicesHaveChanges =
     JSON.stringify(savedSpecializations) !==
     JSON.stringify(draftSpecializations);
+  const hasEmptyServiceData = draftSpecializations.some(
+    (spec) =>
+      spec.name.trim().length === 0 ||
+      spec.services.some(
+        (service) => !service.name.trim() || Number(service.price) <= 0
+      )
+  );
+  const canSaveServices = servicesHaveChanges && !hasEmptyServiceData;
 
   const existingSpecNames = draftSpecializations?.map((ds) => ds.name);
   const availableSpecsToAdd = specializationsData?.filter(
@@ -457,7 +470,7 @@ export default function DoctorDashboardPage() {
                       type="submit"
                       color="primary"
                       size="md"
-                      disabled={isUpdatingProfile || !profileHasChanges}
+                      disabled={isUpdatingProfile || !canSaveProfile}
                     />
                   </div>
                 </div>
@@ -531,7 +544,7 @@ export default function DoctorDashboardPage() {
                   color="primary"
                   size="md"
                   onClick={handleSaveSpecializationAndServices}
-                  disabled={!servicesHaveChanges}
+                  disabled={!canSaveServices}
                 />
               </div>
             </DashboardSection>

@@ -22,6 +22,20 @@ export const AvailabilityModal: FC<AvailabilityModalProps> = ({
   const [availability, setAvailability] =
     useState<Availability>(initialAvailability);
 
+  const normalizeAvailability = (value: Availability) =>
+    JSON.stringify(
+      Object.keys(value)
+        .sort()
+        .reduce<Availability>((acc, date) => {
+          acc[date] = [...value[date]].sort();
+          return acc;
+        }, {})
+    );
+
+  const hasChanges =
+    normalizeAvailability(availability) !==
+    normalizeAvailability(initialAvailability);
+
   const handleSlotToggle = (date: string, time: string) => {
     setAvailability((prev) => {
       const newAvailability = { ...prev };
@@ -55,6 +69,7 @@ export const AvailabilityModal: FC<AvailabilityModalProps> = ({
         color="primary"
         size="md"
         onClick={handleSaveChanges}
+        disabled={!hasChanges}
       />
     </>
   );

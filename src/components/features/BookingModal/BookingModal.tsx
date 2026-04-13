@@ -257,7 +257,7 @@ export const BookingModal: FC<BookingModalProps> = ({
         </div>
       )}
       <div className="footer-buttons">
-        {step > 1 && step < maxSteps && (
+        {step > 1 && (
           <Button
             text="Back"
             color="secondary"

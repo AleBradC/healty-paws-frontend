@@ -15,6 +15,9 @@ export function SpecializationEditor({
 }) {
   const [customServiceName, setCustomServiceName] = useState("");
   const [customServicePrice, setCustomServicePrice] = useState("");
+  const canAddCustomService =
+    customServiceName.trim().length > 0 &&
+    Number(customServicePrice) > 0;
 
   const handleUpdateService = (serviceId: string, newPrice: string) => {
     const normalizedPrice = Math.max(0, Number(newPrice) || 0);
@@ -110,7 +113,13 @@ export function SpecializationEditor({
             step="0.01"
             required
           />
-          <Button text="+ Add Service" type="submit" size="sm" color="primary" />
+          <Button
+            text="+ Add Service"
+            type="submit"
+            size="sm"
+            color="primary"
+            disabled={!canAddCustomService}
+          />
         </div>
       </form>
     </div>

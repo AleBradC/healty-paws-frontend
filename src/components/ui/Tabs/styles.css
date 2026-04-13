@@ -45,7 +45,7 @@
 }
 
 .tab-button.active {
-  color: var(--color-primary-dark);
+  color: var(--color-primary-light);
 }
 
 .tab-button.active::after {

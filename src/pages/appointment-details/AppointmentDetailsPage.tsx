@@ -185,6 +185,33 @@ export default function AppointmentDetailsPage() {
     );
   };
 
+  const hasEmptyRequiredFields = () => {
+    if (!patientDetails || !appointmentDetails) return true;
+
+    const patientMissing =
+      !patientDetails.name?.trim() ||
+      !patientDetails.type?.trim() ||
+      !patientDetails.breed?.trim() ||
+      Number(patientDetails.age) <= 0 ||
+      Number(patientDetails.weight) <= 0;
+
+    const notesMissing =
+      !appointmentDetails.consultation_type?.trim() ||
+      !appointmentDetails.reason?.trim() ||
+      !appointmentDetails.investigation?.trim() ||
+      !appointmentDetails.investigation_result?.trim();
+
+    const lifelongMissing = lifelongConditions.some(
+      (lc) => !lc.condition?.trim() || !lc.treatment?.trim()
+    );
+    const activeMissing = activeTreatments.some(
+      (at) =>
+        !at.condition?.trim() || !at.treatment?.trim() || !at.start_date?.trim()
+    );
+
+    return patientMissing || notesMissing || lifelongMissing || activeMissing;
+  };
+
   const handleSaveAll = async () => {
     if (!fetchedAppointment || !appointmentDetails || !patientDetails) return;
     setSaveError(null);
@@ -250,6 +277,17 @@ export default function AppointmentDetailsPage() {
   }
 
   const changesDetected = hasChanges();
+  const hasInvalidOrEmptyRequiredFields = hasEmptyRequiredFields();
+  const canSaveAll = changesDetected && !hasInvalidOrEmptyRequiredFields;
+  const canSaveLifelongDraft = Boolean(
+    editingLifelongCondition?.condition.trim() &&
+      editingLifelongCondition?.treatment.trim()
+  );
+  const canSaveActiveDraft = Boolean(
+    editingActiveTreatment?.condition.trim() &&
+      editingActiveTreatment?.treatment.trim() &&
+      editingActiveTreatment?.start_date
+  );
 
   return (
     <ProtectedRoute allowedRoles={["doctor"]}>
@@ -273,7 +311,7 @@ export default function AppointmentDetailsPage() {
             color="primary"
             size="sm"
             onClick={handleSaveAll}
-            disabled={!changesDetected || isSavingAppointmentDetailsLoading}
+            disabled={!canSaveAll || isSavingAppointmentDetailsLoading}
           />
         </div>
 
@@ -307,6 +345,7 @@ export default function AppointmentDetailsPage() {
               name="age"
               label="Age (years)"
               type="number"
+              min="0"
               value={String(patientDetails.age ?? "")}
               onChange={handlePatientDetailChange}
             />
@@ -315,6 +354,7 @@ export default function AppointmentDetailsPage() {
               label="Weight (kg)"
               type="number"
               step="0.1"
+              min="0"
               value={String(patientDetails.weight ?? "")}
               onChange={handlePatientDetailChange}
             />
@@ -428,6 +468,7 @@ export default function AppointmentDetailsPage() {
                     size="sm"
                     color="accent"
                     onClick={() => handleCommitNewDiagnostic("lifelong")}
+                    disabled={!canSaveLifelongDraft}
                   />
                   <Button
                     text="Cancel"
@@ -521,6 +562,7 @@ export default function AppointmentDetailsPage() {
                     size="sm"
                     color="accent"
                     onClick={() => handleCommitNewDiagnostic("active")}
+                    disabled={!canSaveActiveDraft}
                   />
                   <Button
                     text="Cancel"
@@ -542,6 +584,12 @@ export default function AppointmentDetailsPage() {
         </DetailsSection>
 
         {saveError && <div className="error-banner">{saveError}</div>}
+        {!saveError && changesDetected && hasInvalidOrEmptyRequiredFields && (
+          <div className="error-banner">
+            Please complete all required consultation, patient, and diagnostic
+            fields before saving.
+          </div>
+        )}
       </div>
     </ProtectedRoute>
   );

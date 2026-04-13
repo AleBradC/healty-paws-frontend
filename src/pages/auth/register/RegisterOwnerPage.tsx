@@ -27,6 +27,19 @@ export default function RegisterOwnerPage() {
   });
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
+  const canProceedStep1 =
+    ownerData.name.trim().length > 0 &&
+    ownerData.email.trim().length > 0 &&
+    /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(ownerData.email) &&
+    ownerData.password.length >= 6 &&
+    ownerData.confirmPassword.length > 0 &&
+    ownerData.password === ownerData.confirmPassword;
+  const canSubmitStep2 =
+    petData.name.trim().length > 0 &&
+    petData.type.trim().length > 0 &&
+    petData.breed.trim().length > 0 &&
+    Number(petData.age) > 0 &&
+    Number(petData.weight) > 0;
 
   const handleOwnerChange = (e: ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -194,6 +207,7 @@ export default function RegisterOwnerPage() {
                   size="md"
                   onClick={handleNext}
                   type="button"
+                  disabled={!canProceedStep1}
                 />
               </div>
             </div>
@@ -249,7 +263,7 @@ export default function RegisterOwnerPage() {
                   color="accent"
                   type="submit"
                   size="md"
-                  disabled={isSubmitting}
+                  disabled={isSubmitting || !canSubmitStep2}
                 />
               </div>
             </div>

@@ -82,7 +82,7 @@ export default function PatientDashboardPage() {
 
   const { createAppointment } = useCreateAppointment();
   const { removeAppointment } = useRemoveAppointment();
-  const { createPet } = useCreatePet();
+  const { createPet, loading: isCreatingPet } = useCreatePet();
   const { updatePet, loading: isUpdatingPet } = useUpdatePet();
   const { updateOwner, loading: isUpdatingOwner } = useUpdateOwner();
 
@@ -105,8 +105,16 @@ export default function PatientDashboardPage() {
   }, [owner]);
 
   const ownerHasChanges = owner?.name !== ownerDetails.name;
+  const isOwnerDetailsValid = ownerDetails.name.trim().length > 0;
+  const canSaveOwnerDetails = ownerHasChanges && isOwnerDetailsValid;
 
   const currentPet = owner?.pets?.find((p) => p.id === activeTab);
+  const isPetDetailsValid =
+    editPetDetails.name.trim().length > 0 &&
+    editPetDetails.type.trim().length > 0 &&
+    editPetDetails.breed.trim().length > 0 &&
+    Number(editPetDetails.age) > 0 &&
+    Number(editPetDetails.weight) > 0;
   const petHasChanges =
     currentPet &&
     (currentPet.name !== editPetDetails.name ||
@@ -114,6 +122,7 @@ export default function PatientDashboardPage() {
       currentPet.breed !== editPetDetails.breed ||
       currentPet.age?.toString() !== editPetDetails.age ||
       currentPet.weight?.toString() !== editPetDetails.weight);
+  const canSavePetDetails = Boolean(petHasChanges && isPetDetailsValid);
 
   useEffect(() => {
     setEditPetError(null);
@@ -155,6 +164,15 @@ export default function PatientDashboardPage() {
   }
 
   const pets = owner.pets ?? [];
+  const newPetHasChanges = Object.values(newPetDetails).some(
+    (value) => value.trim() !== ""
+  );
+  const isNewPetValid =
+    newPetDetails.name.trim().length > 0 &&
+    newPetDetails.type.trim().length > 0 &&
+    newPetDetails.breed.trim().length > 0 &&
+    Number(newPetDetails.age) > 0 &&
+    Number(newPetDetails.weight) > 0;
   const patientTabs = [
     { id: "owner", label: "My Details" },
     ...pets.map((pet) => ({ id: pet.id, label: pet.name })),
@@ -198,13 +216,21 @@ export default function PatientDashboardPage() {
 
   const handleNewPetChange = (e: ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    setNewPetDetails((prev) => ({ ...prev, [name]: value }));
+    const sanitizedValue =
+      name === "age" || name === "weight"
+        ? String(Math.max(0, Number(value) || 0))
+        : value;
+    setNewPetDetails((prev) => ({ ...prev, [name]: sanitizedValue }));
     if (newPetError) setNewPetError(null);
   };
 
   const handleEditPetChange = (e: ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    setEditPetDetails((prev) => ({ ...prev, [name]: value }));
+    const sanitizedValue =
+      name === "age" || name === "weight"
+        ? String(Math.max(0, Number(value) || 0))
+        : value;
+    setEditPetDetails((prev) => ({ ...prev, [name]: sanitizedValue }));
     if (editPetError) setEditPetError(null);
   };
 
@@ -389,7 +415,7 @@ export default function PatientDashboardPage() {
                       color="primary"
                       size="md"
                       onClick={handleSaveOwnerDetails}
-                      disabled={isUpdatingOwner || !ownerHasChanges}
+                      disabled={isUpdatingOwner || !canSaveOwnerDetails}
                       type="button"
                     />
                   </div>
@@ -452,6 +478,7 @@ export default function PatientDashboardPage() {
                         name="age"
                         label="Pet's Age (years)"
                         type="number"
+                        min="0"
                         value={editPetDetails.age}
                         onChange={handleEditPetChange}
                       />
@@ -460,6 +487,7 @@ export default function PatientDashboardPage() {
                         label="Pet's Weight (kg)"
                         type="number"
                         step="0.1"
+                        min="0"
                         value={editPetDetails.weight}
                         onChange={handleEditPetChange}
                       />
@@ -471,7 +499,7 @@ export default function PatientDashboardPage() {
                         color="primary"
                         size="md"
                         onClick={handleSavePetDetails}
-                        disabled={isUpdatingPet || !petHasChanges}
+                        disabled={isUpdatingPet || !canSavePetDetails}
                       />
                     </div>
                   </div>
@@ -597,6 +625,7 @@ export default function PatientDashboardPage() {
                   onClick={handleAddNewPet}
                   form="add-pet-form"
                   type="submit"
+                  disabled={!newPetHasChanges || !isNewPetValid || isCreatingPet}
                 />
               </>
             }
@@ -629,6 +658,7 @@ export default function PatientDashboardPage() {
                 name="age"
                 label="Pet's Age (years)"
                 type="number"
+                min="0"
                 value={newPetDetails.age}
                 onChange={handleNewPetChange}
               />
@@ -637,6 +667,7 @@ export default function PatientDashboardPage() {
                 label="Pet's Weight (kg)"
                 type="number"
                 step="0.1"
+                min="0"
                 value={newPetDetails.weight}
                 onChange={handleNewPetChange}
               />

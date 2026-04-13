@@ -35,6 +35,21 @@ export default function RegisterDoctorPage() {
   const [services, setServices] = useState<ServicePrice[]>([]);
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const [error, setError] = useState<string | undefined>();
+  const canProceedStep1 =
+    formData.name.trim().length > 0 &&
+    formData.email.trim().length > 0 &&
+    /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email) &&
+    formData.password.length >= 6 &&
+    formData.confirmPassword.length > 0 &&
+    formData.password === formData.confirmPassword &&
+    formData.specialization.trim().length > 0 &&
+    formData.clinicName.trim().length > 0 &&
+    formData.clinicAddress.trim().length > 0;
+  const canSubmitStep2 =
+    services.length > 0 &&
+    services.every(
+      (service) => service.price.trim().length > 0 && Number(service.price) > 0
+    );
 
   const specializationOptions = specializationsData.map((spec) => ({
     value: spec.name,
@@ -273,6 +288,7 @@ export default function RegisterDoctorPage() {
                   size="md"
                   onClick={handleNext}
                   type="button"
+                  disabled={!canProceedStep1}
                 />
               </div>
             </div>
@@ -317,7 +333,7 @@ export default function RegisterDoctorPage() {
                   color="primary"
                   type="submit"
                   size="md"
-                  disabled={isSubmitting}
+                  disabled={isSubmitting || !canSubmitStep2}
                 />
               </div>
             </div>
