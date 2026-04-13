@@ -14,6 +14,7 @@ import type {
   EditableAppointmentDetails,
 } from "./types";
 import { Button } from "../../components/ui/Button/Button";
+import { DetailsSection } from "../../components/ui/DetailsSection/DetailsSection";
 import "./styles.css";
 
 export default function AppointmentDetailsPage() {
@@ -276,8 +277,7 @@ export default function AppointmentDetailsPage() {
           />
         </div>
 
-        <div className="details-section">
-          <h2 className="section-title">Patient Details</h2>
+        <DetailsSection title="Patient Details">
           <div className="patient-details-form">
             <Input
               name="name"
@@ -319,10 +319,9 @@ export default function AppointmentDetailsPage() {
               onChange={handlePatientDetailChange}
             />
           </div>
-        </div>
+        </DetailsSection>
 
-        <div className="details-section consultation-notes-section">
-          <h2 className="section-title">Consultation Notes</h2>
+        <DetailsSection title="Consultation Notes" className="consultation-notes-section">
 
           <div className="diagnostic-category">
             <h4>Type of Consultation</h4>
@@ -383,10 +382,9 @@ export default function AppointmentDetailsPage() {
               </div>
             </div>
           </div>
-        </div>
+        </DetailsSection>
 
-        <div className="details-section">
-          <h2 className="section-title">Diagnostic & Health Record</h2>
+        <DetailsSection title="Diagnostic & Health Record">
 
           <div className="diagnostic-category">
             <h4>Lifelong Conditions</h4>
@@ -541,7 +539,7 @@ export default function AppointmentDetailsPage() {
               />
             )}
           </div>
-        </div>
+        </DetailsSection>
 
         {saveError && <div className="error-banner">{saveError}</div>}
       </div>

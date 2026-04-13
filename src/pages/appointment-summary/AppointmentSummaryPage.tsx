@@ -4,6 +4,7 @@ import { ConditionSummaryCard } from "../../components/features/ConditionSummary
 import InfoBlock from "../../components/features/InfoBlock/InfoBlock";
 import { ProtectedRoute } from "../../router/ProtectedRoute/ProtectedRoute";
 import { useAppointment } from "../../lib/graphql/appointments/useAppointment";
+import { DetailsSection } from "../../components/ui/DetailsSection/DetailsSection";
 import "./styles.css";
 
 export default function AppointmentSummaryPage() {
@@ -30,8 +31,7 @@ export default function AppointmentSummaryPage() {
       <div className="summary-page-wrapper">
         <h1 className="page-main-title">Appointment Summary</h1>
 
-        <div className="details-section">
-          <h2 className="section-title">Visit Information</h2>
+        <DetailsSection title="Visit Information">
           <div className="summary-grid">
             <InfoBlock label="Doctor" value={appointment?.doctor?.name} />
             <InfoBlock
@@ -48,10 +48,9 @@ export default function AppointmentSummaryPage() {
               })}
             />
           </div>
-        </div>
+        </DetailsSection>
 
-        <div className="details-section">
-          <h2 className="section-title">Patient Details</h2>
+        <DetailsSection title="Patient Details">
           <div className="summary-grid">
             <InfoBlock
               label="Patient Name"
@@ -78,11 +77,9 @@ export default function AppointmentSummaryPage() {
               value={`${appointment?.patient?.weight} kg`}
             />
           </div>
-        </div>
+        </DetailsSection>
 
-        <div className="details-section">
-          <h2 className="section-title">Consultation Details</h2>
-          
+        <DetailsSection title="Consultation Details">
           <div className="diagnostic-summary">
             <h4>Type of Consultation</h4>
             <p className="detailed-note-text">
@@ -110,10 +107,9 @@ export default function AppointmentSummaryPage() {
               {appointment?.investigation_result || "No results available."}
             </p>
           </div>
-        </div>
+        </DetailsSection>
 
-        <div className="details-section">
-          <h2 className="section-title">Doctor's Diagnostic</h2>
+        <DetailsSection title="Doctor's Diagnostic">
           <div className="diagnostic-summary">
             <h4>Lifelong Conditions</h4>
             {lifelongConditions.length > 0 ? (
@@ -147,7 +143,7 @@ export default function AppointmentSummaryPage() {
               </p>
             )}
           </div>
-        </div>
+        </DetailsSection>
       </div>
     </ProtectedRoute>
   );

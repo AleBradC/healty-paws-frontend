@@ -15,21 +15,7 @@
 }
 
 /* --- Section Cards --- */
-.details-section {
-  background: var(--color-secondary-light);
-  padding: 2rem;
-  border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-soft);
-  margin-bottom: 1.5rem;
-}
 
-.section-title {
-  font-size: 1.25rem;
-  font-weight: 700;
-  color: var(--color-text);
-  margin-bottom: 1.5rem;
-  padding-bottom: 0.75rem;
-}
 
 .section-actions {
   margin-top: 1.5rem;
