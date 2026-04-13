@@ -43,7 +43,7 @@ interface Appointment {
   };
 }
 
-export default function PatientDashboardPage() {
+export default function OwnerDashboardPage() {
   const navigate = useNavigate();
 
   const [isBookingModalOpen, setIsBookingModalOpen] = useState(false);
@@ -182,8 +182,6 @@ export default function PatientDashboardPage() {
     id: pet.id,
     name: pet.name,
   })) as unknown as Pet[];
-
-  // --- Handlers ---
 
   const handleOwnerChange = (e: ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -437,8 +435,8 @@ export default function PatientDashboardPage() {
                         alt="Pet Preview"
                         className="profile-image-preview"
                       />
-                      <label 
-                        htmlFor={`petImage-${pet.id}`} 
+                      <label
+                        htmlFor={`petImage-${pet.id}`}
                         className="image-overlay"
                       >
                         <span>Change Photo</span>
