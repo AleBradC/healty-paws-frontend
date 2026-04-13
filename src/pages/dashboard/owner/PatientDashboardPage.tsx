@@ -27,6 +27,7 @@ import { useAuthentication } from "../../../context/AuthenticationContext";
 import { Button } from "../../../components/ui/Button/Button";
 import { Loading } from "../../../components/ui/Loading/Loading";
 import { useOwner } from "../../../lib/graphql/owner/useOwner";
+import { DashboardSection } from "../../../components/ui/DashboardSection/DashboardSection";
 import "./styles.css";
 
 interface Appointment {
@@ -327,8 +328,7 @@ export default function PatientDashboardPage() {
         />
         <div className="dashboard-content">
           {activeTab === "owner" && (
-            <form className="profile-form">
-              <h2 className="section-title">My Information</h2>
+            <DashboardSection title="My Information" as="form" className="profile-form">
 
               {ownerError && <p className="global-error">{ownerError}</p>}
 
@@ -360,13 +360,12 @@ export default function PatientDashboardPage() {
                   type="button"
                 />
               </div>
-            </form>
+            </DashboardSection>
           )}
 
           {pets.map((pet) =>
             activeTab === pet.id ? (
-              <div key={pet.id} className="profile-form">
-                <h2 className="section-title">{`${pet.name}'s Information`}</h2>
+              <DashboardSection key={pet.id} title={`${pet.name}'s Information`} className="profile-form">
 
                 {editPetError && <p className="global-error">{editPetError}</p>}
 
@@ -474,14 +473,13 @@ export default function PatientDashboardPage() {
                     )}
                   </div>
                 </div>
-              </div>
+              </DashboardSection>
             ) : null
           )}
 
           {activeTab === "appointments" && (
-            <div className="appointments-section">
+            <DashboardSection title="My Appointments" className="appointments-section">
               <div className="appointments-header">
-                <h2 className="section-title no-border">My Appointments</h2>
                 <Button
                   text="Book New Appointment"
                   color="primary"
@@ -511,7 +509,7 @@ export default function PatientDashboardPage() {
                   <p>You have no upcoming appointments.</p>
                 )}
               </div>
-            </div>
+            </DashboardSection>
           )}
         </div>
 

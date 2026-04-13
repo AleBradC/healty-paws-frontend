@@ -31,6 +31,7 @@ import { SpecializationEditor } from "./components/SpecializationEditor";
 import { Button } from "../../../components/ui/Button/Button";
 import { Select } from "../../../components/ui/Select/Select";
 import { Loading } from "../../../components/ui/Loading/Loading";
+import { DashboardSection } from "../../../components/ui/DashboardSection/DashboardSection";
 import "./styles.css";
 
 const doctorTabs = [
@@ -395,11 +396,12 @@ export default function DoctorDashboardPage() {
         />
         <div className="dashboard-content">
           {activeTab === "profile" && (
-            <form className="profile-form dashboard-section" onSubmit={handleSaveDetails}>
-              <div className="section-header-row">
-                <h2 className="section-title">My details</h2>
-              </div>
-
+            <DashboardSection 
+              title="My details" 
+              as="form" 
+              className="profile-form" 
+              onSubmit={handleSaveDetails}
+            >
               {profileError && <p className="global-error">{profileError}</p>}
 
               <div className="profile-layout-grid">
@@ -463,15 +465,11 @@ export default function DoctorDashboardPage() {
                   </div>
                 </div>
               </div>
-            </form>
+            </DashboardSection>
           )}
 
           {activeTab === "services" && (
-            <div className="services-section-wrapper dashboard-section">
-              <div className="section-header-row">
-                <h2 className="section-title">My Specializations & Services</h2>
-              </div>
-
+            <DashboardSection title="My Specializations & Services" className="services-section-wrapper">
               {servicesError && <p className="global-error">{servicesError}</p>}
 
               <div className="add-specialization-controls">
@@ -539,14 +537,10 @@ export default function DoctorDashboardPage() {
                   disabled={!servicesHaveChanges}
                 />
               </div>
-            </div>
+            </DashboardSection>
           )}
-
           {activeTab === "availability" && (
-            <div className="availability-section-wrapper dashboard-section">
-              <div className="section-header-row">
-                <h2 className="section-title">My Availability</h2>
-              </div>
+            <DashboardSection title="My Availability" className="availability-section-wrapper">
 
               <div className="availability-controls">
                 <Button
@@ -585,14 +579,11 @@ export default function DoctorDashboardPage() {
                   <p>You have not set any available slots.</p>
                 )}
               </div>
-            </div>
+            </DashboardSection>
           )}
 
           {activeTab === "appointments" && (
-            <div className="appointments-section dashboard-section">
-              <div className="section-header-row">
-                <h2 className="section-title">My Appointments</h2>
-              </div>
+            <DashboardSection title="My Appointments" className="appointments-section">
               <div className="appointments-list">
                 {appointments?.length > 0 ? (
                   appointments?.map((app) => (
@@ -615,14 +606,11 @@ export default function DoctorDashboardPage() {
                   <p>You have no upcoming appointments.</p>
                 )}
               </div>
-            </div>
+            </DashboardSection>
           )}
 
           {activeTab === "patients" && (
-            <div className="patients-list-section dashboard-section">
-              <div className="section-header-row">
-                <h2 className="section-title">My Patients</h2>
-              </div>
+            <DashboardSection title="My Patients" className="patients-list-section">
               <div className="patient-list">
                 {doctor?.patients?.map((patient: { id: string; name: string; owner?: { name: string } | null }) => (
                   <div
@@ -640,7 +628,7 @@ export default function DoctorDashboardPage() {
                   </div>
                 ))}
               </div>
-            </div>
+            </DashboardSection>
           )}
         </div>
 
