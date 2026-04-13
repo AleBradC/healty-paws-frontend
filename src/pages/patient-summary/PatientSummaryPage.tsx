@@ -52,13 +52,14 @@ export default function PatientSummaryPage() {
 
         <DetailsSection title="Health Record">
           <div className="diagnostic-summary">
-            <h4>Lifelong Conditions</h4>
+            <h4 className="lifelong-conditions-title">Lifelong Conditions</h4>
             {lifelongConditions.length > 0 ? (
               lifelongConditions.map((condition) => (
                 <ConditionSummaryCard
                   key={condition.id}
                   disease={condition.condition}
                   treatment={condition.treatment}
+                  variant="stable"
                 />
               ))
             ) : (
@@ -73,7 +74,7 @@ export default function PatientSummaryPage() {
                   key={condition.id}
                   disease={condition.condition}
                   treatment={condition.treatment}
-                  active
+                  variant="active"
                 />
               ))
             ) : (

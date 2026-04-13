@@ -1,32 +1,42 @@
 .condition-summary-card {
-  background-color: var(--color-background);
-  border-left: 3px solid var(--color-secondary-dark);
-  padding: 1rem 1.25rem;
-  border-radius: var(--radius-md);
+  background-color: var(--color-secondary-light);
   border: 1px solid var(--color-secondary-dark);
-  border-left-width: 4px;
-  margin-bottom: 0.75rem;
-  transition: border-color 0.2s ease;
+  border-left-width: 5px;
+  border-left-color: var(--condition-accent, var(--color-primary-light));
+  border-radius: var(--radius-md);
+  padding: 1.25rem;
+  margin-bottom: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.condition-summary-card.stable {
+  --condition-accent: #4f46e5;
 }
 
 .condition-summary-card.active {
-  border-left-color: var(--color-success);
-  background-color: rgba(16, 185, 129, 0.05);
-  border-color: rgba(16, 185, 129, 0.25);
-  border-left-width: 4px;
+  --condition-accent: var(--color-primary-light);
 }
 
-.condition-summary-card strong {
-  display: block;
-  margin-bottom: 0.375rem;
-  color: #ffffff;
-  font-size: 1rem;
+.condition-row {
+  display: flex;
+  align-items: center;
+  justify-content: baseline;
+  gap: 0.5rem;
+}
+
+.condition-label {
+  font-size: 0.75rem;
   font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
 }
 
-.condition-summary-card p {
-  margin: 0;
-  color: var(--color-text);
-  font-size: 0.925rem;
-  line-height: 1.5;
+.condition-value {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--condition-accent, var(--color-primary-light));
+  line-height: 1.4;
 }
+

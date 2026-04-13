@@ -72,12 +72,12 @@
 }
 
 .auth-subtitle {
-  font-size: 1.25rem;
+  font-size: 1rem;
   font-weight: 700;
   color: var(--color-text);
   margin: 0;
   padding-bottom: 0.5rem;
-  border-bottom: 1px solid var(--color-secondary-dark);
+  text-align: center;
 }
 
 .auth-note {

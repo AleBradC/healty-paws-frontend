@@ -109,8 +109,6 @@ export default function DoctorDashboardPage() {
 
   // --- EFFECTS ---
   useEffect(() => {
-
-
     const availabilityMap: Record<string, string[]> = {};
     (doctor?.availabilities ?? []).forEach((avail: { available_datetime: string }) => {
       const dateObj = new Date(avail.available_datetime);
@@ -233,21 +231,8 @@ export default function DoctorDashboardPage() {
   };
 
   const handleRemoveSpecialization = async (specId: string) => {
-    try {
-      if (specId.startsWith("draft-")) {
-        setDraftSpecializations((prev) =>
-          prev.filter((spec) => spec.id !== specId)
-        );
-      } else {
-        await removeDoctorSpecialization({
-          doctorId: doctor.id,
-          specializationId: specId,
-        });
-        doctorRefetch();
-      }
-    } catch (e) {
-      console.error("Failed to delete specialization:", e);
-    }
+    setDraftSpecializations((prev) => prev.filter((spec) => spec.id !== specId));
+    if (servicesError) setServicesError(null);
   };
 
   const validateServices = (): boolean => {
@@ -272,6 +257,18 @@ export default function DoctorDashboardPage() {
 
     try {
       const mutationPromises = [];
+      const draftSpecIds = new Set(draftSpecializations.map((spec) => spec.id));
+
+      for (const savedSpec of savedSpecializations) {
+        if (!draftSpecIds.has(savedSpec.id)) {
+          mutationPromises.push(
+            removeDoctorSpecialization({
+              doctorId: doctor.id,
+              specializationId: savedSpec.id,
+            })
+          );
+        }
+      }
 
       for (const draftSpec of draftSpecializations) {
         if (draftSpec.id.startsWith("draft-")) {

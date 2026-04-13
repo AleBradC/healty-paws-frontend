@@ -111,13 +111,14 @@ export default function AppointmentSummaryPage() {
 
         <DetailsSection title="Doctor's Diagnostic">
           <div className="diagnostic-summary">
-            <h4>Lifelong Conditions</h4>
+            <h4 className="lifelong-conditions-title">Lifelong Conditions</h4>
             {lifelongConditions.length > 0 ? (
               lifelongConditions.map((condition) => (
                 <ConditionSummaryCard
                   key={condition?.id}
                   disease={condition?.condition}
                   treatment={condition?.treatment}
+                  variant="stable"
                 />
               ))
             ) : (
@@ -134,7 +135,7 @@ export default function AppointmentSummaryPage() {
                   key={treatment?.id}
                   disease={treatment?.condition}
                   treatment={treatment?.treatment}
-                  active
+                  variant="active"
                 />
               ))
             ) : (

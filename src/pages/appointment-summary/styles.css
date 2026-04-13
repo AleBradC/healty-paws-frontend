@@ -48,6 +48,10 @@
   margin-bottom: 1rem;
 }
 
+.diagnostic-summary .lifelong-conditions-title {
+  color: #4f46e5;
+}
+
 .no-record-note,
 .detailed-note-text {
   color: #ffffff;

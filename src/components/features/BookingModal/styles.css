@@ -136,7 +136,9 @@
 }
 
 .doctor-select-item {
-  text-align: left;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
   padding: 1rem 1.25rem;
   border: 1px solid var(--color-secondary-dark);
   border-radius: var(--radius-md);

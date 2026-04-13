@@ -71,7 +71,7 @@
   margin: 0;
   font-size: 0.875rem;
   font-weight: 600;
-  color: var(--color-primary-dark);
+  color: var(--color-primary-light);
   background: rgba(20, 184, 166, 0.1); /* Subtle teal background */
   padding: 0.25rem 0.75rem;
   border-radius: 9999px;

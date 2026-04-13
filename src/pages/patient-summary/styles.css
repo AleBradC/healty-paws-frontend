@@ -53,6 +53,10 @@
   margin-bottom: 1rem;
 }
 
+.diagnostic-summary .lifelong-conditions-title {
+  color: #4f46e5;
+}
+
 /* --- Appointment History Table --- */
 .appointment-history-list table {
   width: 100%;

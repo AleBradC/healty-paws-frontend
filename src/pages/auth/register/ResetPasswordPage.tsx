@@ -185,6 +185,13 @@ export default function ResetPasswordPage() {
                   disabled={isSubmitting}
                 />
               </div>
+              <div className="auth-links">
+                <Button
+                  onClick={() => handleRedirect(authLoginPath)}
+                  text="Back to login"
+                  className="auth-inline-link"
+                />
+              </div>
             </form>
           )}
 

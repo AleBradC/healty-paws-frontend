@@ -60,6 +60,10 @@ const DoctorsPage = () => {
   const totalPages = Math.ceil(
     (doctorsList?.totalCount || 0) / DOCTORS_PER_PAGE
   );
+  const visibleDoctors =
+    doctorsList?.items?.filter(
+      (doctor) => (doctor.specializations?.length ?? 0) > 0
+    ) ?? [];
 
   const handleSelectDoctor = (doctorId: string) => {
     setSelectedDoctorId(doctorId);
@@ -83,7 +87,7 @@ const DoctorsPage = () => {
           <div
             className={`doctors-list ${doctorsLoading ? "content-dimmed" : ""}`}
           >
-            {doctorsList?.items?.map((doctor) => (
+            {visibleDoctors.map((doctor) => (
               <DoctorCard
                 key={doctor.id}
                 id={doctor.id}

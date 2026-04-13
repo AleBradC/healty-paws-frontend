@@ -83,8 +83,8 @@ export default function PatientDashboardPage() {
   const { createAppointment } = useCreateAppointment();
   const { removeAppointment } = useRemoveAppointment();
   const { createPet } = useCreatePet();
-  const { updatePet } = useUpdatePet();
-  const { updateOwner } = useUpdateOwner();
+  const { updatePet, loading: isUpdatingPet } = useUpdatePet();
+  const { updateOwner, loading: isUpdatingOwner } = useUpdateOwner();
 
   const { doctor: detailedDoctor, loading: detailedDoctorLoading } =
     useDoctor(selectedDoctorId);
@@ -103,6 +103,17 @@ export default function PatientDashboardPage() {
       }
     }
   }, [owner]);
+
+  const ownerHasChanges = owner?.name !== ownerDetails.name;
+
+  const currentPet = owner?.pets?.find((p) => p.id === activeTab);
+  const petHasChanges =
+    currentPet &&
+    (currentPet.name !== editPetDetails.name ||
+      currentPet.type !== editPetDetails.type ||
+      currentPet.breed !== editPetDetails.breed ||
+      currentPet.age?.toString() !== editPetDetails.age ||
+      currentPet.weight?.toString() !== editPetDetails.weight);
 
   useEffect(() => {
     setEditPetError(null);
@@ -328,37 +339,61 @@ export default function PatientDashboardPage() {
         />
         <div className="dashboard-content">
           {activeTab === "owner" && (
-            <DashboardSection title="My Information" as="form" className="profile-form">
-
+            <DashboardSection title="My Details" as="form" className="profile-form">
               {ownerError && <p className="global-error">{ownerError}</p>}
 
-              <Input
-                name="name"
-                label="My Name"
-                value={ownerDetails.name}
-                onChange={handleOwnerChange}
-              />
-              <Input
-                name="email"
-                label="My Email"
-                defaultValue={owner.email ?? ""}
-                readOnly
-              />
-              <div className="form-actions aligned-end">
-                <Button
-                  text="Add New Pet"
-                  color="secondary"
-                  onClick={() => setIsAddPetModalOpen(true)}
-                  size="md"
-                  type="button"
-                />
-                <Button
-                  text="Save My Details"
-                  color="accent"
-                  size="lg"
-                  onClick={handleSaveOwnerDetails}
-                  type="button"
-                />
+              <div className="profile-layout-grid">
+                <div className="profile-sidebar">
+                  <div className="image-upload-wrapper">
+                    <img
+                      src="/profile-placeholder.jpg"
+                      alt="Profile Preview"
+                      width={160}
+                      height={160}
+                      className="profile-image-preview"
+                    />
+                    <div className="image-overlay">
+                      <span>Change Photo</span>
+                    </div>
+                  </div>
+                  <p className="profile-info-text">Update your professional profile picture to personalize your dashboard.</p>
+                </div>
+
+                <div className="profile-main-info">
+                  <div className="inputs-grid">
+                    <Input
+                      name="name"
+                      label="My full name"
+                      value={ownerDetails.name}
+                      onChange={handleOwnerChange}
+                    />
+                    <Input
+                      name="email"
+                      label="Email Address"
+                      value={owner.email ?? ""}
+                      readOnly
+                      disabled
+                    />
+                  </div>
+
+                  <div className="profile-actions">
+                    <Button
+                      text="Add New Pet"
+                      color="secondary"
+                      onClick={() => setIsAddPetModalOpen(true)}
+                      size="md"
+                      type="button"
+                    />
+                    <Button
+                      text="Save changes"
+                      color="primary"
+                      size="md"
+                      onClick={handleSaveOwnerDetails}
+                      disabled={isUpdatingOwner || !ownerHasChanges}
+                      type="button"
+                    />
+                  </div>
+                </div>
               </div>
             </DashboardSection>
           )}
@@ -366,113 +401,125 @@ export default function PatientDashboardPage() {
           {pets.map((pet) =>
             activeTab === pet.id ? (
               <DashboardSection key={pet.id} title={`${pet.name}'s Information`} className="profile-form">
-
                 {editPetError && <p className="global-error">{editPetError}</p>}
 
-                <div className="pet-details-grid">
-                  <div className="image-upload-wrapper">
-                    <img
-                      src="/profile-placeholder.jpg"
-                      alt="Pet Preview"
-                      width={120}
-                      height={120}
-                      className="profile-image-preview"
-                      style={{ objectFit: "cover", borderRadius: "50%" }}
-                    />
-                    <label
-                      htmlFor={`petImage-${pet.id}`}
-                      className="upload-button"
-                    >
-                      Change Photo
-                    </label>
-                    <input
-                      id={`petImage-${pet.id}`}
-                      name="petImage"
-                      type="file"
-                      accept="image/*"
-                    />
+                <div className="profile-layout-grid">
+                  <div className="profile-sidebar">
+                    <div className="image-upload-wrapper">
+                      <img
+                        src="/profile-placeholder.jpg"
+                        alt="Pet Preview"
+                        className="profile-image-preview"
+                      />
+                      <label 
+                        htmlFor={`petImage-${pet.id}`} 
+                        className="image-overlay"
+                      >
+                        <span>Change Photo</span>
+                      </label>
+                      <input
+                        id={`petImage-${pet.id}`}
+                        name="petImage"
+                        type="file"
+                        accept="image/*"
+                        style={{ display: "none" }}
+                      />
+                    </div>
+                    <p className="profile-info-text">Update {pet.name}'s photo and general information to keep their health records up to date.</p>
                   </div>
-                  <div className="general-details-inputs">
-                    <Input
-                      name="name"
-                      label="Pet's Name"
-                      value={editPetDetails.name}
-                      onChange={handleEditPetChange}
-                    />
-                    <Input
-                      name="type"
-                      label="Pet Type"
-                      value={editPetDetails.type}
-                      onChange={handleEditPetChange}
-                    />
-                    <Input
-                      name="breed"
-                      label="Pet's Breed"
-                      value={editPetDetails.breed}
-                      onChange={handleEditPetChange}
-                    />
-                    <Input
-                      name="age"
-                      label="Pet's Age (years)"
-                      type="number"
-                      value={editPetDetails.age}
-                      onChange={handleEditPetChange}
-                    />
-                    <Input
-                      name="weight"
-                      label="Pet's Weight (kg)"
-                      type="number"
-                      step="0.1"
-                      value={editPetDetails.weight}
-                      onChange={handleEditPetChange}
-                    />
+
+                  <div className="profile-main-info">
+                    <div className="inputs-grid">
+                      <Input
+                        name="name"
+                        label="Pet's Name"
+                        value={editPetDetails.name}
+                        onChange={handleEditPetChange}
+                      />
+                      <Input
+                        name="type"
+                        label="Pet Type"
+                        value={editPetDetails.type}
+                        onChange={handleEditPetChange}
+                      />
+                      <Input
+                        name="breed"
+                        label="Pet's Breed"
+                        value={editPetDetails.breed}
+                        onChange={handleEditPetChange}
+                      />
+                      <Input
+                        name="age"
+                        label="Pet's Age (years)"
+                        type="number"
+                        value={editPetDetails.age}
+                        onChange={handleEditPetChange}
+                      />
+                      <Input
+                        name="weight"
+                        label="Pet's Weight (kg)"
+                        type="number"
+                        step="0.1"
+                        value={editPetDetails.weight}
+                        onChange={handleEditPetChange}
+                      />
+                    </div>
+
+                    <div className="profile-actions">
+                      <Button
+                        text="Save Pet Details"
+                        color="primary"
+                        size="md"
+                        onClick={handleSavePetDetails}
+                        disabled={isUpdatingPet || !petHasChanges}
+                      />
+                    </div>
                   </div>
-                </div>
-                <div className="form-actions">
-                  <Button
-                    text="Save Pet Details"
-                    color="accent"
-                    size="lg"
-                    onClick={handleSavePetDetails}
-                  />
                 </div>
 
-                <div className="health-section">
-                  <h3 className="sub-section-title">Health Record</h3>
-                  <div className="health-category">
-                    <h4>Lifelong Conditions</h4>
-                    {(pet.lifelong_conditions ?? []).length > 0 ? (
-                      (pet.lifelong_conditions ?? []).map(
-                        (condition, index) => (
+                <DashboardSection title="Health Record" className="health-section">
+                  <div className="health-record-grid">
+                    <div className="health-category stable">
+                      <div className="category-header">
+                        <h4>Lifelong Conditions</h4>
+                      </div>
+                      {(pet.lifelong_conditions ?? []).length > 0 ? (
+                        (pet.lifelong_conditions ?? []).map(
+                          (condition, index) => (
+                            <ConditionSummaryCard
+                              key={index}
+                              disease={condition.condition}
+                              treatment={condition.treatment}
+                              variant="stable"
+                            />
+                          )
+                        )
+                      ) : (
+                        <p className="no-record-note">
+                          No lifelong conditions recorded.
+                        </p>
+                      )}
+                    </div>
+
+                    <div className="health-category active">
+                      <div className="category-header">
+                        <h4>Active Treatments</h4>
+                      </div>
+                      {(pet.active_treatments ?? []).length > 0 ? (
+                        (pet.active_treatments ?? []).map((condition, index) => (
                           <ConditionSummaryCard
                             key={index}
                             disease={condition.condition}
                             treatment={condition.treatment}
+                            variant="active"
                           />
-                        )
-                      )
-                    ) : (
-                      <p className="no-record-note">
-                        No lifelong conditions recorded.
-                      </p>
-                    )}
+                        ))
+                      ) : (
+                        <p className="no-record-note">No active treatments.</p>
+                      )}
+                    </div>
                   </div>
-                  <div className="health-category">
-                    <h4>Active Treatments</h4>
-                    {(pet.active_treatments ?? []).length > 0 ? (
-                      (pet.active_treatments ?? []).map((condition, index) => (
-                        <ConditionSummaryCard
-                          key={index}
-                          disease={condition.condition}
-                          treatment={condition.treatment}
-                          active
-                        />
-                      ))
-                    ) : (
-                      <p className="no-record-note">No active treatments.</p>
-                    )}
-                  </div>
-                </div>
+                </DashboardSection>
               </DashboardSection>
             ) : null
           )}
@@ -556,7 +603,7 @@ export default function PatientDashboardPage() {
           >
             <form
               id="add-pet-form"
-              className="profile-form"
+              className="profile-form add-pet-form"
               onSubmit={handleAddNewPet}
             >
               {newPetError && <p className="global-error">{newPetError}</p>}
