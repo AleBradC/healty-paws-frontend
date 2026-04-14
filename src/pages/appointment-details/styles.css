@@ -169,6 +169,19 @@
   transition: all 0.2s ease;
 }
 
+.diagnostic-row-actions {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.diagnostic-row-actions .delete-diagnostic-row-btn {
+  position: static;
+}
+
 .delete-diagnostic-row-btn:hover {
   background-color: var(--color-error);
   border-color: var(--color-error);
