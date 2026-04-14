@@ -6,6 +6,7 @@ import { ProtectedRoute } from "../../router/ProtectedRoute/ProtectedRoute";
 import { usePet } from "../../lib/graphql/patients/usePet";
 import { appointmentSummaryPath } from "../../utils/path";
 import { Button } from "../../components/ui/Button/Button";
+import { DetailsSection } from "../../components/ui/DetailsSection/DetailsSection";
 import "./styles.css";
 
 export default function PatientSummaryPage() {
@@ -38,8 +39,7 @@ export default function PatientSummaryPage() {
       <div className="summary-page-wrapper">
         <h1 className="page-main-title">Patient Summary</h1>
 
-        <div className="details-section">
-          <h2 className="section-title">Patient Details</h2>
+        <DetailsSection title="Patient Details">
           <div className="summary-grid">
             <InfoBlock label="Pet Name" value={pet.name} />
             <InfoBlock label="Owner" value={pet.owner?.name ?? "Unknown"} />
@@ -48,18 +48,18 @@ export default function PatientSummaryPage() {
             <InfoBlock label="Age (years)" value={String(pet.age ?? "")} />
             <InfoBlock label="Weight (kg)" value={String(pet.weight ?? "")} />
           </div>
-        </div>
+        </DetailsSection>
 
-        <div className="details-section">
-          <h2 className="section-title">Health Record</h2>
+        <DetailsSection title="Health Record">
           <div className="diagnostic-summary">
-            <h4>Lifelong Conditions</h4>
+            <h4 className="lifelong-conditions-title">Lifelong Conditions</h4>
             {lifelongConditions.length > 0 ? (
               lifelongConditions.map((condition) => (
                 <ConditionSummaryCard
                   key={condition.id}
                   disease={condition.condition}
                   treatment={condition.treatment}
+                  variant="stable"
                 />
               ))
             ) : (
@@ -74,17 +74,21 @@ export default function PatientSummaryPage() {
                   key={condition.id}
                   disease={condition.condition}
                   treatment={condition.treatment}
-                  active
+                  variant="active"
                 />
               ))
             ) : (
               <p className="no-record-note">No active treatments.</p>
             )}
           </div>
-        </div>
+        </DetailsSection>
 
-        <div className="details-section">
-          <h2 className="section-title">Appointment History</h2>
+        <DetailsSection 
+          title="Appointment History" 
+          headerActions={
+            appointments.length > 0 && <span className="count-badge">{appointments.length} Visits</span>
+          }
+        >
           <div className="appointment-history-list">
             {appointments.length > 0 ? (
               <table>
@@ -99,9 +103,17 @@ export default function PatientSummaryPage() {
                 <tbody>
                   {appointments.map((app) => (
                     <tr key={app.id}>
-                      <td>{app.datetime}</td>
-                      <td>{app.consultation_type ?? "General"}</td>
-                      <td>{app.doctor?.name ?? "Unknown"}</td>
+                      <td>
+                        <strong>
+                          {new Date(app.datetime).toLocaleDateString(undefined, {
+                            year: "numeric",
+                            month: "short",
+                            day: "numeric",
+                          })}
+                        </strong>
+                      </td>
+                      <td>{app.consultation_type ?? "General Checkup"}</td>
+                      <td>Dr. {app.doctor?.name ?? "Unknown"}</td>
                       <td>
                         <Button
                           text="View Details"
@@ -118,7 +130,7 @@ export default function PatientSummaryPage() {
               <p className="no-record-note">No past appointments found.</p>
             )}
           </div>
-        </div>
+        </DetailsSection>
       </div>
     </ProtectedRoute>
   );

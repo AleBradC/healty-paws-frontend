@@ -2,58 +2,37 @@
 .summary-page-wrapper {
   max-width: 960px;
   margin: 2rem auto;
-  padding: 2rem;
-  background-color: #f8f9fa;
+  padding: 1rem 2rem 3rem;
 }
 
 .page-main-title {
-  font-size: 2.5rem;
+  font-size: clamp(1.75rem, 4vw, 2.5rem);
   font-weight: 800;
-  color: #212529;
+  color: var(--color-text);
   text-align: center;
   margin-bottom: 2.5rem;
+  letter-spacing: -0.02em;
 }
 
-.details-section {
-  background: #fff;
-  padding: 2rem;
-  border-radius: 12px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
-  margin-bottom: 2rem;
-}
+/* --- Section Cards --- */
 
-.section-title {
-  font-size: 1.8rem;
+
+.count-badge {
+  background: var(--color-primary-light);
+  color: white;
+  padding: 0.25rem 0.75rem;
+  border-radius: 999px;
+  font-size: 0.75rem;
   font-weight: 700;
-  color: #343a40;
-  margin-bottom: 1.5rem;
-  border-bottom: 2px solid #e9ecef;
-  padding-bottom: 0.75rem;
-}
-
-/* --- Summary Grid & Info Blocks (Used for Patient Details) --- */
-.summary-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-  gap: 1.5rem;
-}
-
-.info-block {
-  display: flex;
-  flex-direction: column;
-  gap: 0.25rem;
-}
-
-.info-label {
-  font-size: 0.9rem;
-  font-weight: 600;
-  color: #6c757d;
+  letter-spacing: 0.05em;
   text-transform: uppercase;
 }
 
-.info-value {
-  font-size: 1.1rem;
-  color: #212529;
+/* --- Summary Grid & Info Blocks --- */
+.summary-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1.25rem;
 }
 
 /* --- Health Record Section --- */
@@ -66,10 +45,16 @@
 }
 
 .diagnostic-summary h4 {
-  font-size: 1.2rem;
-  font-weight: 600;
-  color: #007bff;
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--color-primary-light);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
   margin-bottom: 1rem;
+}
+
+.diagnostic-summary .lifelong-conditions-title {
+  color: #4f46e5;
 }
 
 /* --- Appointment History Table --- */
@@ -82,14 +67,23 @@
 .appointment-history-list th,
 .appointment-history-list td {
   text-align: left;
-  padding: 0.75rem 1rem;
-  border-bottom: 1px solid #dee2e6;
+  padding: 0.875rem 1rem;
+  border-bottom: 1px solid var(--color-secondary-dark);
+  color: var(--color-text);
+  font-size: 0.95rem;
 }
 
 .appointment-history-list th {
-  background-color: #f8f9fa;
-  font-weight: 600;
-  color: #495057;
+  background-color: var(--color-background);
+  font-weight: 700;
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--color-text-muted);
+}
+
+.appointment-history-list tr:hover td {
+  background-color: var(--color-background);
 }
 
 .appointment-history-list tr:last-child td {
@@ -98,10 +92,11 @@
 
 /* --- General Note for empty sections --- */
 .no-record-note {
-  color: #888;
+  color: var(--color-text-muted);
   font-style: italic;
-  padding: 1rem;
-  background-color: #f8f9fa;
-  border-radius: 6px;
+  padding: 1rem 1.25rem;
+  background-color: var(--color-background);
+  border-radius: var(--radius-sm);
+  border: 1px dashed var(--color-secondary-dark);
   text-align: center;
 }

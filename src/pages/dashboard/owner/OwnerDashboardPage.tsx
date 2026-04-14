@@ -26,7 +26,9 @@ import { appointmentSummaryPath } from "../../../utils/path";
 import { useAuthentication } from "../../../context/AuthenticationContext";
 import { Button } from "../../../components/ui/Button/Button";
 import { Loading } from "../../../components/ui/Loading/Loading";
+import { AvatarImage } from "../../../components/ui/AvatarImage/AvatarImage";
 import { useOwner } from "../../../lib/graphql/owner/useOwner";
+import { DashboardSection } from "../../../components/ui/DashboardSection/DashboardSection";
 import "./styles.css";
 
 interface Appointment {
@@ -42,7 +44,7 @@ interface Appointment {
   };
 }
 
-export default function PatientDashboardPage() {
+export default function OwnerDashboardPage() {
   const navigate = useNavigate();
 
   const [isBookingModalOpen, setIsBookingModalOpen] = useState(false);
@@ -81,9 +83,9 @@ export default function PatientDashboardPage() {
 
   const { createAppointment } = useCreateAppointment();
   const { removeAppointment } = useRemoveAppointment();
-  const { createPet } = useCreatePet();
-  const { updatePet } = useUpdatePet();
-  const { updateOwner } = useUpdateOwner();
+  const { createPet, loading: isCreatingPet } = useCreatePet();
+  const { updatePet, loading: isUpdatingPet } = useUpdatePet();
+  const { updateOwner, loading: isUpdatingOwner } = useUpdateOwner();
 
   const { doctor: detailedDoctor, loading: detailedDoctorLoading } =
     useDoctor(selectedDoctorId);
@@ -102,6 +104,26 @@ export default function PatientDashboardPage() {
       }
     }
   }, [owner]);
+
+  const ownerHasChanges = owner?.name !== ownerDetails.name;
+  const isOwnerDetailsValid = ownerDetails.name.trim().length > 0;
+  const canSaveOwnerDetails = ownerHasChanges && isOwnerDetailsValid;
+
+  const currentPet = owner?.pets?.find((p) => p.id === activeTab);
+  const isPetDetailsValid =
+    editPetDetails.name.trim().length > 0 &&
+    editPetDetails.type.trim().length > 0 &&
+    editPetDetails.breed.trim().length > 0 &&
+    Number(editPetDetails.age) > 0 &&
+    Number(editPetDetails.weight) > 0;
+  const petHasChanges =
+    currentPet &&
+    (currentPet.name !== editPetDetails.name ||
+      currentPet.type !== editPetDetails.type ||
+      currentPet.breed !== editPetDetails.breed ||
+      currentPet.age?.toString() !== editPetDetails.age ||
+      currentPet.weight?.toString() !== editPetDetails.weight);
+  const canSavePetDetails = Boolean(petHasChanges && isPetDetailsValid);
 
   useEffect(() => {
     setEditPetError(null);
@@ -143,6 +165,15 @@ export default function PatientDashboardPage() {
   }
 
   const pets = owner.pets ?? [];
+  const newPetHasChanges = Object.values(newPetDetails).some(
+    (value) => value.trim() !== ""
+  );
+  const isNewPetValid =
+    newPetDetails.name.trim().length > 0 &&
+    newPetDetails.type.trim().length > 0 &&
+    newPetDetails.breed.trim().length > 0 &&
+    Number(newPetDetails.age) > 0 &&
+    Number(newPetDetails.weight) > 0;
   const patientTabs = [
     { id: "owner", label: "My Details" },
     ...pets.map((pet) => ({ id: pet.id, label: pet.name })),
@@ -152,8 +183,7 @@ export default function PatientDashboardPage() {
     id: pet.id,
     name: pet.name,
   })) as unknown as Pet[];
-
-  // --- Handlers ---
+  const ownerAvatarStorageKey = user?.id ? `avatar-owner-${user.id}` : undefined;
 
   const handleOwnerChange = (e: ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -186,13 +216,21 @@ export default function PatientDashboardPage() {
 
   const handleNewPetChange = (e: ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    setNewPetDetails((prev) => ({ ...prev, [name]: value }));
+    const sanitizedValue =
+      name === "age" || name === "weight"
+        ? String(Math.max(0, Number(value) || 0))
+        : value;
+    setNewPetDetails((prev) => ({ ...prev, [name]: sanitizedValue }));
     if (newPetError) setNewPetError(null);
   };
 
   const handleEditPetChange = (e: ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    setEditPetDetails((prev) => ({ ...prev, [name]: value }));
+    const sanitizedValue =
+      name === "age" || name === "weight"
+        ? String(Math.max(0, Number(value) || 0))
+        : value;
+    setEditPetDetails((prev) => ({ ...prev, [name]: sanitizedValue }));
     if (editPetError) setEditPetError(null);
   };
 
@@ -293,7 +331,11 @@ export default function PatientDashboardPage() {
     }
   };
 
-  const handleAppointmentClick = (appointmentId: string | number) => {
+  const handleAppointmentClick = (
+    appointmentId: string | number,
+    status: string
+  ) => {
+    if (status !== "Completed") return;
     navigate(`${appointmentSummaryPath}/${appointmentId}`);
   };
 
@@ -327,161 +369,176 @@ export default function PatientDashboardPage() {
         />
         <div className="dashboard-content">
           {activeTab === "owner" && (
-            <form className="profile-form">
-              <h2 className="section-title">My Information</h2>
-
+            <DashboardSection title="My Details" as="form" className="profile-form">
               {ownerError && <p className="global-error">{ownerError}</p>}
 
-              <Input
-                name="name"
-                label="My Name"
-                value={ownerDetails.name}
-                onChange={handleOwnerChange}
-              />
-              <Input
-                name="email"
-                label="My Email"
-                defaultValue={owner.email ?? ""}
-                readOnly
-              />
-              <div className="form-actions aligned-end">
-                <Button
-                  text="Add New Pet"
-                  color="secondary"
-                  onClick={() => setIsAddPetModalOpen(true)}
-                  size="md"
-                  type="button"
-                />
-                <Button
-                  text="Save My Details"
-                  color="accent"
-                  size="lg"
-                  onClick={handleSaveOwnerDetails}
-                  type="button"
-                />
+              <div className="profile-layout-grid">
+                <div className="profile-sidebar">
+                  <AvatarImage
+                    alt="Profile Preview"
+                    size={160}
+                    editable
+                    storageKey={ownerAvatarStorageKey}
+                  />
+                  <p className="profile-info-text">Update your professional profile picture to personalize your dashboard.</p>
+                </div>
+
+                <div className="profile-main-info">
+                  <div className="inputs-grid">
+                    <Input
+                      name="name"
+                      label="My full name"
+                      value={ownerDetails.name}
+                      onChange={handleOwnerChange}
+                    />
+                    <Input
+                      name="email"
+                      label="Email Address"
+                      value={owner.email ?? ""}
+                      readOnly
+                      disabled
+                    />
+                  </div>
+
+                  <div className="profile-actions">
+                    <Button
+                      text="Add New Pet"
+                      color="secondary"
+                      onClick={() => setIsAddPetModalOpen(true)}
+                      size="md"
+                      type="button"
+                    />
+                    <Button
+                      text="Save changes"
+                      color="primary"
+                      size="md"
+                      onClick={handleSaveOwnerDetails}
+                      disabled={isUpdatingOwner || !canSaveOwnerDetails}
+                      type="button"
+                    />
+                  </div>
+                </div>
               </div>
-            </form>
+            </DashboardSection>
           )}
 
           {pets.map((pet) =>
             activeTab === pet.id ? (
-              <div key={pet.id} className="profile-form">
-                <h2 className="section-title">{`${pet.name}'s Information`}</h2>
-
+              <DashboardSection key={pet.id} title={`${pet.name}'s Information`} className="profile-form">
                 {editPetError && <p className="global-error">{editPetError}</p>}
 
-                <div className="pet-details-grid">
-                  <div className="image-upload-wrapper">
-                    <img
-                      src="/profile-placeholder.jpg"
-                      alt="Pet Preview"
-                      width={120}
-                      height={120}
-                      className="profile-image-preview"
-                      style={{ objectFit: "cover", borderRadius: "50%" }}
-                    />
-                    <label
-                      htmlFor={`petImage-${pet.id}`}
-                      className="upload-button"
-                    >
-                      Change Photo
-                    </label>
-                    <input
-                      id={`petImage-${pet.id}`}
-                      name="petImage"
-                      type="file"
-                      accept="image/*"
-                    />
-                  </div>
-                  <div className="general-details-inputs">
-                    <Input
-                      name="name"
-                      label="Pet's Name"
-                      value={editPetDetails.name}
-                      onChange={handleEditPetChange}
-                    />
-                    <Input
-                      name="type"
-                      label="Pet Type"
-                      value={editPetDetails.type}
-                      onChange={handleEditPetChange}
-                    />
-                    <Input
-                      name="breed"
-                      label="Pet's Breed"
-                      value={editPetDetails.breed}
-                      onChange={handleEditPetChange}
-                    />
-                    <Input
-                      name="age"
-                      label="Pet's Age (years)"
-                      type="number"
-                      value={editPetDetails.age}
-                      onChange={handleEditPetChange}
-                    />
-                    <Input
-                      name="weight"
-                      label="Pet's Weight (kg)"
-                      type="number"
-                      step="0.1"
-                      value={editPetDetails.weight}
-                      onChange={handleEditPetChange}
-                    />
-                  </div>
-                </div>
-                <div className="form-actions">
-                  <Button
-                    text="Save Pet Details"
-                    color="accent"
-                    size="lg"
-                    onClick={handleSavePetDetails}
+                <div className="profile-layout-grid">
+                  <div className="profile-sidebar">
+                  <AvatarImage
+                    alt="Pet Preview"
+                    size={160}
+                    editable
+                    storageKey={`avatar-pet-${pet.id}`}
                   />
+                    <p className="profile-info-text">Update {pet.name}'s photo and general information to keep their health records up to date.</p>
+                  </div>
+
+                  <div className="profile-main-info">
+                    <div className="inputs-grid">
+                      <Input
+                        name="name"
+                        label="Pet's Name"
+                        value={editPetDetails.name}
+                        onChange={handleEditPetChange}
+                      />
+                      <Input
+                        name="type"
+                        label="Pet Type"
+                        value={editPetDetails.type}
+                        onChange={handleEditPetChange}
+                      />
+                      <Input
+                        name="breed"
+                        label="Pet's Breed"
+                        value={editPetDetails.breed}
+                        onChange={handleEditPetChange}
+                      />
+                      <Input
+                        name="age"
+                        label="Pet's Age (years)"
+                        type="number"
+                        min="0"
+                        value={editPetDetails.age}
+                        onChange={handleEditPetChange}
+                      />
+                      <Input
+                        name="weight"
+                        label="Pet's Weight (kg)"
+                        type="number"
+                        step="0.1"
+                        min="0"
+                        value={editPetDetails.weight}
+                        onChange={handleEditPetChange}
+                      />
+                    </div>
+
+                    <div className="profile-actions">
+                      <Button
+                        text="Save Pet Details"
+                        color="primary"
+                        size="md"
+                        onClick={handleSavePetDetails}
+                        disabled={isUpdatingPet || !canSavePetDetails}
+                      />
+                    </div>
+                  </div>
                 </div>
 
-                <div className="health-section">
-                  <h3 className="sub-section-title">Health Record</h3>
-                  <div className="health-category">
-                    <h4>Lifelong Conditions</h4>
-                    {(pet.lifelong_conditions ?? []).length > 0 ? (
-                      (pet.lifelong_conditions ?? []).map(
-                        (condition, index) => (
+                <DashboardSection title="Health Record" className="health-section">
+                  <div className="health-record-grid">
+                    <div className="health-category stable">
+                      <div className="category-header">
+                        <h4>Lifelong Conditions</h4>
+                      </div>
+                      {(pet.lifelong_conditions ?? []).length > 0 ? (
+                        (pet.lifelong_conditions ?? []).map(
+                          (condition, index) => (
+                            <ConditionSummaryCard
+                              key={index}
+                              disease={condition.condition}
+                              treatment={condition.treatment}
+                              variant="stable"
+                            />
+                          )
+                        )
+                      ) : (
+                        <p className="no-record-note">
+                          No lifelong conditions recorded.
+                        </p>
+                      )}
+                    </div>
+
+                    <div className="health-category active">
+                      <div className="category-header">
+                        <h4>Active Treatments</h4>
+                      </div>
+                      {(pet.active_treatments ?? []).length > 0 ? (
+                        (pet.active_treatments ?? []).map((condition, index) => (
                           <ConditionSummaryCard
                             key={index}
                             disease={condition.condition}
                             treatment={condition.treatment}
+                            variant="active"
                           />
-                        )
-                      )
-                    ) : (
-                      <p className="no-record-note">
-                        No lifelong conditions recorded.
-                      </p>
-                    )}
+                        ))
+                      ) : (
+                        <p className="no-record-note">No active treatments.</p>
+                      )}
+                    </div>
                   </div>
-                  <div className="health-category">
-                    <h4>Active Treatments</h4>
-                    {(pet.active_treatments ?? []).length > 0 ? (
-                      (pet.active_treatments ?? []).map((condition, index) => (
-                        <ConditionSummaryCard
-                          key={index}
-                          disease={condition.condition}
-                          treatment={condition.treatment}
-                          active
-                        />
-                      ))
-                    ) : (
-                      <p className="no-record-note">No active treatments.</p>
-                    )}
-                  </div>
-                </div>
-              </div>
+                </DashboardSection>
+              </DashboardSection>
             ) : null
           )}
 
           {activeTab === "appointments" && (
-            <div className="appointments-section">
+            <DashboardSection title="My Appointments" className="appointments-section">
               <div className="appointments-header">
-                <h2 className="section-title no-border">My Appointments</h2>
                 <Button
                   text="Book New Appointment"
                   color="primary"
@@ -491,27 +548,40 @@ export default function PatientDashboardPage() {
               </div>
               <div className="appointments-list">
                 {appointments.length > 0 ? (
-                  appointments.map((app) => (
-                    <AppointmentCard
-                      key={app.id}
-                      id={app.id}
-                      status={app.status}
-                      doctorName={`Dr. ${app.doctor.name}`}
-                      petName={app.patient.name}
-                      date={new Date(app.datetime).toLocaleDateString()}
-                      time={new Date(app.datetime).toLocaleTimeString([], {
-                        hour: "2-digit",
-                        minute: "2-digit",
-                      })}
-                      onClick={() => handleAppointmentClick(app.id)}
-                      onDelete={() => handleDeleteAppointment(app.id)}
-                    />
-                  ))
+                  appointments.map((app) => {
+                    const isCompleted = app.status === "Completed";
+
+                    return (
+                      <AppointmentCard
+                        key={app.id}
+                        id={app.id}
+                        status={app.status}
+                        doctorName={`Dr. ${app.doctor.name}`}
+                        petName={app.patient.name}
+                        date={new Date(app.datetime).toLocaleDateString()}
+                        time={new Date(app.datetime).toLocaleTimeString([], {
+                          hour: "2-digit",
+                          minute: "2-digit",
+                        })}
+                        isDisabled={!isCompleted}
+                        onClick={
+                          isCompleted
+                            ? () => handleAppointmentClick(app.id, app.status)
+                            : undefined
+                        }
+                        onDelete={
+                          isCompleted
+                            ? () => handleDeleteAppointment(app.id)
+                            : undefined
+                        }
+                      />
+                    );
+                  })
                 ) : (
                   <p>You have no upcoming appointments.</p>
                 )}
               </div>
-            </div>
+            </DashboardSection>
           )}
         </div>
 
@@ -552,13 +622,14 @@ export default function PatientDashboardPage() {
                   onClick={handleAddNewPet}
                   form="add-pet-form"
                   type="submit"
+                  disabled={!newPetHasChanges || !isNewPetValid || isCreatingPet}
                 />
               </>
             }
           >
             <form
               id="add-pet-form"
-              className="profile-form"
+              className="profile-form add-pet-form"
               onSubmit={handleAddNewPet}
             >
               {newPetError && <p className="global-error">{newPetError}</p>}
@@ -584,6 +655,7 @@ export default function PatientDashboardPage() {
                 name="age"
                 label="Pet's Age (years)"
                 type="number"
+                min="0"
                 value={newPetDetails.age}
                 onChange={handleNewPetChange}
               />
@@ -592,6 +664,7 @@ export default function PatientDashboardPage() {
                 label="Pet's Weight (kg)"
                 type="number"
                 step="0.1"
+                min="0"
                 value={newPetDetails.weight}
                 onChange={handleNewPetChange}
               />

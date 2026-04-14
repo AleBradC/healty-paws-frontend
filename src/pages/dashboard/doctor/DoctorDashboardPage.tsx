@@ -24,6 +24,7 @@ import { useUpdateDoctorSpecialization } from "../../../lib/graphql/doctors/useU
 import type { Specialization } from "../../../types";
 import {
   appointmentDetailsPath,
+  appointmentSummaryPath,
   patientSummaryPath,
 } from "../../../utils/path";
 import { useAuthentication } from "../../../context/AuthenticationContext";
@@ -31,6 +32,8 @@ import { SpecializationEditor } from "./components/SpecializationEditor";
 import { Button } from "../../../components/ui/Button/Button";
 import { Select } from "../../../components/ui/Select/Select";
 import { Loading } from "../../../components/ui/Loading/Loading";
+import { AvatarImage } from "../../../components/ui/AvatarImage/AvatarImage";
+import { DashboardSection } from "../../../components/ui/DashboardSection/DashboardSection";
 import "./styles.css";
 
 const doctorTabs = [
@@ -95,21 +98,33 @@ export default function DoctorDashboardPage() {
     doctor?.name !== profileDetails.name ||
     doctor?.clinic_name !== profileDetails.clinicName ||
     doctor?.clinic_address !== profileDetails.clinicAddress;
+  const isProfileValid =
+    profileDetails.name.trim().length > 0 &&
+    profileDetails.clinicName.trim().length > 0 &&
+    profileDetails.clinicAddress.trim().length > 0;
+  const canSaveProfile = profileHasChanges && isProfileValid;
 
   const servicesHaveChanges =
     JSON.stringify(savedSpecializations) !==
     JSON.stringify(draftSpecializations);
+  const hasEmptyServiceData = draftSpecializations.some(
+    (spec) =>
+      spec.name.trim().length === 0 ||
+      spec.services.some(
+        (service) => !service.name.trim() || Number(service.price) <= 0
+      )
+  );
+  const canSaveServices = servicesHaveChanges && !hasEmptyServiceData;
 
   const existingSpecNames = draftSpecializations?.map((ds) => ds.name);
   const availableSpecsToAdd = specializationsData?.filter(
     (spec) => !existingSpecNames?.includes(spec?.name)
   );
   const appointments = doctor?.appointments ?? [];
+  const doctorAvatarStorageKey = user?.id ? `avatar-doctor-${user.id}` : undefined;
 
   // --- EFFECTS ---
   useEffect(() => {
-
-
     const availabilityMap: Record<string, string[]> = {};
     (doctor?.availabilities ?? []).forEach((avail: { available_datetime: string }) => {
       const dateObj = new Date(avail.available_datetime);
@@ -232,21 +247,8 @@ export default function DoctorDashboardPage() {
   };
 
   const handleRemoveSpecialization = async (specId: string) => {
-    try {
-      if (specId.startsWith("draft-")) {
-        setDraftSpecializations((prev) =>
-          prev.filter((spec) => spec.id !== specId)
-        );
-      } else {
-        await removeDoctorSpecialization({
-          doctorId: doctor.id,
-          specializationId: specId,
-        });
-        doctorRefetch();
-      }
-    } catch (e) {
-      console.error("Failed to delete specialization:", e);
-    }
+    setDraftSpecializations((prev) => prev.filter((spec) => spec.id !== specId));
+    if (servicesError) setServicesError(null);
   };
 
   const validateServices = (): boolean => {
@@ -271,6 +273,18 @@ export default function DoctorDashboardPage() {
 
     try {
       const mutationPromises = [];
+      const draftSpecIds = new Set(draftSpecializations.map((spec) => spec.id));
+
+      for (const savedSpec of savedSpecializations) {
+        if (!draftSpecIds.has(savedSpec.id)) {
+          mutationPromises.push(
+            removeDoctorSpecialization({
+              doctorId: doctor.id,
+              specializationId: savedSpec.id,
+            })
+          );
+        }
+      }
 
       for (const draftSpec of draftSpecializations) {
         if (draftSpec.id.startsWith("draft-")) {
@@ -374,8 +388,22 @@ export default function DoctorDashboardPage() {
     }
   };
 
-  const handleAppointmentClick = (appointmentId: string | number) => {
-    navigate(`${appointmentDetailsPath}/${appointmentId}`);
+  const handleAppointmentClick = (
+    appointmentId: string | number,
+    status: string | null | undefined
+  ) => {
+    switch (status) {
+      case "Completed":
+        navigate(`${appointmentSummaryPath}/${appointmentId}`);
+        return;
+      case "Confirmed":
+      case "Upcoming":
+        navigate(`${appointmentDetailsPath}/${appointmentId}`);
+        return;
+      case "Cancelled":
+      default:
+        return;
+    }
   };
 
   const handlePatientClick = (patientId: string | number) => {
@@ -395,62 +423,74 @@ export default function DoctorDashboardPage() {
         />
         <div className="dashboard-content">
           {activeTab === "profile" && (
-            <form className="profile-form" onSubmit={handleSaveDetails}>
-              <h2 className="section-title">My details</h2>
-
+            <DashboardSection 
+              title="My details" 
+              as="form" 
+              className="profile-form" 
+              onSubmit={handleSaveDetails}
+            >
               {profileError && <p className="global-error">{profileError}</p>}
 
-              <div className="image-upload-wrapper">
-                <img
-                  src={"/profile-placeholder.jpg"}
-                  alt="Profile Preview"
-                  width={120}
-                  height={120}
-                  className="profile-image-preview"
-                  style={{ objectFit: "cover", borderRadius: "50%" }}
-                />
+              <div className="profile-layout-grid">
+                <div className="profile-sidebar">
+                  <AvatarImage
+                    alt="Profile Preview"
+                    size={160}
+                    editable
+                    storageKey={doctorAvatarStorageKey}
+                  />
+                  <p className="profile-info-text">Update your professional profile picture for your clinic profile.</p>
+                </div>
+
+                <div className="profile-main-info">
+                  <div className="inputs-grid">
+                    <Input
+                      name="name"
+                      label="My full name"
+                      value={profileDetails.name}
+                      onChange={handleProfileChange}
+                    />
+                    <Input
+                      name="email"
+                      label="Email Address"
+                      value={doctor.email ?? ""}
+                      readOnly
+                      disabled
+                    />
+                    <div className="full-width-input">
+                      <Input
+                        name="clinicName"
+                        label="Clinic Name"
+                        value={profileDetails.clinicName ?? ""}
+                        onChange={handleProfileChange}
+                      />
+                    </div>
+                    <div className="full-width-input">
+                      <Input
+                        name="clinicAddress"
+                        label="Clinic Address"
+                        value={profileDetails.clinicAddress ?? ""}
+                        onChange={handleProfileChange}
+                      />
+                    </div>
+                  </div>
+                  
+                  <div className="profile-actions">
+                    <Button
+                      text="Save changes"
+                      type="submit"
+                      color="primary"
+                      size="md"
+                      disabled={isUpdatingProfile || !canSaveProfile}
+                    />
+                  </div>
+                </div>
               </div>
-              <Input
-                name="name"
-                label="My full name"
-                value={profileDetails.name}
-                onChange={handleProfileChange}
-              />
-              <Input
-                name="email"
-                label="Email Address"
-                value={doctor.email ?? ""}
-                readOnly
-                disabled
-              />
-              <Input
-                name="clinicName"
-                label="Clinic Name"
-                value={profileDetails.clinicName ?? ""}
-                onChange={handleProfileChange}
-              />
-              <Input
-                name="clinicAddress"
-                label="Clinic Address"
-                value={profileDetails.clinicAddress ?? ""}
-                onChange={handleProfileChange}
-              />
-              <div className="form-actions">
-                <Button
-                  text="Save details"
-                  type="submit"
-                  color="primary"
-                  size="lg"
-                  disabled={isUpdatingProfile || !profileHasChanges}
-                />
-              </div>
-            </form>
+            </DashboardSection>
           )}
 
           {activeTab === "services" && (
-            <div className="services-section-wrapper">
-              <h2 className="section-title">My Specializations & Services</h2>
-
+            <DashboardSection title="My Specializations & Services" className="services-section-wrapper">
               {servicesError && <p className="global-error">{servicesError}</p>}
 
               <div className="add-specialization-controls">
@@ -473,6 +513,7 @@ export default function DoctorDashboardPage() {
                     <Button
                       text="Add to Draft"
                       size="sm"
+                      color="primary"
                       onClick={handleAddToDraft}
                       disabled={!newSpecializationSelectionId}
                     />
@@ -514,16 +555,15 @@ export default function DoctorDashboardPage() {
                   color="primary"
                   size="md"
                   onClick={handleSaveSpecializationAndServices}
-                  disabled={!servicesHaveChanges}
+                  disabled={!canSaveServices}
                 />
               </div>
-            </div>
+            </DashboardSection>
           )}
-
           {activeTab === "availability" && (
-            <div className="availability-section">
-              <div className="section-header">
-                <h2 className="section-title">My Availability</h2>
+            <DashboardSection title="My Availability" className="availability-section-wrapper">
+
+              <div className="availability-controls">
                 <Button
                   text="Manage Availability"
                   color="primary"
@@ -560,40 +600,54 @@ export default function DoctorDashboardPage() {
                   <p>You have not set any available slots.</p>
                 )}
               </div>
-            </div>
+            </DashboardSection>
           )}
 
           {activeTab === "appointments" && (
-            <div className="appointments-section">
-              <h2 className="section-title">My Appointments</h2>
+            <DashboardSection title="My Appointments" className="appointments-section">
               <div className="appointments-list">
                 {appointments?.length > 0 ? (
                   appointments?.map((app) => (
-                    <AppointmentCard
-                      key={app.id}
-                      id={app.id}
-                      status={app.status ?? "Upcoming"}
-                      doctorName={app.patient?.owner?.name ?? "Unknown Owner"}
-                      petName={app.patient?.name ?? "Unknown Pet"}
-                      date={new Date(app.datetime).toLocaleDateString()}
-                      time={new Date(app.datetime).toLocaleTimeString([], {
-                        hour: "2-digit",
-                        minute: "2-digit",
-                      })}
-                      onClick={() => handleAppointmentClick(app.id)}
-                      onDelete={() => handleDeleteAppointment(app.id)}
-                    />
+                    (() => {
+                      const appointmentStatus = app.status ?? "Upcoming";
+                      const isCancelled = appointmentStatus === "Cancelled";
+
+                      return (
+                        <AppointmentCard
+                          key={app.id}
+                          id={app.id}
+                          status={appointmentStatus}
+                          doctorName={app.patient?.owner?.name ?? "Unknown Owner"}
+                          petName={app.patient?.name ?? "Unknown Pet"}
+                          date={new Date(app.datetime).toLocaleDateString()}
+                          time={new Date(app.datetime).toLocaleTimeString([], {
+                            hour: "2-digit",
+                            minute: "2-digit",
+                          })}
+                          isDisabled={isCancelled}
+                          onClick={
+                            isCancelled
+                              ? undefined
+                              : () => handleAppointmentClick(app.id, appointmentStatus)
+                          }
+                          onDelete={
+                            isCancelled
+                              ? undefined
+                              : () => handleDeleteAppointment(app.id)
+                          }
+                        />
+                      );
+                    })()
                   ))
                 ) : (
                   <p>You have no upcoming appointments.</p>
                 )}
               </div>
-            </div>
+            </DashboardSection>
           )}
 
           {activeTab === "patients" && (
-            <div className="patients-list-section">
-              <h2 className="section-title">My Patients</h2>
+            <DashboardSection title="My Patients" className="patients-list-section">
               <div className="patient-list">
                 {doctor?.patients?.map((patient: { id: string; name: string; owner?: { name: string } | null }) => (
                   <div
@@ -611,7 +665,7 @@ export default function DoctorDashboardPage() {
                   </div>
                 ))}
               </div>
-            </div>
+            </DashboardSection>
           )}
         </div>
 

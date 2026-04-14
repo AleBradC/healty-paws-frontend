@@ -15,11 +15,15 @@ export function SpecializationEditor({
 }) {
   const [customServiceName, setCustomServiceName] = useState("");
   const [customServicePrice, setCustomServicePrice] = useState("");
+  const canAddCustomService =
+    customServiceName.trim().length > 0 &&
+    Number(customServicePrice) > 0;
 
   const handleUpdateService = (serviceId: string, newPrice: string) => {
+    const normalizedPrice = Math.max(0, Number(newPrice) || 0);
     const updatedServices = specialization.services.map((prevServices) =>
       prevServices.id === serviceId
-        ? { ...prevServices, price: Number(newPrice) || 0 }
+        ? { ...prevServices, price: normalizedPrice }
         : prevServices
     );
     onUpdate({ ...specialization, services: updatedServices });
@@ -39,7 +43,7 @@ export function SpecializationEditor({
     const newService: Service = {
       id: `custom-${Date.now()}`,
       name: customServiceName.trim(),
-      price: Number(customServicePrice) || 0,
+      price: Math.max(0, Number(customServicePrice) || 0),
       specialization_id: specialization.id,
     };
 
@@ -57,7 +61,9 @@ export function SpecializationEditor({
         <h3>{specialization.name}</h3>
         <Button
           text="Remove Specialization"
+          type="button"
           size="sm"
+          color="danger"
           onClick={() => onDelete(specialization.id)}
         />
       </div>
@@ -70,11 +76,14 @@ export function SpecializationEditor({
               value={String(service.price)}
               onChange={(e) => handleUpdateService(service.id, e.target.value)}
               placeholder="Price ($)"
+              min="0"
+              step="0.01"
             />
             <button
               type="button"
               className="delete-service-btn"
               onClick={() => handleDeleteService(service.id)}
+              aria-label="Remove service"
             >
               &times;
             </button>
@@ -96,11 +105,21 @@ export function SpecializationEditor({
           <Input
             type="number"
             value={customServicePrice}
-            onChange={(e) => setCustomServicePrice(e.target.value)}
+            onChange={(e) =>
+              setCustomServicePrice(String(Math.max(0, Number(e.target.value) || 0)))
+            }
             placeholder="Price ($)"
+            min="0"
+            step="0.01"
             required
           />
-          <Button text="Add Service to Draft" type="submit" size="sm" />
+          <Button
+            text="+ Add Service"
+            type="submit"
+            size="sm"
+            color="primary"
+            disabled={!canAddCustomService}
+          />
         </div>
       </form>
     </div>

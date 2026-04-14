@@ -8,6 +8,7 @@ interface AppointmentCardProps {
   petName: string;
   date: string;
   time: string;
+  isDisabled?: boolean;
   onClick?: () => void;
   onDelete?: () => void;
 }
@@ -18,12 +19,13 @@ export const AppointmentCard: FC<AppointmentCardProps> = ({
   petName,
   date,
   time,
+  isDisabled = false,
   onClick,
   onDelete,
 }) => {
   const statusClass = `status-${status.toLowerCase()}`;
-  const cardClasses = `appointment-card ${statusClass} ${
-    onClick ? "clickable" : ""
+  const cardClasses = `appointment-card ${statusClass} ${onClick ? "clickable" : ""} ${
+    isDisabled ? "disabled" : ""
   }`;
 
   const handleDeleteClick = (e: MouseEvent<HTMLButtonElement>) => {
@@ -32,7 +34,7 @@ export const AppointmentCard: FC<AppointmentCardProps> = ({
   };
 
   return (
-    <div className={cardClasses} onClick={onClick}>
+    <div className={cardClasses} onClick={isDisabled ? undefined : onClick}>
       <div className="appointment-details">
         <span className="primary-name">{doctorName}</span>
         <span className="secondary-name">For: {petName}</span>

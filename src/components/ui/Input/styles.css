@@ -1,6 +1,7 @@
 .input-field {
-  display: grid;
-  gap: 0.4rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
 }
 
 .input-field.full-width {
@@ -8,24 +9,36 @@
 }
 
 .input-label {
-  font-weight: 700;
-  color: #2b3442;
-  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--color-text);
+  font-size: 0.875rem; /* 14px */
+  margin-left: 0.25rem;
+  transition: color 0.2s ease;
 }
 
 .input-control {
   position: relative;
-  display: grid;
+  display: flex;
   align-items: center;
-  background: #fff;
-  border: 1px solid rgba(0, 0, 0, 0.14);
-  border-radius: 12px;
-  transition: box-shadow 0.15s ease, border-color 0.15s ease;
+  background: var(--color-secondary-light);
+  border: 1.5px solid var(--color-secondary-dark);
+  border-radius: var(--radius-md);
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.input-control:hover {
+  border-color: var(--color-primary-light);
 }
 
 .input-control:focus-within {
-  border-color: #4db5ff; /* Use your theme's primary color */
-  box-shadow: 0 0 0 3px rgba(77, 181, 255, 0.18);
+  border-color: var(--color-primary);
+  background: rgba(20, 184, 166, 0.04);
+  box-shadow: 0 0 0 4px rgba(20, 184, 166, 0.1);
+}
+
+.input-control:focus-within + .input-label,
+.input-control:focus-within ~ .input-label {
+  color: var(--color-primary);
 }
 
 .input-native {
@@ -33,34 +46,56 @@
   border: 0;
   outline: none;
   background: transparent;
-  color: #223041;
+  color: var(--color-text);
   font-size: 1rem;
-  padding: 0.85rem 1rem;
+  font-family: inherit;
+  padding: 0.75rem 1rem;
   padding-right: 2.5rem; /* Room for toggle icon */
+}
+
+.input-native::placeholder {
+  color: var(--color-text-muted);
+  opacity: 0.7;
+}
+
+/* Chrome/Safari Autofill override — stops the browser injecting a white/blue background */
+.input-native:-webkit-autofill,
+.input-native:-webkit-autofill:hover,
+.input-native:-webkit-autofill:focus,
+.input-native:-webkit-autofill:active {
+  -webkit-text-fill-color: var(--color-text) !important;
+  caret-color: var(--color-text);
+  transition: background-color 5000s ease-in-out 0s;
+}
+
+/* Lock the wrapper border during autofill so the browser can't inject its own style */
+.input-control:has(.input-native:-webkit-autofill) {
+  border-color: var(--color-secondary-dark);
+  background: var(--color-secondary-light);
 }
 
 /* Sizing */
 .input-control.size-sm {
-  border-radius: 10px;
+  border-radius: var(--radius-sm);
 }
 .input-control.size-sm .input-native {
-  padding: 0.6rem 0.9rem;
-  font-size: 0.95rem;
+  padding: 0.5rem 0.75rem;
+  font-size: 0.875rem;
 }
 
 .input-control.size-md {
-  border-radius: 12px;
+  border-radius: var(--radius-md);
 }
 .input-control.size-md .input-native {
-  padding: 0.85rem 1rem;
+  padding: 0.75rem 1rem;
 }
 
 .input-control.size-lg {
-  border-radius: 14px;
+  border-radius: var(--radius-lg);
 }
 .input-control.size-lg .input-native {
-  padding: 1rem 1.1rem;
-  font-size: 1.05rem;
+  padding: 1rem 1.25rem;
+  font-size: 1.125rem;
 }
 
 /* Icons */
@@ -70,40 +105,90 @@
   position: absolute;
   top: 50%;
   transform: translateY(-50%);
-  color: rgba(0, 0, 0, 0.55);
+  color: var(--color-text-muted);
   display: flex;
   align-items: center;
+  transition: color 0.2s ease;
+}
+
+.input-control:focus-within .input-left-icon,
+.input-control:focus-within .input-right-icon {
+  color: var(--color-primary-light);
 }
 
 .input-left-icon {
-  left: 12px;
+  left: 1rem;
 }
 
 .input-right-icon {
-  right: 12px;
+  right: 1rem;
+}
+
+.input-native.has-left-icon {
+  padding-left: 2.75rem;
 }
 
 .input-toggle {
-  right: 12px;
+  right: 1rem;
   background: none;
   border: 0;
   cursor: pointer;
   padding: 0;
 }
 
+.input-toggle:hover {
+  color: var(--color-text);
+}
+
 /* Error State */
 .input-control.has-error {
-  border-color: #e26d6d;
-  box-shadow: none;
+  border-color: var(--color-error);
+}
+
+.input-control.has-error:focus-within {
+  border-color: var(--color-error);
 }
 
 .input-hint {
-  color: rgba(0, 0, 0, 0.6);
-  font-size: 0.9rem;
+  color: var(--color-text-muted);
+  font-size: 0.8rem;
+  margin-left: 0.25rem;
 }
 
 .input-error-text {
-  color: #c24444;
-  font-weight: 600;
-  font-size: 0.9rem;
+  color: var(--color-error);
+  font-weight: 500;
+  font-size: 0.85rem;
+  margin-left: 0.25rem;
+  animation: slideDown 0.2s ease-out;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+/* Readonly & Disabled States */
+.input-control:has(.input-native[readonly]),
+.input-control:has(.input-native:disabled) {
+  cursor: default;
+  pointer-events: none;
+  background-color: var(--color-background);
+  opacity: 0.8;
+}
+
+.input-control:has(.input-native[readonly]):hover {
+  border-color: var(--color-secondary-dark);
+}
+
+.input-native[readonly],
+.input-native:disabled {
+  cursor: default;
+  color: var(--color-text-muted);
+  pointer-events: none;
 }

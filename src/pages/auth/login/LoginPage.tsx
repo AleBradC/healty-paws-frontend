@@ -21,6 +21,10 @@ export default function LoginPage() {
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
 
   const [error, setError] = useState<string | undefined>();
+  const canSubmitLogin =
+    email.trim().length > 0 &&
+    /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) &&
+    password.length >= 6;
 
   const validateForm = (): string | null => {
     if (!email.trim() && !password) {
@@ -129,7 +133,7 @@ export default function LoginPage() {
                 color="accent"
                 size="lg"
                 type="submit"
-                disabled={isSubmitting}
+                disabled={isSubmitting || !canSubmitLogin}
               />
             </div>
             <div className="auth-links">

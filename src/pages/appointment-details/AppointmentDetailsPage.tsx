@@ -14,6 +14,7 @@ import type {
   EditableAppointmentDetails,
 } from "./types";
 import { Button } from "../../components/ui/Button/Button";
+import { DetailsSection } from "../../components/ui/DetailsSection/DetailsSection";
 import "./styles.css";
 
 export default function AppointmentDetailsPage() {
@@ -46,16 +47,23 @@ export default function AppointmentDetailsPage() {
     useState<LifelongCondition | null>(null);
   const [editingActiveTreatment, setEditingActiveTreatment] =
     useState<ActiveTreatment | null>(null);
+  const [lifelongEditMode, setLifelongEditMode] = useState<
+    "new" | "existing" | null
+  >(null);
+  const [activeEditMode, setActiveEditMode] = useState<
+    "new" | "existing" | null
+  >(null);
   const [saveError, setSaveError] = useState<string | null>(null);
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
 
   useEffect(() => {
     if (fetchedAppointment) {
       const newPatientDetails = {
-        name: fetchedAppointment?.patient?.name,
-        type: fetchedAppointment?.patient?.type,
-        breed: fetchedAppointment.patient?.breed,
-        age: fetchedAppointment.patient?.age,
-        weight: fetchedAppointment.patient?.weight,
+        name: fetchedAppointment?.patient?.name || "",
+        type: fetchedAppointment?.patient?.type || "",
+        breed: fetchedAppointment.patient?.breed || "",
+        age: String(fetchedAppointment.patient?.age ?? ""),
+        weight: String(fetchedAppointment.patient?.weight ?? ""),
       };
 
       const newAppointmentDetails = {
@@ -88,11 +96,15 @@ export default function AppointmentDetailsPage() {
 
       setEditingLifelongCondition(null);
       setEditingActiveTreatment(null);
+      setLifelongEditMode(null);
+      setActiveEditMode(null);
+      setHasUnsavedChanges(false);
     }
   }, [fetchedAppointment]);
 
   // --- Handlers ---
   const handlePatientDetailChange = (e: ChangeEvent<HTMLInputElement>) => {
+    setHasUnsavedChanges(true);
     setPatientDetails((prev) =>
       prev ? { ...prev, [e.target.name]: e.target.value } : null
     );
@@ -101,6 +113,7 @@ export default function AppointmentDetailsPage() {
   const handleAppointmentDetailChange = (
     e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
+    setHasUnsavedChanges(true);
     setAppointmentDetails((prev) =>
       prev ? { ...prev, [e.target.name]: e.target.value } : null
     );
@@ -109,12 +122,14 @@ export default function AppointmentDetailsPage() {
   const handleStartEditing = (type: "lifelong" | "active") => {
     setSaveError(null);
     if (type === "lifelong" && !editingLifelongCondition) {
+      setLifelongEditMode("new");
       setEditingLifelongCondition({
         id: `new-lc-${Date.now()}`,
         condition: "",
         treatment: "",
       });
     } else if (type === "active" && !editingActiveTreatment) {
+      setActiveEditMode("new");
       setEditingActiveTreatment({
         id: `new-at-${Date.now()}`,
         condition: "",
@@ -138,8 +153,13 @@ export default function AppointmentDetailsPage() {
   };
 
   const handleCancelEditing = (type: "lifelong" | "active") => {
-    if (type === "lifelong") setEditingLifelongCondition(null);
-    else setEditingActiveTreatment(null);
+    if (type === "lifelong") {
+      setEditingLifelongCondition(null);
+      setLifelongEditMode(null);
+    } else {
+      setEditingActiveTreatment(null);
+      setActiveEditMode(null);
+    }
   };
 
   const handleCommitNewDiagnostic = (type: "lifelong" | "active") => {
@@ -148,23 +168,70 @@ export default function AppointmentDetailsPage() {
       editingLifelongCondition?.condition &&
       editingLifelongCondition?.treatment
     ) {
-      setLifelongConditions((prev) => [...prev, editingLifelongCondition]);
+      const isNewLifelong = editingLifelongCondition.id.startsWith("new-lc-");
+      setLifelongConditions((prev) =>
+        isNewLifelong
+          ? [...prev, editingLifelongCondition]
+          : prev.map((condition) =>
+              condition.id === editingLifelongCondition.id
+                ? editingLifelongCondition
+                : condition
+            )
+      );
       setEditingLifelongCondition(null);
+      setLifelongEditMode(null);
+      setHasUnsavedChanges(true);
     } else if (
       type === "active" &&
       editingActiveTreatment?.condition &&
       editingActiveTreatment?.treatment &&
       editingActiveTreatment.start_date
     ) {
-      setActiveTreatments((prev) => [...prev, editingActiveTreatment]);
+      const isNewActiveTreatment = editingActiveTreatment.id.startsWith("new-at-");
+      setActiveTreatments((prev) =>
+        isNewActiveTreatment
+          ? [...prev, editingActiveTreatment]
+          : prev.map((treatment) =>
+              treatment.id === editingActiveTreatment.id
+                ? editingActiveTreatment
+                : treatment
+            )
+      );
       setEditingActiveTreatment(null);
+      setActiveEditMode(null);
+      setHasUnsavedChanges(true);
     }
   };
 
   const removeDiagnostic = (type: "lifelong" | "active", id: string) => {
+    setHasUnsavedChanges(true);
     const setState =
       type === "lifelong" ? setLifelongConditions : setActiveTreatments;
     setState((prev: any) => prev.filter((item: any) => item.id !== id));
+  };
+
+  const handleEditExistingDiagnostic = (
+    type: "lifelong" | "active",
+    id: string
+  ) => {
+    setSaveError(null);
+
+    if (type === "lifelong") {
+      const conditionToEdit = lifelongConditions.find((item) => item.id === id);
+      if (!conditionToEdit) return;
+      setLifelongEditMode("existing");
+      setEditingLifelongCondition({ ...conditionToEdit });
+      return;
+    }
+
+    const treatmentToEdit = activeTreatments.find((item) => item.id === id);
+    if (!treatmentToEdit) return;
+    setActiveEditMode("existing");
+    setEditingActiveTreatment({
+      ...treatmentToEdit,
+      start_date: treatmentToEdit.start_date?.split("T")[0] ?? "",
+      end_date: treatmentToEdit.end_date?.split("T")[0] ?? "",
+    });
   };
 
   // --- CHECK FOR CHANGES ---
@@ -176,12 +243,42 @@ export default function AppointmentDetailsPage() {
     const currentLifelongString = JSON.stringify(lifelongConditions);
     const currentActiveString = JSON.stringify(activeTreatments);
 
-    return (
+    const hasDataDiff =
       currentPatientString !== initialSnapshot.patientDetails ||
       currentAppointmentString !== initialSnapshot.appointmentDetails ||
       currentLifelongString !== initialSnapshot.lifelongConditions ||
-      currentActiveString !== initialSnapshot.activeTreatments
+      currentActiveString !== initialSnapshot.activeTreatments;
+
+    const needsStatusUpdate = fetchedAppointment?.status !== "Completed";
+
+    return hasUnsavedChanges || hasDataDiff || needsStatusUpdate;
+  };
+
+  const hasEmptyRequiredFields = () => {
+    if (!patientDetails || !appointmentDetails) return true;
+
+    const patientMissing =
+      !patientDetails.name?.trim() ||
+      !patientDetails.type?.trim() ||
+      !patientDetails.breed?.trim() ||
+      Number(patientDetails.age) <= 0 ||
+      Number(patientDetails.weight) <= 0;
+
+    const notesMissing =
+      !appointmentDetails.consultation_type?.trim() ||
+      !appointmentDetails.reason?.trim() ||
+      !appointmentDetails.investigation?.trim() ||
+      !appointmentDetails.investigation_result?.trim();
+
+    const lifelongMissing = lifelongConditions.some(
+      (lc) => !lc.condition?.trim() || !lc.treatment?.trim()
     );
+    const activeMissing = activeTreatments.some(
+      (at) =>
+        !at.condition?.trim() || !at.treatment?.trim() || !at.start_date?.trim()
+    );
+
+    return patientMissing || notesMissing || lifelongMissing || activeMissing;
   };
 
   const handleSaveAll = async () => {
@@ -226,6 +323,7 @@ export default function AppointmentDetailsPage() {
 
     try {
       await updateAppointmentDetails(input);
+      setHasUnsavedChanges(false);
       refetchAppointment();
     } catch (e: any) {
       setSaveError(
@@ -249,20 +347,89 @@ export default function AppointmentDetailsPage() {
   }
 
   const changesDetected = hasChanges();
+  const hasInvalidOrEmptyRequiredFields = hasEmptyRequiredFields();
+  const canSaveAll = changesDetected && !hasInvalidOrEmptyRequiredFields;
+  const normalizeDate = (value?: string | null) =>
+    value ? value.split("T")[0] : "";
+
+  const canSaveLifelongDraft = (() => {
+    if (!editingLifelongCondition) return false;
+
+    const hasRequiredFields = Boolean(
+      editingLifelongCondition.condition.trim() &&
+        editingLifelongCondition.treatment.trim()
+    );
+    if (!hasRequiredFields) return false;
+
+    if (lifelongEditMode === "new") return true;
+    if (lifelongEditMode !== "existing") return false;
+
+    const original = lifelongConditions.find(
+      (item) => item.id === editingLifelongCondition.id
+    );
+    if (!original) return false;
+
+    return (
+      editingLifelongCondition.condition.trim() !== original.condition.trim() ||
+      editingLifelongCondition.treatment.trim() !== original.treatment.trim()
+    );
+  })();
+
+  const canSaveActiveDraft = (() => {
+    if (!editingActiveTreatment) return false;
+
+    const hasRequiredFields = Boolean(
+      editingActiveTreatment.condition.trim() &&
+        editingActiveTreatment.treatment.trim() &&
+        editingActiveTreatment.start_date
+    );
+    if (!hasRequiredFields) return false;
+
+    if (activeEditMode === "new") return true;
+    if (activeEditMode !== "existing") return false;
+
+    const original = activeTreatments.find(
+      (item) => item.id === editingActiveTreatment.id
+    );
+    if (!original) return false;
+
+    return (
+      editingActiveTreatment.condition.trim() !== original.condition.trim() ||
+      editingActiveTreatment.treatment.trim() !== original.treatment.trim() ||
+      normalizeDate(editingActiveTreatment.start_date) !==
+        normalizeDate(original.start_date) ||
+      normalizeDate(editingActiveTreatment.end_date) !==
+        normalizeDate(original.end_date)
+    );
+  })();
 
   return (
     <ProtectedRoute allowedRoles={["doctor"]}>
       <div className="details-page-wrapper">
-        <h1 className="page-main-title">Consultation & Health Record</h1>
-        <p className="appointment-date">
-          For appointment on:
-          <strong>
-            {new Date(fetchedAppointment.datetime).toLocaleDateString()}
-          </strong>
-        </p>
+        <h1 className="page-main-title">Appointment details</h1>
+        <div className="page-header-bar">
+          <p className="appointment-date">
+            For appointment on:
+            <strong>
+              {" "}{new Date(fetchedAppointment.datetime).toLocaleDateString()}
+            </strong>
+          </p>
+          <Button
+            text={
+              isSavingAppointmentDetailsLoading
+                ? "Saving..."
+                : changesDetected
+                ? "Save All Changes"
+                : "Saved ✓"
+            }
+            color="primary"
+            size="sm"
+            onClick={handleSaveAll}
+            disabled={!canSaveAll || isSavingAppointmentDetailsLoading}
+          />
+        </div>
 
-        <div className="details-section">
-          <h2 className="section-title">Patient Details</h2>
+        <DetailsSection title="Patient Details">
           <div className="patient-details-form">
             <Input
               name="name"
@@ -292,6 +459,7 @@ export default function AppointmentDetailsPage() {
               name="age"
               label="Age (years)"
               type="number"
+              min="0"
               value={String(patientDetails.age ?? "")}
               onChange={handlePatientDetailChange}
             />
@@ -300,74 +468,143 @@ export default function AppointmentDetailsPage() {
               label="Weight (kg)"
               type="number"
               step="0.1"
+              min="0"
               value={String(patientDetails.weight ?? "")}
               onChange={handlePatientDetailChange}
             />
           </div>
-        </div>
+        </DetailsSection>
 
-        <div className="details-section consultation-notes-section">
-          <h2 className="section-title">Consultation Notes</h2>
+        <DetailsSection title="Consultation Notes" className="consultation-notes-section">
 
-          <div className="consultation-type-wrapper">
-            <Input
-              name="consultation_type"
-              label="Type of Consultation"
-              placeholder="e.g. In-Person, Telehealth"
-              value={appointmentDetails.consultation_type ?? ""}
-              onChange={handleAppointmentDetailChange}
-              fullWidth
-            />
+          <div className="diagnostic-category">
+            <h4>Type of Consultation</h4>
+            <div className="diagnostic-list">
+              <div className="diagnostic-row editable">
+                <Input
+                  name="consultation_type"
+                  placeholder="e.g. In-Person, Telehealth"
+                  value={appointmentDetails.consultation_type ?? ""}
+                  onChange={handleAppointmentDetailChange}
+                  fullWidth
+                />
+              </div>
+            </div>
           </div>
 
-          <div className="consultation-textareas-row">
-            <Textarea
-              name="reason"
-              label="Reason for Visit"
-              placeholder="Enter reason for today's visit..."
-              value={appointmentDetails.reason ?? ""}
-              onChange={handleAppointmentDetailChange}
-              rows={5}
-            />
-            <Textarea
-              name="investigation"
-              label="Investigation"
-              placeholder="Describe investigation details..."
-              value={appointmentDetails.investigation ?? ""}
-              onChange={handleAppointmentDetailChange}
-              rows={5}
-            />
-            <Textarea
-              name="investigation_result"
-              label="Investigation Result"
-              placeholder="Provide investigation results..."
-              value={appointmentDetails.investigation_result ?? ""}
-              onChange={handleAppointmentDetailChange}
-              rows={5}
-            />
+          <div className="diagnostic-category">
+            <h4>Reason for Visit</h4>
+            <div className="diagnostic-list">
+              <div className="diagnostic-row editable">
+                <Textarea
+                  name="reason"
+                  placeholder="Enter reason for today's visit..."
+                  value={appointmentDetails.reason ?? ""}
+                  onChange={handleAppointmentDetailChange}
+                  rows={4}
+                />
+              </div>
+            </div>
           </div>
-        </div>
 
-        <div className="details-section">
-          <h2 className="section-title">Diagnostic & Health Record</h2>
+          <div className="diagnostic-category">
+            <h4>Investigation</h4>
+            <div className="diagnostic-list">
+              <div className="diagnostic-row editable">
+                <Textarea
+                  name="investigation"
+                  placeholder="Describe investigation details..."
+                  value={appointmentDetails.investigation ?? ""}
+                  onChange={handleAppointmentDetailChange}
+                  rows={4}
+                />
+              </div>
+            </div>
+          </div>
+
+          <div className="diagnostic-category">
+            <h4>Investigation Result</h4>
+            <div className="diagnostic-list">
+              <div className="diagnostic-row editable">
+                <Textarea
+                  name="investigation_result"
+                  placeholder="Provide investigation results..."
+                  value={appointmentDetails.investigation_result ?? ""}
+                  onChange={handleAppointmentDetailChange}
+                  rows={4}
+                />
+              </div>
+            </div>
+          </div>
+        </DetailsSection>
+
+        <DetailsSection title="Diagnostic & Health Record">
 
           <div className="diagnostic-category">
             <h4>Lifelong Conditions</h4>
             <div className="diagnostic-list">
-              {lifelongConditions.map((c) => (
-                <div key={c.id} className="diagnostic-row readonly">
-                  <ReadOnlyInfoBlock label="Condition" value={c.condition} />
-                  <ReadOnlyInfoBlock label="Treatment" value={c.treatment} />
-                  <button
-                    className="delete-diagnostic-row-btn"
-                    onClick={() => removeDiagnostic("lifelong", c.id)}
-                  >
-                    &times;
-                  </button>
-                </div>
-              ))}
+              {lifelongConditions.map((c) =>
+                lifelongEditMode === "existing" &&
+                editingLifelongCondition?.id === c.id ? (
+                  <div key={c.id} className="diagnostic-row editable">
+                    <LabeledInput
+                      label="Condition"
+                      placeholder="e.g. Arthritis"
+                      value={editingLifelongCondition.condition}
+                      onChange={(e) =>
+                        handleEditingChange("lifelong", "condition", e.target.value)
+                      }
+                      required
+                    />
+                    <LabeledInput
+                      label="Treatment"
+                      placeholder="e.g. Daily supplement"
+                      value={editingLifelongCondition.treatment}
+                      onChange={(e) =>
+                        handleEditingChange("lifelong", "treatment", e.target.value)
+                      }
+                      required
+                    />
+                    <div className="edit-row-actions">
+                      <Button
+                        text="Save"
+                        size="sm"
+                        color="accent"
+                        onClick={() => handleCommitNewDiagnostic("lifelong")}
+                        disabled={!canSaveLifelongDraft}
+                      />
+                      <Button
+                        text="Cancel"
+                        size="sm"
+                        color="secondary"
+                        onClick={() => handleCancelEditing("lifelong")}
+                      />
+                    </div>
+                  </div>
+                ) : (
+                  <div key={c.id} className="diagnostic-row readonly">
+                    <ReadOnlyInfoBlock label="Condition" value={c.condition} />
+                    <ReadOnlyInfoBlock label="Treatment" value={c.treatment} />
+                    <div className="diagnostic-row-actions">
+                      <Button
+                        text="Edit"
+                        size="sm"
+                        color="secondary"
+                        onClick={() => handleEditExistingDiagnostic("lifelong", c.id)}
+                        disabled={Boolean(editingLifelongCondition)}
+                      />
+                      <button
+                        className="delete-diagnostic-row-btn"
+                        onClick={() => removeDiagnostic("lifelong", c.id)}
+                      >
+                        &times;
+                      </button>
+                    </div>
+                  </div>
+                )
+              )}
             </div>
-            {editingLifelongCondition ? (
+            {lifelongEditMode === "new" && editingLifelongCondition ? (
               <div className="diagnostic-row editable">
                 <LabeledInput
                   label="Condition"
@@ -391,7 +628,9 @@ export default function AppointmentDetailsPage() {
                   <Button
                     text="Save"
                     size="sm"
+                    color="accent"
                     onClick={() => handleCommitNewDiagnostic("lifelong")}
+                    disabled={!canSaveLifelongDraft}
                   />
                   <Button
                     text="Cancel"
@@ -407,6 +646,7 @@ export default function AppointmentDetailsPage() {
                 color="primary"
                 size="sm"
                 onClick={() => handleStartEditing("lifelong")}
+                disabled={Boolean(editingLifelongCondition)}
               />
             )}
           </div>
@@ -414,35 +654,103 @@ export default function AppointmentDetailsPage() {
           <div className="diagnostic-category">
             <h4>Active Treatments</h4>
             <div className="diagnostic-list">
-              {activeTreatments.map((t) => (
-                <div
-                  key={t.id}
-                  className="diagnostic-row readonly active-treatment"
-                >
-                  <ReadOnlyInfoBlock label="Condition" value={t.condition} />
-                  <ReadOnlyInfoBlock label="Treatment" value={t.treatment} />
-                  <ReadOnlyInfoBlock
-                    label="Start Date"
-                    value={new Date(t.start_date).toLocaleDateString()}
-                  />
-                  <ReadOnlyInfoBlock
-                    label="End Date"
-                    value={
-                      t.end_date
-                        ? new Date(t.end_date).toLocaleDateString()
-                        : "Ongoing"
-                    }
-                  />
-                  <button
-                    className="delete-diagnostic-row-btn"
-                    onClick={() => removeDiagnostic("active", t.id)}
+              {activeTreatments.map((t) =>
+                activeEditMode === "existing" &&
+                editingActiveTreatment?.id === t.id ? (
+                  <div
+                    key={t.id}
+                    className="diagnostic-row editable active-treatment-edit"
                   >
-                    &times;
-                  </button>
-                </div>
-              ))}
+                    <LabeledInput
+                      label="Condition"
+                      placeholder="e.g. Ear Infection"
+                      value={editingActiveTreatment.condition}
+                      onChange={(e) =>
+                        handleEditingChange("active", "condition", e.target.value)
+                      }
+                      required
+                    />
+                    <LabeledInput
+                      label="Treatment"
+                      placeholder="e.g. Medicated drops"
+                      value={editingActiveTreatment.treatment}
+                      onChange={(e) =>
+                        handleEditingChange("active", "treatment", e.target.value)
+                      }
+                      required
+                    />
+                    <LabeledInput
+                      label="Start Date"
+                      type="date"
+                      value={editingActiveTreatment.start_date}
+                      onChange={(e) =>
+                        handleEditingChange("active", "start_date", e.target.value)
+                      }
+                      required
+                    />
+                    <LabeledInput
+                      label="End Date"
+                      type="date"
+                      value={editingActiveTreatment.end_date || ""}
+                      onChange={(e) =>
+                        handleEditingChange("active", "end_date", e.target.value)
+                      }
+                    />
+                    <div className="edit-row-actions">
+                      <Button
+                        text="Save"
+                        size="sm"
+                        color="accent"
+                        onClick={() => handleCommitNewDiagnostic("active")}
+                        disabled={!canSaveActiveDraft}
+                      />
+                      <Button
+                        text="Cancel"
+                        size="sm"
+                        color="secondary"
+                        onClick={() => handleCancelEditing("active")}
+                      />
+                    </div>
+                  </div>
+                ) : (
+                  <div
+                    key={t.id}
+                    className="diagnostic-row readonly active-treatment"
+                  >
+                    <ReadOnlyInfoBlock label="Condition" value={t.condition} />
+                    <ReadOnlyInfoBlock label="Treatment" value={t.treatment} />
+                    <ReadOnlyInfoBlock
+                      label="Start Date"
+                      value={new Date(t.start_date).toLocaleDateString()}
+                    />
+                    <ReadOnlyInfoBlock
+                      label="End Date"
+                      value={
+                        t.end_date
+                          ? new Date(t.end_date).toLocaleDateString()
+                          : "Ongoing"
+                      }
+                    />
+                    <div className="diagnostic-row-actions">
+                      <Button
+                        text="Edit"
+                        size="sm"
+                        color="secondary"
+                        onClick={() => handleEditExistingDiagnostic("active", t.id)}
+                        disabled={Boolean(editingActiveTreatment)}
+                      />
+                      <button
+                        className="delete-diagnostic-row-btn"
+                        onClick={() => removeDiagnostic("active", t.id)}
+                      >
+                        &times;
+                      </button>
+                    </div>
+                  </div>
+                )
+              )}
             </div>
-            {editingActiveTreatment ? (
+            {activeEditMode === "new" && editingActiveTreatment ? (
               <div className="diagnostic-row editable active-treatment-edit">
                 <LabeledInput
                   label="Condition"
@@ -483,7 +791,9 @@ export default function AppointmentDetailsPage() {
                   <Button
                     text="Save"
                     size="sm"
+                    color="accent"
                     onClick={() => handleCommitNewDiagnostic("active")}
+                    disabled={!canSaveActiveDraft}
                   />
                   <Button
                     text="Cancel"
@@ -499,26 +809,19 @@ export default function AppointmentDetailsPage() {
                 color="primary"
                 size="sm"
                 onClick={() => handleStartEditing("active")}
+                disabled={Boolean(editingActiveTreatment)}
               />
             )}
           </div>
-        </div>
+        </DetailsSection>
 
         {saveError && <div className="error-banner">{saveError}</div>}
-
-        <div className="page-actions">
-          <Button
-            text={
-              isSavingAppointmentDetailsLoading
-                ? "Saving..."
-                : "Save All Changes"
-            }
-            color="primary"
-            size="lg"
-            onClick={handleSaveAll}
-            disabled={!changesDetected || isSavingAppointmentDetailsLoading}
-          />
-        </div>
+        {!saveError && changesDetected && hasInvalidOrEmptyRequiredFields && (
+          <div className="error-banner">
+            Please complete all required consultation, patient, and diagnostic
+            fields before saving.
+          </div>
+        )}
       </div>
     </ProtectedRoute>
   );

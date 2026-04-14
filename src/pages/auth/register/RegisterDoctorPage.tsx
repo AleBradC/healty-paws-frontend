@@ -9,9 +9,10 @@ import { useNavigate } from "react-router-dom";
 import { API_BASE_URL, registerEndpoint } from "../../../api/endpoint";
 import { Input } from "../../../components/ui/Input/Input";
 import { specializationsData } from "../../../data/specialization";
-import { successPagePath } from "../../../utils/path";
+import { successPagePath, homePath } from "../../../utils/path";
 import { Select } from "../../../components/ui/Select/Select";
 import { Button } from "../../../components/ui/Button/Button";
+import { Link } from "react-router-dom";
 import "../styles.css";
 
 interface ServicePrice {
@@ -34,6 +35,21 @@ export default function RegisterDoctorPage() {
   const [services, setServices] = useState<ServicePrice[]>([]);
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const [error, setError] = useState<string | undefined>();
+  const canProceedStep1 =
+    formData.name.trim().length > 0 &&
+    formData.email.trim().length > 0 &&
+    /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email) &&
+    formData.password.length >= 6 &&
+    formData.confirmPassword.length > 0 &&
+    formData.password === formData.confirmPassword &&
+    formData.specialization.trim().length > 0 &&
+    formData.clinicName.trim().length > 0 &&
+    formData.clinicAddress.trim().length > 0;
+  const canSubmitStep2 =
+    services.length > 0 &&
+    services.every(
+      (service) => service.price.trim().length > 0 && Number(service.price) > 0
+    );
 
   const specializationOptions = specializationsData.map((spec) => ({
     value: spec.name,
@@ -202,6 +218,9 @@ export default function RegisterDoctorPage() {
   return (
     <div className="auth-page">
       <div className="auth-card">
+        <Link to={homePath} className="auth-close-button" aria-label="Close">
+          ×
+        </Link>
         <h1 className="auth-title">Doctor Registration</h1>
         {error && <p className="global-error">{error}</p>}
         <form className="auth-form" onSubmit={handleSubmit}>
@@ -269,6 +288,7 @@ export default function RegisterDoctorPage() {
                   size="md"
                   onClick={handleNext}
                   type="button"
+                  disabled={!canProceedStep1}
                 />
               </div>
             </div>
@@ -278,9 +298,7 @@ export default function RegisterDoctorPage() {
               <h2 className="auth-subtitle">Services & Pricing</h2>
               <section className="form-section">
                 <p className="auth-note">
-                  Based on your specialization{" "}
-                  <strong>"{formData.specialization}"</strong>, please set
-                  prices.
+                  Please select the prices for the services you offer.
                 </p>
                 <div className="services-list">
                   {services.map((service) => (
@@ -315,7 +333,7 @@ export default function RegisterDoctorPage() {
                   color="primary"
                   type="submit"
                   size="md"
-                  disabled={isSubmitting}
+                  disabled={isSubmitting || !canSubmitStep2}
                 />
               </div>
             </div>

@@ -2,7 +2,7 @@ import React, { type FC } from "react";
 import { cx } from "../../../utils/cx";
 import "./styles.css";
 
-type ButtonColor = "primary" | "secondary" | "accent" | "neutral" | "default";
+type ButtonColor = "primary" | "secondary" | "accent" | "neutral" | "default" | "danger";
 type ButtonSize = "sm" | "md" | "lg";
 
 interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
@@ -19,6 +19,7 @@ const colorClass: Record<ButtonColor, string> = {
   accent: "btn--accent",
   neutral: "btn--neutral",
   default: "btn--neutral",
+  danger: "btn--danger",
 };
 
 const sizeClass: Record<ButtonSize, string> = {

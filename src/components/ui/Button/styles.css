@@ -1,74 +1,107 @@
 .btn {
   border: 0;
-  border-radius: var(--radius);
-  font-weight: 400;
+  border-radius: var(--radius-lg);
+  font-family: inherit;
+  font-weight: 600;
   cursor: pointer;
-  display: flex;
+  display: inline-flex;
   align-items: center;
   justify-content: center;
+  gap: 0.5rem;
   line-height: 1;
   white-space: nowrap;
   text-decoration: none;
-  transition: background-color 0.2s ease, color 0.2s ease, transform 0.05s ease;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: var(--shadow-sm);
+  outline: none;
 }
 
 .btn:active {
-  transform: translateY(1px);
+  transform: translateY(2px) scale(0.98);
+}
+
+.btn:focus-visible {
+  box-shadow: 0 0 0 3px var(--color-background), 0 0 0 6px var(--color-primary-light);
+}
+
+.btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
 }
 
 /* Sizes */
 .btn--sm {
-  padding: 0.45rem 0.85rem;
-  font-size: 1rem;
+  padding: 0.4rem 0.875rem;
+  font-size: 0.8125rem;
+  letter-spacing: 0.01em;
+  border-radius: var(--radius-md);
 }
+
 .btn--md {
-  padding: 0.8rem 1.2rem;
-  font-size: 1.2rem;
+  padding: 0.75rem 1.5rem;
+  font-size: 1rem; /* 16px */
 }
+
 .btn--lg {
-  padding: 0.8rem 1.25rem;
-  font-size: 1.4rem;
+  padding: 1rem 2rem;
+  font-size: 1.125rem; /* 18px */
   width: 100%;
 }
 
-/* Variants (with simple hover) */
-.btn--default {
-  background: var(--color-default);
-  color: var(--color-text);
+/* Variants */
+.btn--default, .btn--neutral {
+  background: transparent;
+  color: var(--color-text-muted);
+  border: 1.5px solid var(--color-secondary-dark);
 }
-.btn--default:hover {
-  background: grey;
+
+.btn--default:hover:not(:disabled), .btn--neutral:hover:not(:disabled) {
+  background: var(--color-background);
+  color: var(--color-primary-dark);
+  border-color: var(--color-primary-light);
+}
+
+/* Danger variant — for destructive actions like Remove */
+.btn--danger {
+  background: transparent;
+  color: var(--color-error);
+  border: 1.5px solid rgba(239, 68, 68, 0.3);
+}
+
+.btn--danger:hover:not(:disabled) {
+  background: var(--color-error-bg);
+  border-color: var(--color-error);
 }
 
 .btn--primary {
-  background: var(--color-primary);
-  color: var(--color-text);
+  background: var(--gradient-primary);
+  color: #fff;
+  border: 1px solid transparent;
 }
-.btn--primary:hover {
-  filter: brightness(0.92);
+
+.btn--primary:hover:not(:disabled) {
+  box-shadow: 0 10px 15px -3px rgba(15, 118, 110, 0.4);
+  transform: translateY(-2px);
 }
 
 .btn--secondary {
   background: var(--color-secondary);
   color: var(--color-text);
+  border: 1px solid var(--color-secondary-dark);
 }
-.btn--secondary:hover {
-  filter: brightness(0.92);
+
+.btn--secondary:hover:not(:disabled) {
+  background: var(--color-secondary-light);
+  box-shadow: var(--shadow-md);
 }
 
 .btn--accent {
-  background: var(--color-accent);
-  color: var(--color-text);
-}
-.btn--accent:hover {
-  filter: brightness(0.92);
+  background: var(--gradient-accent);
+  color: #fff;
 }
 
-.btn--neutral {
-  background: #fff;
-  color: var(--color-text);
-  border: 1px solid rgba(0, 0, 0, 0.1);
-}
-.btn--neutral:hover {
-  background: #f4f4f4;
+.btn--accent:hover:not(:disabled) {
+  box-shadow: 0 10px 15px -3px rgba(99, 102, 241, 0.4);
+  transform: translateY(-2px);
 }

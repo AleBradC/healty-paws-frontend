@@ -29,8 +29,8 @@ const ResetPasswordPage = lazy(
 const DoctorDashboardPage = lazy(
   () => import("./pages/dashboard/doctor/DoctorDashboardPage")
 );
-const PatientDashboardPage = lazy(
-  () => import("./pages/dashboard/owner/PatientDashboardPage")
+const OwnerDashboardPage = lazy(
+  () => import("./pages/dashboard/owner/OwnerDashboardPage")
 );
 
 // Appointment & Patient Pages
@@ -94,7 +94,7 @@ function App() {
                 />
                 <Route
                   path="/dashboard/owner"
-                  element={<PatientDashboardPage />}
+                  element={<OwnerDashboardPage />}
                 />
 
                 {/* Detailed Views */}

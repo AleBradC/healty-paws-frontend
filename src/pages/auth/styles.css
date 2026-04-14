@@ -4,20 +4,40 @@
   justify-content: center;
   align-items: center;
   min-height: 80vh;
-  padding: 1rem;
+  padding: 2rem 1rem;
   box-sizing: border-box;
+  position: relative;
+}
+
+/* Close button - Often injected via React routing absolute position but if they mean the container needs one, adding style for an X button if we drop it in */
+.auth-close-button {
+  position: absolute;
+  top: 1.5rem;
+  right: 1.5rem;
+  width: 36px;
+  height: 36px;
+  color: var(--color-text-muted);
+  cursor: pointer;
+  z-index: 10;
+  text-decoration: none;
+}
+
+.auth-close-button:hover {
+  color: var(--color-success);
 }
 
 .auth-card {
-  background: white;
-  padding: 2.5rem 3rem;
-  border-radius: 16px;
-  box-shadow: 0 12px 35px rgba(0, 0, 0, 0.08);
-  /* width: 100%; */
-  width: 600px;
+  background: var(--color-secondary-light);
+  padding: 3rem;
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--color-secondary-dark);
+  box-shadow: var(--shadow-lg);
+  width: 100%;
+  max-width: 540px;
   display: flex;
   flex-direction: column;
-  gap: 1rem;
+  gap: 1.5rem;
+  position: relative;
 }
 
 /* --- Form Specifics --- */
@@ -25,34 +45,52 @@
   width: 100%;
   display: flex;
   flex-direction: column;
-  gap: 1.25rem; /* Consistent space between inputs */
+  gap: 1.5rem;
+}
+
+.form-step {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  animation: fadeIn 0.3s ease-out;
+}
+
+.form-section {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
 }
 
 /* --- Typography --- */
 .auth-title {
-  font-size: 2.5rem;
+  font-size: clamp(2rem, 4vw, 2.5rem);
   font-weight: 800;
-  color: #1c2a48;
+  color: var(--color-text);
   text-align: center;
   margin: 0;
+  letter-spacing: -0.02em;
 }
 
 .auth-subtitle {
-  font-size: 1.5rem;
+  font-size: 1rem;
   font-weight: 700;
-  color: #2a3b5f;
-  text-align: center;
+  color: var(--color-text);
   margin: 0;
+  padding-bottom: 0.5rem;
+  text-align: center;
 }
 
 .auth-note {
   display: flex;
   flex-direction: column;
-  color: #5a6475;
-  font-size: 1rem;
+  color: var(--color-text-muted);
+  font-size: 0.95rem;
   line-height: 1.6;
-  text-align: center;
   margin: 0;
+  background: var(--color-background);
+  padding: 1rem;
+  border-radius: var(--radius-sm);
+  border: 1px dashed var(--color-secondary-dark);
 }
 
 .auth-note-centered {
@@ -64,8 +102,8 @@
 .auth-actions {
   margin-top: 1rem;
   display: flex;
-  justify-content: center;
-  gap: 20px;
+  justify-content: flex-end;
+  gap: 1rem;
   width: 100%;
 }
 
@@ -77,26 +115,24 @@
   justify-content: flex-end;
 }
 
-.auth-actions.align-end {
-  justify-content: flex-end;
-}
-
 .auth-links {
-  margin-top: 1rem;
+  margin-top: 1.5rem;
   text-align: center;
-  font-size: 0.9rem;
+  font-size: 0.95rem;
+  color: var(--color-text-muted);
 }
 
 .auth-inline-link {
-  color: #007bff;
+  color: var(--color-primary);
   font-weight: 600;
   text-decoration: none;
   background: none;
+  transition: all 0.2s ease;
 }
 
 .auth-inline-link:hover {
   text-decoration: underline;
-  color: #0056b3;
+  color: var(--color-primary-dark);
 }
 
 /* --- Role Selection Page Specifics --- */
@@ -105,7 +141,24 @@
   flex-direction: column;
   gap: 1rem;
   width: 100%;
-  margin: 1rem 0;
+  margin: 1.5rem 0;
+}
+
+/* --- Services List overrides for auth layout --- */
+.services-list {
+  display: grid;
+  gap: 1rem;
+}
+
+.service-price-item {
+  display: grid;
+  gap: 0.5rem;
+}
+
+.service-price-item label {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--color-text);
 }
 
 /* --- States (Confirmation & Error) --- */
@@ -113,18 +166,31 @@
   text-align: center;
   display: flex;
   flex-direction: column;
-  gap: 1rem;
+  gap: 1.5rem;
   align-items: center;
+  padding: 2rem 0;
 }
 
 .global-error {
-  color: #d93025;
+  color: var(--color-error);
   font-weight: 600;
   text-align: center;
-  background-color: #f8d7da;
-  border: 1px solid #f5c6cb;
-  border-radius: 8px;
-  padding: 0.8rem;
+  background-color: var(--color-error-bg);
+  border: 1px solid rgba(239, 68, 68, 0.2);
+  border-radius: var(--radius-md);
+  padding: 1rem;
   width: 100%;
   box-sizing: border-box;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(5px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@media (max-width: 600px) {
+  .auth-card {
+    padding: 2rem 1.5rem;
+    border-radius: var(--radius-md);
+  }
 }

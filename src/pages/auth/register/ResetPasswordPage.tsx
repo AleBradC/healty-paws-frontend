@@ -18,6 +18,9 @@ export default function ResetPasswordPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [message, setMessage] = useState<string | undefined>(undefined);
   const [error, setError] = useState<string | undefined>(undefined);
+  const canSendResetCode = email.trim().length > 0;
+  const canVerifyCode = code.trim().length === 6;
+  const canResetPassword = newPassword.length >= 6;
 
   const handleRedirect = (path: string) => navigate(path);
 
@@ -182,7 +185,14 @@ export default function ResetPasswordPage() {
                   color="primary"
                   size="lg"
                   type="submit"
-                  disabled={isSubmitting}
+                  disabled={isSubmitting || !canSendResetCode}
+                />
+              </div>
+              <div className="auth-links">
+                <Button
+                  onClick={() => handleRedirect(authLoginPath)}
+                  text="Back to login"
+                  className="auth-inline-link"
                 />
               </div>
             </form>
@@ -229,7 +239,7 @@ export default function ResetPasswordPage() {
                   color="primary"
                   size="lg"
                   type="submit"
-                  disabled={isSubmitting}
+                  disabled={isSubmitting || !canVerifyCode}
                 />
               </div>
             </form>
@@ -280,7 +290,7 @@ export default function ResetPasswordPage() {
                   color="primary"
                   size="lg"
                   type="submit"
-                  disabled={isSubmitting}
+                  disabled={isSubmitting || !canResetPassword}
                 />
               </div>
             </form>

@@ -38,6 +38,7 @@ export const Header: FC = () => {
   };
 
   const showDoctorsButton = user?.role === "owner";
+  const avatarStorageKey = user?.id ? `avatar-${user.role}-${user.id}` : undefined;
 
   const menuItems = [
     {
@@ -59,25 +60,17 @@ export const Header: FC = () => {
             <span className="logo__text">HealthyPaws</span>
           </Link>
         </div>
-        <nav className="header__nav" aria-label="Primary">
-          <Button
-            onClick={() => handleRedirect(homePath)}
-            text="Home"
-            color="default"
-            size="sm"
-            className="nav__link"
-          />
-          {showDoctorsButton && (
-            <Button
-              onClick={() => handleRedirect(doctorsPath)}
-              text="Doctors"
-              color="default"
-              size="sm"
-              className="nav__link"
-            />
-          )}
-        </nav>
         <div className="header__right">
+          <nav className="header__nav" aria-label="Primary">
+            <Link to={homePath} className="nav__link">
+              Home
+            </Link>
+            {showDoctorsButton && (
+              <Link to={doctorsPath} className="nav__link">
+                Doctors
+              </Link>
+            )}
+          </nav>
           {isLoading ? (
             <div
               style={{
@@ -89,13 +82,16 @@ export const Header: FC = () => {
               }}
             />
           ) : isLoggedIn ? (
-            <ProfilePicture menuItems={menuItems} />
+            <ProfilePicture
+              menuItems={menuItems}
+              avatarStorageKey={avatarStorageKey}
+            />
           ) : (
             <Button
               onClick={() => handleRedirect(authLoginPath)}
               text="Login"
               color="default"
-              size="sm"
+              size="md"
             />
           )}
         </div>
