@@ -1,10 +1,7 @@
 
 import { useParams } from "react-router-dom";
-import { ConditionSummaryCard } from "../../components/features/ConditionSummaryCard/ConditionSummaryCard";
-import InfoBlock from "../../components/features/InfoBlock/InfoBlock";
 import { ProtectedRoute } from "../../router/ProtectedRoute/ProtectedRoute";
 import { useAppointment } from "../../lib/graphql/appointments/useAppointment";
-import { DetailsSection } from "../../components/ui/DetailsSection/DetailsSection";
 import "./styles.css";
 
 export default function AppointmentSummaryPage() {
@@ -25,126 +22,108 @@ export default function AppointmentSummaryPage() {
 
   const lifelongConditions = appointment.patient?.lifelong_conditions ?? [];
   const activeTreatments = appointment.patient?.active_treatments ?? [];
+  const appointmentDate = new Date(appointment.datetime);
+  const ownerName = appointment.patient?.owner?.name ?? "N/A";
+  const doctorName = appointment.doctor?.name ?? "N/A";
+  const clinicName = appointment.doctor?.clinic_name ?? "N/A";
 
   return (
     <ProtectedRoute>
       <div className="summary-page-wrapper">
-        <h1 className="page-main-title">Appointment Summary</h1>
-
-        <DetailsSection title="Visit Information">
-          <div className="summary-grid">
-            <InfoBlock label="Doctor" value={appointment?.doctor?.name} />
-            <InfoBlock
-              label="Clinic"
-              value={appointment?.doctor?.clinic_name}
-            />
-            <InfoBlock
-              label="Appointment Date"
-              value={new Date(appointment?.datetime).toLocaleDateString(undefined, {
-                weekday: 'long',
-                year: 'numeric',
-                month: 'long',
-                day: 'numeric'
+        <article className="medical-letter">
+          <header className="letter-header">
+            <p className="letter-kicker">Veterinary Medical Summary</p>
+            <h1 className="page-main-title">Appointment Summary</h1>
+            <p className="letter-date">
+              Issued on{" "}
+              {appointmentDate.toLocaleDateString(undefined, {
+                weekday: "long",
+                year: "numeric",
+                month: "long",
+                day: "numeric",
               })}
-            />
-          </div>
-        </DetailsSection>
-
-        <DetailsSection title="Patient Details">
-          <div className="summary-grid">
-            <InfoBlock
-              label="Patient Name"
-              value={appointment?.patient?.name}
-            />
-            <InfoBlock
-              label="Owner"
-              value={appointment?.patient?.owner?.name}
-            />
-            <InfoBlock
-              label="Pet Type"
-              value={appointment?.patient?.type}
-            />
-            <InfoBlock
-              label="Breed"
-              value={appointment?.patient?.breed}
-            />
-            <InfoBlock
-              label="Age"
-              value={`${appointment?.patient?.age} years`}
-            />
-            <InfoBlock
-              label="Weight"
-              value={`${appointment?.patient?.weight} kg`}
-            />
-          </div>
-        </DetailsSection>
-
-        <DetailsSection title="Consultation Details">
-          <div className="diagnostic-summary">
-            <h4>Type of Consultation</h4>
-            <p className="detailed-note-text">
-              {appointment?.consultation_type || "General Clinic Visit"}
             </p>
-          </div>
+          </header>
 
-          <div className="diagnostic-summary">
-            <h4>Reason for Visit</h4>
-            <p className="detailed-note-text">
-              {appointment?.reason || "No reason specified."}
-            </p>
-          </div>
+          <section className="letter-section">
+            <h2>Patient Information</h2>
+            <div className="summary-grid">
+              <p><strong>Pet:</strong> {appointment.patient?.name ?? "N/A"}</p>
+              <p><strong>Owner:</strong> {ownerName}</p>
+              <p><strong>Species:</strong> {appointment.patient?.type ?? "N/A"}</p>
+              <p><strong>Breed:</strong> {appointment.patient?.breed ?? "N/A"}</p>
+              <p><strong>Age:</strong> {appointment.patient?.age ?? "N/A"} years</p>
+              <p><strong>Weight:</strong> {appointment.patient?.weight ?? "N/A"} kg</p>
+            </div>
+          </section>
 
-          <div className="diagnostic-summary">
-            <h4>Investigation</h4>
-            <p className="detailed-note-text">
-              {appointment?.investigation || "No investigation details recorded."}
-            </p>
-          </div>
+          <section className="letter-section">
+            <h2>Consultation Record</h2>
+            <div className="consultation-record-grid">
+              <div className="consultation-record-item">
+                <h3>Consultation Type</h3>
+                <p>{appointment.consultation_type || "General Clinic Visit"}</p>
+              </div>
 
-          <div className="diagnostic-summary">
-            <h4>Investigation Result</h4>
-            <p className="detailed-note-text">
-              {appointment?.investigation_result || "No results available."}
-            </p>
-          </div>
-        </DetailsSection>
+              <div className="consultation-record-item">
+                <h3>Reason for Visit</h3>
+                <p>{appointment.reason || "No reason specified."}</p>
+              </div>
 
-        <DetailsSection title="Doctor's Diagnostic">
-          <div className="diagnostic-summary">
-            <h4 className="lifelong-conditions-title">Lifelong Conditions</h4>
+              <div className="consultation-record-item">
+                <h3>Investigation Performed</h3>
+                <p>{appointment.investigation || "No investigation details recorded."}</p>
+              </div>
+
+              <div className="consultation-record-item">
+                <h3>Investigation Result</h3>
+                <p>{appointment.investigation_result || "No results available."}</p>
+              </div>
+            </div>
+          </section>
+
+          <section className="letter-section">
+            <h2>Clinical Findings</h2>
+            <h3>Lifelong Conditions</h3>
             {lifelongConditions.length > 0 ? (
-              lifelongConditions.map((condition) => (
-                <ConditionSummaryCard
-                  key={condition?.id}
-                  disease={condition?.condition}
-                  treatment={condition?.treatment}
-                  variant="stable"
-                />
-              ))
+              <ul className="summary-list">
+                {lifelongConditions.map((condition) => (
+                  <li key={condition.id}>
+                    <strong>{condition.condition}:</strong> {condition.treatment}
+                  </li>
+                ))}
+              </ul>
             ) : (
-              <p className="no-record-note">
-                No lifelong conditions were recorded for this visit.
-              </p>
+              <p className="no-record-note">No lifelong conditions were recorded.</p>
             )}
-          </div>
-          <div className="diagnostic-summary">
-            <h4>Active Treatments</h4>
-            {activeTreatments?.length > 0 ? (
-              activeTreatments?.map((treatment) => (
-                <ConditionSummaryCard
-                  key={treatment?.id}
-                  disease={treatment?.condition}
-                  treatment={treatment?.treatment}
-                  variant="active"
-                />
-              ))
+
+            <h3>Active Treatments</h3>
+            {activeTreatments.length > 0 ? (
+              <ul className="summary-list">
+                {activeTreatments.map((treatment) => (
+                  <li key={treatment.id}>
+                    <strong>{treatment.condition}:</strong> {treatment.treatment}
+                    <span className="treatment-dates">
+                      {" "}
+                      (from {new Date(treatment.start_date).toLocaleDateString()}
+                      {treatment.end_date
+                        ? ` to ${new Date(treatment.end_date).toLocaleDateString()}`
+                        : " - ongoing"})
+                    </span>
+                  </li>
+                ))}
+              </ul>
             ) : (
-              <p className="no-record-note">
-                No active treatments were prescribed for this visit.
-              </p>
+              <p className="no-record-note">No active treatments were prescribed.</p>
             )}
-          </div>
-        </DetailsSection>
+          </section>
+
+          <footer className="letter-footer">
+            <p>Sincerely,</p>
+            <p><strong>Dr. {doctorName}</strong></p>
+            <p>{clinicName}</p>
+          </footer>
+        </article>
       </div>
     </ProtectedRoute>
   );

@@ -1,70 +1,139 @@
-/* --- Main Page Layout --- */
 .summary-page-wrapper {
-  max-width: 960px;
+  max-width: 1000px;
   margin: 2rem auto;
-  padding: 1rem 2rem 3rem;
+  padding: 1rem 1.5rem 3rem;
+}
+
+.medical-letter {
+  background: var(--color-secondary-light);
+  color: var(--color-text);
+  border: 1px solid var(--color-secondary-dark);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
+  padding: 2rem;
+}
+
+.letter-header {
+  border-bottom: 2px solid var(--color-secondary-dark);
+  padding-bottom: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.letter-kicker {
+  margin: 0;
+  color: var(--color-primary);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-size: 0.75rem;
 }
 
 .page-main-title {
-  font-size: clamp(1.75rem, 4vw, 2.5rem);
+  margin: 0.5rem 0 0.25rem;
+  font-size: clamp(1.5rem, 3.2vw, 2.1rem);
   font-weight: 800;
   color: var(--color-text);
-  text-align: center;
-  margin-bottom: 2.5rem;
-  letter-spacing: -0.02em;
+  letter-spacing: -0.01em;
 }
 
-/* --- Section Cards --- */
-
-
-.section-actions {
-  margin-top: 1.5rem;
-  display: flex;
-  justify-content: flex-end;
+.letter-date {
+  margin: 0;
+  color: var(--color-text-muted);
+  font-size: 0.92rem;
 }
 
-/* --- Summary Grid & Info Blocks --- */
-.summary-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-  gap: 1.25rem;
-}
-
-/* --- Diagnostic Summary Section --- */
-.diagnostic-summary {
+.letter-section {
   margin-bottom: 2rem;
 }
 
-.diagnostic-summary:last-child {
-  margin-bottom: 0;
-}
-
-.diagnostic-summary h4 {
+.letter-section h2 {
   font-size: 1rem;
-  font-weight: 700;
+  margin: 0 0 1rem;
+  color: var(--color-text);
+  border-left: 4px solid var(--color-primary-light);
+  padding-left: 0.75rem;
+}
+
+.letter-section h3 {
+  font-size: 0.95rem;
+  margin: 1.15rem 0 0.6rem;
   color: var(--color-primary-light);
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  margin-bottom: 1rem;
 }
 
-.diagnostic-summary .lifelong-conditions-title {
-  color: #4f46e5;
-}
-
-.no-record-note,
-.detailed-note-text {
-  color: #ffffff;
+.letter-section p {
+  margin: 0.55rem 0;
   line-height: 1.6;
-  padding: 1rem 1.25rem;
-  background-color: var(--color-background);
-  border-radius: var(--radius-sm);
-  border: 1px solid var(--color-secondary-dark);
+}
+
+.consultation-record-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.consultation-record-item {
+  background: transparent;
+  border: none;
+  border-left: 3px solid color-mix(in oklab, var(--color-primary-light) 55%, white);
+  border-radius: 0;
+  padding: 0.45rem 0 0.45rem 0.9rem;
+}
+
+.consultation-record-item h3 {
+  margin: 0 0 0.35rem;
+  color: var(--color-primary-light);
+  font-size: 0.9rem;
+}
+
+.consultation-record-item p {
+  margin: 0;
+  color: var(--color-text);
+  line-height: 1.6;
+}
+
+.summary-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+}
+
+.summary-list {
+  margin: 0.4rem 0 0;
+  padding-left: 1.2rem;
+}
+
+.summary-list li {
+  margin-bottom: 0.75rem;
+  line-height: 1.55;
+  color: var(--color-text);
+}
+
+.treatment-dates {
+  color: var(--color-primary-light);
+  font-size: 0.9rem;
 }
 
 .no-record-note {
-  color: var(--color-text-muted);
+  margin: 0.45rem 0;
+  color: color-mix(in oklab, var(--color-primary-light) 55%, var(--color-text));
   font-style: italic;
-  border-style: dashed;
-  text-align: center;
+}
+
+.letter-footer {
+  border-top: 2px solid var(--color-secondary-dark);
+  padding-top: 1.3rem;
+  margin-top: 2.4rem;
+}
+
+.letter-footer p {
+  margin: 0.4rem 0;
+}
+
+@media (max-width: 720px) {
+  .summary-page-wrapper {
+    padding: 1rem;
+  }
+
+  .medical-letter {
+    padding: 1.25rem;
+  }
 }
