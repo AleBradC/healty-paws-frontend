@@ -249,7 +249,9 @@ export default function AppointmentDetailsPage() {
       currentLifelongString !== initialSnapshot.lifelongConditions ||
       currentActiveString !== initialSnapshot.activeTreatments;
 
-    return hasUnsavedChanges || hasDataDiff;
+    const needsStatusUpdate = fetchedAppointment?.status !== "Completed";
+
+    return hasUnsavedChanges || hasDataDiff || needsStatusUpdate;
   };
 
   const hasEmptyRequiredFields = () => {
