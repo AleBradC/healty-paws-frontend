@@ -1,5 +1,6 @@
 import { type FC, useState, useRef, useEffect } from "react";
 import { DropdownMenu } from "../../ui/DropDownMenu/DropdownMenu";
+import { AvatarImage } from "../../ui/AvatarImage/AvatarImage";
 import "./styles.css";
 
 export interface MenuItem {
@@ -9,9 +10,13 @@ export interface MenuItem {
 
 interface ProfilePictureProps {
   menuItems: MenuItem[];
+  avatarStorageKey?: string;
 }
 
-export const ProfilePicture: FC<ProfilePictureProps> = ({ menuItems }) => {
+export const ProfilePicture: FC<ProfilePictureProps> = ({
+  menuItems,
+  avatarStorageKey,
+}) => {
   const [isOpen, setIsOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -34,15 +39,11 @@ export const ProfilePicture: FC<ProfilePictureProps> = ({ menuItems }) => {
       ref={containerRef}
       suppressHydrationWarning
     >
-      <img
-        src="/profile-placeholder.jpg"
+      <AvatarImage
         alt="Profile"
-        className="profile-picture"
+        storageKey={avatarStorageKey}
+        size={40}
         onClick={() => setIsOpen(!isOpen)}
-        role="button"
-        tabIndex={0}
-        width={40}
-        height={40}
       />
 
       <DropdownMenu

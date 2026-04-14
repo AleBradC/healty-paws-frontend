@@ -31,6 +31,7 @@ import { SpecializationEditor } from "./components/SpecializationEditor";
 import { Button } from "../../../components/ui/Button/Button";
 import { Select } from "../../../components/ui/Select/Select";
 import { Loading } from "../../../components/ui/Loading/Loading";
+import { AvatarImage } from "../../../components/ui/AvatarImage/AvatarImage";
 import { DashboardSection } from "../../../components/ui/DashboardSection/DashboardSection";
 import "./styles.css";
 
@@ -119,6 +120,7 @@ export default function DoctorDashboardPage() {
     (spec) => !existingSpecNames?.includes(spec?.name)
   );
   const appointments = doctor?.appointments ?? [];
+  const doctorAvatarStorageKey = user?.id ? `avatar-doctor-${user.id}` : undefined;
 
   // --- EFFECTS ---
   useEffect(() => {
@@ -416,18 +418,12 @@ export default function DoctorDashboardPage() {
 
               <div className="profile-layout-grid">
                 <div className="profile-sidebar">
-                  <div className="image-upload-wrapper">
-                    <img
-                      src={"/profile-placeholder.jpg"}
-                      alt="Profile Preview"
-                      width={160}
-                      height={160}
-                      className="profile-image-preview"
-                    />
-                    <div className="image-overlay">
-                      <span>Change Photo</span>
-                    </div>
-                  </div>
+                  <AvatarImage
+                    alt="Profile Preview"
+                    size={160}
+                    editable
+                    storageKey={doctorAvatarStorageKey}
+                  />
                   <p className="profile-info-text">Update your professional profile picture for your clinic profile.</p>
                 </div>
 

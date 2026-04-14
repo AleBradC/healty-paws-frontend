@@ -26,6 +26,7 @@ import { appointmentSummaryPath } from "../../../utils/path";
 import { useAuthentication } from "../../../context/AuthenticationContext";
 import { Button } from "../../../components/ui/Button/Button";
 import { Loading } from "../../../components/ui/Loading/Loading";
+import { AvatarImage } from "../../../components/ui/AvatarImage/AvatarImage";
 import { useOwner } from "../../../lib/graphql/owner/useOwner";
 import { DashboardSection } from "../../../components/ui/DashboardSection/DashboardSection";
 import "./styles.css";
@@ -182,6 +183,7 @@ export default function OwnerDashboardPage() {
     id: pet.id,
     name: pet.name,
   })) as unknown as Pet[];
+  const ownerAvatarStorageKey = user?.id ? `avatar-owner-${user.id}` : undefined;
 
   const handleOwnerChange = (e: ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -368,18 +370,12 @@ export default function OwnerDashboardPage() {
 
               <div className="profile-layout-grid">
                 <div className="profile-sidebar">
-                  <div className="image-upload-wrapper">
-                    <img
-                      src="/profile-placeholder.jpg"
-                      alt="Profile Preview"
-                      width={160}
-                      height={160}
-                      className="profile-image-preview"
-                    />
-                    <div className="image-overlay">
-                      <span>Change Photo</span>
-                    </div>
-                  </div>
+                  <AvatarImage
+                    alt="Profile Preview"
+                    size={160}
+                    editable
+                    storageKey={ownerAvatarStorageKey}
+                  />
                   <p className="profile-info-text">Update your professional profile picture to personalize your dashboard.</p>
                 </div>
 
@@ -429,26 +425,12 @@ export default function OwnerDashboardPage() {
 
                 <div className="profile-layout-grid">
                   <div className="profile-sidebar">
-                    <div className="image-upload-wrapper">
-                      <img
-                        src="/profile-placeholder.jpg"
-                        alt="Pet Preview"
-                        className="profile-image-preview"
-                      />
-                      <label
-                        htmlFor={`petImage-${pet.id}`}
-                        className="image-overlay"
-                      >
-                        <span>Change Photo</span>
-                      </label>
-                      <input
-                        id={`petImage-${pet.id}`}
-                        name="petImage"
-                        type="file"
-                        accept="image/*"
-                        style={{ display: "none" }}
-                      />
-                    </div>
+                  <AvatarImage
+                    alt="Pet Preview"
+                    size={160}
+                    editable
+                    storageKey={`avatar-pet-${pet.id}`}
+                  />
                     <p className="profile-info-text">Update {pet.name}'s photo and general information to keep their health records up to date.</p>
                   </div>
 

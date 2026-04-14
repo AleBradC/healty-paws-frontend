@@ -38,6 +38,7 @@ export const Header: FC = () => {
   };
 
   const showDoctorsButton = user?.role === "owner";
+  const avatarStorageKey = user?.id ? `avatar-${user.role}-${user.id}` : undefined;
 
   const menuItems = [
     {
@@ -81,7 +82,10 @@ export const Header: FC = () => {
               }}
             />
           ) : isLoggedIn ? (
-            <ProfilePicture menuItems={menuItems} />
+            <ProfilePicture
+              menuItems={menuItems}
+              avatarStorageKey={avatarStorageKey}
+            />
           ) : (
             <Button
               onClick={() => handleRedirect(authLoginPath)}
