@@ -331,7 +331,11 @@ export default function OwnerDashboardPage() {
     }
   };
 
-  const handleAppointmentClick = (appointmentId: string | number) => {
+  const handleAppointmentClick = (
+    appointmentId: string | number,
+    status: string
+  ) => {
+    if (status !== "Completed") return;
     navigate(`${appointmentSummaryPath}/${appointmentId}`);
   };
 
@@ -544,22 +548,35 @@ export default function OwnerDashboardPage() {
               </div>
               <div className="appointments-list">
                 {appointments.length > 0 ? (
-                  appointments.map((app) => (
-                    <AppointmentCard
-                      key={app.id}
-                      id={app.id}
-                      status={app.status}
-                      doctorName={`Dr. ${app.doctor.name}`}
-                      petName={app.patient.name}
-                      date={new Date(app.datetime).toLocaleDateString()}
-                      time={new Date(app.datetime).toLocaleTimeString([], {
-                        hour: "2-digit",
-                        minute: "2-digit",
-                      })}
-                      onClick={() => handleAppointmentClick(app.id)}
-                      onDelete={() => handleDeleteAppointment(app.id)}
-                    />
-                  ))
+                  appointments.map((app) => {
+                    const isCompleted = app.status === "Completed";
+
+                    return (
+                      <AppointmentCard
+                        key={app.id}
+                        id={app.id}
+                        status={app.status}
+                        doctorName={`Dr. ${app.doctor.name}`}
+                        petName={app.patient.name}
+                        date={new Date(app.datetime).toLocaleDateString()}
+                        time={new Date(app.datetime).toLocaleTimeString([], {
+                          hour: "2-digit",
+                          minute: "2-digit",
+                        })}
+                        isDisabled={!isCompleted}
+                        onClick={
+                          isCompleted
+                            ? () => handleAppointmentClick(app.id, app.status)
+                            : undefined
+                        }
+                        onDelete={
+                          isCompleted
+                            ? () => handleDeleteAppointment(app.id)
+                            : undefined
+                        }
+                      />
+                    );
+                  })
                 ) : (
                   <p>You have no upcoming appointments.</p>
                 )}

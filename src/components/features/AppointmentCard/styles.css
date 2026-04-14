@@ -23,6 +23,12 @@
   background-color: var(--color-background);
 }
 
+.appointment-card.disabled {
+  opacity: 0.55;
+  filter: grayscale(0.2);
+  cursor: not-allowed;
+}
+
 /* --- Status Vertical Accents --- */
 .appointment-card.status-confirmed,
 .appointment-card.status-Confirmed {

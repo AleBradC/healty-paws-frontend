@@ -24,6 +24,7 @@ import { useUpdateDoctorSpecialization } from "../../../lib/graphql/doctors/useU
 import type { Specialization } from "../../../types";
 import {
   appointmentDetailsPath,
+  appointmentSummaryPath,
   patientSummaryPath,
 } from "../../../utils/path";
 import { useAuthentication } from "../../../context/AuthenticationContext";
@@ -387,8 +388,22 @@ export default function DoctorDashboardPage() {
     }
   };
 
-  const handleAppointmentClick = (appointmentId: string | number) => {
-    navigate(`${appointmentDetailsPath}/${appointmentId}`);
+  const handleAppointmentClick = (
+    appointmentId: string | number,
+    status: string | null | undefined
+  ) => {
+    switch (status) {
+      case "Completed":
+        navigate(`${appointmentSummaryPath}/${appointmentId}`);
+        return;
+      case "Confirmed":
+      case "Upcoming":
+        navigate(`${appointmentDetailsPath}/${appointmentId}`);
+        return;
+      case "Cancelled":
+      default:
+        return;
+    }
   };
 
   const handlePatientClick = (patientId: string | number) => {
@@ -593,20 +608,36 @@ export default function DoctorDashboardPage() {
               <div className="appointments-list">
                 {appointments?.length > 0 ? (
                   appointments?.map((app) => (
-                    <AppointmentCard
-                      key={app.id}
-                      id={app.id}
-                      status={app.status ?? "Upcoming"}
-                      doctorName={app.patient?.owner?.name ?? "Unknown Owner"}
-                      petName={app.patient?.name ?? "Unknown Pet"}
-                      date={new Date(app.datetime).toLocaleDateString()}
-                      time={new Date(app.datetime).toLocaleTimeString([], {
-                        hour: "2-digit",
-                        minute: "2-digit",
-                      })}
-                      onClick={() => handleAppointmentClick(app.id)}
-                      onDelete={() => handleDeleteAppointment(app.id)}
-                    />
+                    (() => {
+                      const appointmentStatus = app.status ?? "Upcoming";
+                      const isCancelled = appointmentStatus === "Cancelled";
+
+                      return (
+                        <AppointmentCard
+                          key={app.id}
+                          id={app.id}
+                          status={appointmentStatus}
+                          doctorName={app.patient?.owner?.name ?? "Unknown Owner"}
+                          petName={app.patient?.name ?? "Unknown Pet"}
+                          date={new Date(app.datetime).toLocaleDateString()}
+                          time={new Date(app.datetime).toLocaleTimeString([], {
+                            hour: "2-digit",
+                            minute: "2-digit",
+                          })}
+                          isDisabled={isCancelled}
+                          onClick={
+                            isCancelled
+                              ? undefined
+                              : () => handleAppointmentClick(app.id, appointmentStatus)
+                          }
+                          onDelete={
+                            isCancelled
+                              ? undefined
+                              : () => handleDeleteAppointment(app.id)
+                          }
+                        />
+                      );
+                    })()
                   ))
                 ) : (
                   <p>You have no upcoming appointments.</p>
