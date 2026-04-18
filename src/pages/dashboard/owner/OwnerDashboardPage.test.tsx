@@ -38,16 +38,14 @@ const mockOwner = {
   ],
 };
 
+const mockUseOwner = vi.fn();
 vi.mock('../../../lib/graphql/owner/useOwner', () => ({
-  useOwner: () => ({
-    owner: mockOwner,
-    error: null,
-    refetch: mockRefetchOwner,
-  }),
+  useOwner: () => mockUseOwner(),
 }));
 
+const mockUseDoctor = vi.fn();
 vi.mock('../../../lib/graphql/doctors/useDoctor', () => ({
-  useDoctor: () => ({ doctor: null, loading: false }),
+  useDoctor: () => mockUseDoctor(),
 }));
 vi.mock('../../../lib/graphql/appointments/useCreateAppointment', () => ({
   useCreateAppointment: () => ({ createAppointment: vi.fn() }),
@@ -88,6 +86,16 @@ function renderPage() {
 }
 
 describe('OwnerDashboardPage', () => {
+  beforeEach(() => {
+    vi.resetAllMocks();
+    mockUseOwner.mockReturnValue({
+      owner: mockOwner,
+      error: null,
+      refetch: mockRefetchOwner,
+    });
+    mockUseDoctor.mockReturnValue({ doctor: null, loading: false });
+  });
+
   it('renders the My Dashboard heading', async () => {
     renderPage();
     expect(await screen.findByRole('heading', { name: /my dashboard/i })).toBeInTheDocument();
@@ -129,5 +137,16 @@ describe('OwnerDashboardPage', () => {
     const addPetBtn = await screen.findByRole('button', { name: /add new pet/i });
     await userEvent.click(addPetBtn);
     expect(await screen.findByRole('heading', { name: /add a new pet/i })).toBeInTheDocument();
+  });
+
+  it('shows error message when owner data cannot be loaded', async () => {
+    mockUseOwner.mockReturnValue({
+      owner: null,
+      error: new Error('Forbidden'),
+      refetch: vi.fn(),
+    });
+
+    renderPage();
+    expect(await screen.findByText(/could not load your information/i)).toBeInTheDocument();
   });
 });
