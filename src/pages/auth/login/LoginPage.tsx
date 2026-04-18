@@ -141,6 +141,7 @@ export default function LoginPage() {
                 onClick={() => handleRedirect(authResetPasswordPath)}
                 text="Forgot password?"
                 className="auth-inline-link"
+                type="button"
               />
               <div>
                 <p className="auth-note">Don't have an account?</p>
@@ -148,6 +149,7 @@ export default function LoginPage() {
                   onClick={() => handleRedirect(authRegisterPath)}
                   text="Register"
                   className="auth-inline-link"
+                  type="button"
                 />
               </div>
             </div>

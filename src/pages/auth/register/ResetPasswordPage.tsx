@@ -193,6 +193,7 @@ export default function ResetPasswordPage() {
                   onClick={() => handleRedirect(authLoginPath)}
                   text="Back to login"
                   className="auth-inline-link"
+                  type="button"
                 />
               </div>
             </form>
