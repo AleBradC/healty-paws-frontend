@@ -39,12 +39,9 @@ const mockDoctor = {
   patients: [],
 };
 
+const mockUseDoctor = vi.fn();
 vi.mock('../../../lib/graphql/doctors/useDoctor', () => ({
-  useDoctor: () => ({
-    doctor: mockDoctor,
-    error: null,
-    refetch: vi.fn(),
-  }),
+  useDoctor: () => mockUseDoctor(),
 }));
 
 vi.mock('../../../lib/graphql/doctors/useUpdateDoctorDetails', () => ({
@@ -93,6 +90,15 @@ function renderPage() {
 }
 
 describe('DoctorDashboardPage', () => {
+  beforeEach(() => {
+    vi.resetAllMocks();
+    mockUseDoctor.mockReturnValue({
+      doctor: mockDoctor,
+      error: null,
+      refetch: vi.fn(),
+    });
+  });
+
   it('renders the Doctor Dashboard heading', async () => {
     renderPage();
     expect(await screen.findByRole('heading', { name: /doctor dashboard/i })).toBeInTheDocument();
@@ -130,5 +136,17 @@ describe('DoctorDashboardPage', () => {
     const manageBtn = await screen.findByRole('button', { name: /manage availability/i });
     await userEvent.click(manageBtn);
     expect(await screen.findByText(/manage your availability/i)).toBeInTheDocument();
+  });
+
+  it('shows error message when doctor data cannot be loaded', async () => {
+    mockUseDoctor.mockReturnValue({
+      doctor: null,
+      error: new Error('Forbidden'),
+      loading: false,
+      refetch: vi.fn(),
+    });
+
+    renderPage();
+    expect(await screen.findByText(/could not load your information/i)).toBeInTheDocument();
   });
 });
