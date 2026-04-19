@@ -1,6 +1,5 @@
 import { type MouseEvent, type FC } from "react";
 import { getAppointmentDisplayStatus } from "../../../utils/appointment-status";
-import { Button } from "../../ui/Button/Button";
 import "./styles.css";
 
 interface AppointmentCardProps {
@@ -32,31 +31,15 @@ export const AppointmentCard: FC<AppointmentCardProps> = ({
   onDeny,
 }) => {
   const displayStatus = getAppointmentDisplayStatus(baseStatus, datetime);
-  const statusClass = `status-${displayStatus.toLowerCase()}`;
-
-  const isCancel = displayStatus === "Cancel";
-  const isDeclined = displayStatus === "Declined";
-  const isUpcoming = displayStatus === "Upcoming";
-  const isPending = displayStatus === "Pending";
-  const isConfirmed = displayStatus === "Confirmed";
-  const isAccepted = displayStatus === "Accepted";
-  const isBegin = displayStatus === "Begin";
-  const isCompleted = displayStatus === "Completed";
   
-  // Disable logic: Cancel/Declined terminal states are always disabled for consultation access.
-  // Upcoming/Confirmed are disabled until the Begin window opens (<5m).
-  const isDisabled = manuallyDisabled || isUpcoming || isConfirmed || isCancel || isDeclined;
-
-  // Show cancel (X) button for Pending (Patient only), Confirmed, and Upcoming.
-  // Hide it if lifecycle actions (Accept/Decline) are active to avoid UI clutter.
-  // Hide it during the 'Begin' phase as per specific rule.
-  const isLifecycleActive = isPending && onAccept && onDeny;
-  const showActions = (isPending || isConfirmed || isAccepted || isUpcoming) && onDelete && !isLifecycleActive && !isBegin;
-
+  // Terminal states (Cancel, Declined) or waiting states (Upcoming, Confirmed) are disabled for consultation access.
+  const isPending = baseStatus === "Pending";
+  const isUpcoming = displayStatus === "Upcoming";
+  const isConfirmed = displayStatus === "Confirmed";
   const isTerminal = ["Cancel", "Declined"].includes(baseStatus);
   
   const statusDisabled = isUpcoming || isConfirmed || isTerminal;
-  const isDisabled = forceDisabled || statusDisabled;
+  const isDisabled = manuallyDisabled || statusDisabled;
 
   const statusClass = `status-${displayStatus.toLowerCase()}`;
   const cardClasses = `appointment-card ${statusClass} ${onClick && !isDisabled ? "clickable" : ""} ${
@@ -109,10 +92,16 @@ export const AppointmentCard: FC<AppointmentCardProps> = ({
               </button>
             )}
           </div>
-        ) : (
-          <span className={`appointment-status ${statusClass}`}>
-            {displayStatus}
-          </span>
+        )}
+
+        {showDelete && (
+          <button
+            onClick={handleDeleteClick}
+            className="delete-appointment-btn"
+            aria-label="Cancel appointment"
+          >
+            &times;
+          </button>
         )}
       </div>
     </div>
