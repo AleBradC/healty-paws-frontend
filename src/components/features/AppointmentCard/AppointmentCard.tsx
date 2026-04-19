@@ -53,37 +53,33 @@ export const AppointmentCard: FC<AppointmentCardProps> = ({
   const isLifecycleActive = isPending && onAccept && onDeny;
   const showActions = (isPending || isConfirmed || isAccepted || isUpcoming) && onDelete && !isLifecycleActive && !isBegin;
 
-  // Clickability logic: Only clickable if it's Begin (Consultation) or Completed (Summary).
-  const isNavigable = isBegin || isCompleted;
-  const cardClasses = `appointment-card ${statusClass} ${
-    onClick && isNavigable ? "clickable" : ""
-  } ${(!isNavigable && !isPending) ? "disabled" : ""}`;
+  const isTerminal = ["Cancel", "Declined"].includes(baseStatus);
+  
+  const statusDisabled = isUpcoming || isConfirmed || isTerminal;
+  const isDisabled = forceDisabled || statusDisabled;
+
+  const statusClass = `status-${displayStatus.toLowerCase()}`;
+  const cardClasses = `appointment-card ${statusClass} ${onClick && !isDisabled ? "clickable" : ""} ${
+    isDisabled ? "disabled" : ""
+  }`;
 
   const handleDeleteClick = (e: MouseEvent<HTMLButtonElement>) => {
     e.stopPropagation();
     onDelete?.();
   };
 
-  const handleAction = (e: MouseEvent, action?: () => void) => {
+  const handleActionClick = (e: MouseEvent<HTMLButtonElement>, action?: () => void) => {
     e.stopPropagation();
     action?.();
   };
 
+  // Only show delete button if it's NOT in 'Begin' phase and not currently in action phase
+  const showDelete = onDelete && displayStatus !== "Begin" && !onAccept && !onDeny;
+
   return (
-    <div className={cardClasses} onClick={isNavigable ? onClick : undefined}>
-      {showActions && (
-        <button
-          onClick={handleDeleteClick}
-          className="delete-appointment-btn"
-          aria-label="Cancel appointment"
-        >
-          &times;
-        </button>
-      )}
-
-
+    <div className={cardClasses} onClick={isDisabled ? undefined : onClick}>
       <div className="appointment-details">
-        {doctorName && <span className="primary-name">{doctorName}</span>}
+        <span className="primary-name">{doctorName}</span>
         <span className="secondary-name">For: {petName}</span>
       </div>
       <div className="appointment-time">
@@ -91,20 +87,27 @@ export const AppointmentCard: FC<AppointmentCardProps> = ({
         <span>{time}</span>
       </div>
       <div className="appointment-status-wrapper">
-        {isPending && onAccept && onDeny ? (
+        <span className="appointment-status">{displayStatus}</span>
+        
+        {/* Approve/Deny Buttons for Doctors on Pending status */}
+        {isPending && (onAccept || onDeny) && (
           <div className="lifecycle-actions">
-            <Button
-              text="Accept"
-              size="sm"
-              color="primary"
-              onClick={(e) => handleAction(e, onAccept)}
-            />
-            <Button
-              text="Decline"
-              size="sm"
-              color="secondary"
-              onClick={(e) => handleAction(e, onDeny)}
-            />
+            {onAccept && (
+              <button 
+                className="action-btn accept" 
+                onClick={(e) => handleActionClick(e, onAccept)}
+              >
+                Accept
+              </button>
+            )}
+            {onDeny && (
+              <button 
+                className="action-btn deny" 
+                onClick={(e) => handleActionClick(e, onDeny)}
+              >
+                Decline
+              </button>
+            )}
           </div>
         ) : (
           <span className={`appointment-status ${statusClass}`}>
