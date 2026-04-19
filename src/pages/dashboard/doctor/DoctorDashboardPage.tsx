@@ -6,12 +6,16 @@ import {
 } from "react";
 import { useNavigate } from "react-router-dom";
 import { format } from "date-fns";
+import { getAppointmentDisplayStatus } from "../../../utils/appointment-status";
 import { AppointmentCard } from "../../../components/features/AppointmentCard/AppointmentCard";
 import { AvailabilityModal } from "../../../components/features/AvailabilityModal/AvailabilityModal";
 import { Input } from "../../../components/ui/Input/Input";
+import { Loading } from "../../../components/ui/Loading/Loading";
+import { Modal } from "../../../components/ui/Modal/Modal";
 import { ProtectedRoute } from "../../../router/ProtectedRoute/ProtectedRoute";
 import { Tabs } from "../../../components/ui/Tabs/Tabs";
 import { specializationsData } from "../../../data/specialization";
+import { useUpdateAppointment } from "../../../lib/graphql/appointments/useUpdateAppointment";
 import { useRemoveAppointment } from "../../../lib/graphql/appointments/useRemoveAppointment";
 import { useAddDoctorAvailability } from "../../../lib/graphql/doctors/useAddDoctorAvailability";
 import type { AddDoctorAvailabilityInput } from "../../../generated/graphql";
@@ -31,7 +35,6 @@ import { useAuthentication } from "../../../context/AuthenticationContext";
 import { SpecializationEditor } from "./components/SpecializationEditor";
 import { Button } from "../../../components/ui/Button/Button";
 import { Select } from "../../../components/ui/Select/Select";
-import { Loading } from "../../../components/ui/Loading/Loading";
 import { AvatarImage } from "../../../components/ui/AvatarImage/AvatarImage";
 import { DashboardSection } from "../../../components/ui/DashboardSection/DashboardSection";
 import "./styles.css";
@@ -47,16 +50,20 @@ const doctorTabs = [
 export default function DoctorDashboardPage() {
   const navigate = useNavigate();
   const { user } = useAuthentication();
+
+  // --- HOOKS: Data Fetching ---
   const {
     doctor,
     error: doctorError,
     refetch: doctorRefetch,
   } = useDoctor(user?.id ?? null);
+
   const {
     updateDoctorDetails,
     loading: isUpdatingProfile,
     error: updateDoctorDetailsError,
   } = useUpdateDoctorDetails();
+
   const { addDoctorSpecialization } = useAddDoctorSpecialization();
   const { updateDoctorSpecialization } = useUpdateDoctorSpecialization();
   const { removeDoctorSpecialization } = useRemoveDoctorSpecialization();
@@ -64,10 +71,13 @@ export default function DoctorDashboardPage() {
     useAddDoctorAvailability();
   const { removeDoctorAvailability } = useRemoveDoctorAvailability();
   const { removeAppointment } = useRemoveAppointment();
+  const { updateAppointmentDetails } = useUpdateAppointment();
 
-  const [activeTab, setActiveTab] = useState("profile");
+  // --- STATE: UI & Tabs ---
+  const [activeTab, setActiveTab] = useState(() => {
+    return localStorage.getItem("doctor_dashboard_active_tab") || "profile";
+  });
   const [isAvailabilityModalOpen, setIsAvailabilityModalOpen] = useState(false);
-
 
   // --- STATE: Profile Details ---
   const [profileDetails, setProfileDetails] = useState({
@@ -93,6 +103,45 @@ export default function DoctorDashboardPage() {
   const [doctorAvailability, setDoctorAvailability] = useState<
     Record<string, string[]>
   >({});
+
+  // --- EFFECTS ---
+  useEffect(() => {
+    localStorage.setItem("doctor_dashboard_active_tab", activeTab);
+  }, [activeTab]);
+
+  useEffect(() => {
+    const availabilityMap: Record<string, string[]> = {};
+    (doctor?.availabilities ?? []).forEach(
+      (avail: { available_datetime: string }) => {
+        const dateObj = new Date(avail.available_datetime);
+        const date = format(dateObj, "yyyy-MM-dd");
+        const time = format(dateObj, "HH:mm");
+
+        if (!availabilityMap[date]) {
+          availabilityMap[date] = [];
+        }
+        availabilityMap[date].push(time);
+      }
+    );
+    setDoctorAvailability(availabilityMap);
+
+    if (doctor) {
+      setProfileDetails({
+        name: doctor.name,
+        clinicName: doctor.clinic_name ?? "",
+        clinicAddress: doctor.clinic_address ?? "",
+      });
+
+      const specs = JSON.parse(JSON.stringify(doctor.specializations));
+      setSavedSpecializations(specs);
+      setDraftSpecializations(specs);
+    }
+  }, [doctor]);
+
+  useEffect(() => {
+    setProfileError(null);
+    setServicesError(null);
+  }, [activeTab]);
 
   const profileHasChanges =
     doctor?.name !== profileDetails.name ||
@@ -121,40 +170,9 @@ export default function DoctorDashboardPage() {
     (spec) => !existingSpecNames?.includes(spec?.name)
   );
   const appointments = doctor?.appointments ?? [];
-  const doctorAvatarStorageKey = user?.id ? `avatar-doctor-${user.id}` : undefined;
-
-  // --- EFFECTS ---
-  useEffect(() => {
-    const availabilityMap: Record<string, string[]> = {};
-    (doctor?.availabilities ?? []).forEach((avail: { available_datetime: string }) => {
-      const dateObj = new Date(avail.available_datetime);
-      const date = format(dateObj, "yyyy-MM-dd");
-      const time = format(dateObj, "HH:mm");
-
-      if (!availabilityMap[date]) {
-        availabilityMap[date] = [];
-      }
-      availabilityMap[date].push(time);
-    });
-    setDoctorAvailability(availabilityMap);
-
-    if (doctor) {
-      setProfileDetails({
-        name: doctor.name,
-        clinicName: doctor.clinic_name ?? "",
-        clinicAddress: doctor.clinic_address ?? "",
-      });
-
-      const specs = JSON.parse(JSON.stringify(doctor.specializations));
-      setSavedSpecializations(specs);
-      setDraftSpecializations(specs);
-    }
-  }, [doctor]);
-
-  useEffect(() => {
-    setProfileError(null);
-    setServicesError(null);
-  }, [activeTab]);
+  const doctorAvatarStorageKey = user?.id
+    ? `avatar-doctor-${user.id}`
+    : undefined;
 
   if (doctorError || updateDoctorDetailsError) {
     return (
@@ -166,12 +184,14 @@ export default function DoctorDashboardPage() {
 
   if (!doctor) {
     return (
-      <Loading
-        isLoading={true}
-        message="Loading..."
-        variant="fullscreen"
-        minDuration={5000}
-      />
+      <ProtectedRoute allowedRoles={["doctor"]}>
+        <Loading
+          isLoading={true}
+          message="Loading..."
+          variant="fullscreen"
+          minDuration={1000}
+        />
+      </ProtectedRoute>
     );
   }
 
@@ -388,19 +408,35 @@ export default function DoctorDashboardPage() {
     }
   };
 
+  const handleUpdateStatus = async (appointmentId: string, status: string) => {
+    try {
+      await updateAppointmentDetails({
+        appointmentId,
+        status,
+      });
+      await doctorRefetch();
+    } catch (error) {
+      console.error("Failed to update appointment status:", error);
+    }
+  };
+
   const handleAppointmentClick = (
     appointmentId: string | number,
-    status: string | null | undefined
+    baseStatus: string | null | undefined,
+    datetime: string
   ) => {
-    switch (status) {
+    const displayStatus = getAppointmentDisplayStatus(baseStatus, datetime);
+
+    switch (displayStatus) {
       case "Completed":
         navigate(`${appointmentSummaryPath}/${appointmentId}`);
         return;
-      case "Confirmed":
-      case "Upcoming":
+      case "Begin":
         navigate(`${appointmentDetailsPath}/${appointmentId}`);
         return;
-      case "Cancelled":
+      case "Confirmed":
+      case "Upcoming":
+      case "Cancel":
       default:
         return;
     }
@@ -409,8 +445,6 @@ export default function DoctorDashboardPage() {
   const handlePatientClick = (patientId: string | number) => {
     navigate(`${patientSummaryPath}/${patientId}`);
   };
-
-
 
   return (
     <ProtectedRoute allowedRoles={["doctor"]}>
@@ -606,11 +640,15 @@ export default function DoctorDashboardPage() {
           {activeTab === "appointments" && (
             <DashboardSection title="My Appointments" className="appointments-section">
               <div className="appointments-list">
-                {appointments?.length > 0 ? (
-                  appointments?.map((app) => (
+                {appointments.length > 0 ? (
+                  appointments.map((app) => (
                     (() => {
-                      const appointmentStatus = app.status ?? "Upcoming";
-                      const isCancelled = appointmentStatus === "Cancelled";
+                      const appointmentStatus: string = app.status ?? "Upcoming";
+                      const isPending = appointmentStatus === "Pending";
+                      const isCompleted = appointmentStatus === "Completed";
+                      const isCancel = appointmentStatus === "Cancel";
+                      const isDeclined = appointmentStatus === "Declined";
+                      const isDisabled = isCancel || isDeclined;
 
                       return (
                         <AppointmentCard
@@ -624,16 +662,32 @@ export default function DoctorDashboardPage() {
                             hour: "2-digit",
                             minute: "2-digit",
                           })}
-                          isDisabled={isCancelled}
+                          datetime={app.datetime}
+                          isDisabled={isDisabled}
                           onClick={
-                            isCancelled
+                            isDisabled
                               ? undefined
-                              : () => handleAppointmentClick(app.id, appointmentStatus)
+                              : () =>
+                                  handleAppointmentClick(
+                                    app.id,
+                                    appointmentStatus,
+                                    app.datetime
+                                  )
                           }
                           onDelete={
-                            isCancelled
+                            isDisabled
                               ? undefined
                               : () => handleDeleteAppointment(app.id)
+                          }
+                          onAccept={
+                            isPending
+                              ? () => handleUpdateStatus(app.id, "Confirmed")
+                              : undefined
+                          }
+                          onDeny={
+                            isPending
+                              ? () => handleUpdateStatus(app.id, "Declined")
+                              : undefined
                           }
                         />
                       );

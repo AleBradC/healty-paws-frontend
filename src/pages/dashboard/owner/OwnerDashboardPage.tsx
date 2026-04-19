@@ -8,6 +8,7 @@ import { useNavigate } from "react-router-dom";
 import { AppointmentCard } from "../../../components/features/AppointmentCard/AppointmentCard";
 import { BookingModal } from "../../../components/features/BookingModal/BookingModal";
 import { ConditionSummaryCard } from "../../../components/features/ConditionSummaryCard/ConditionSummaryCard";
+import { getAppointmentDisplayStatus } from "../../../utils/appointment-status";
 import { Input } from "../../../components/ui/Input/Input";
 import { Modal } from "../../../components/ui/Modal/Modal";
 import { ProtectedRoute } from "../../../router/ProtectedRoute/ProtectedRoute";
@@ -46,16 +47,24 @@ interface Appointment {
 
 export default function OwnerDashboardPage() {
   const navigate = useNavigate();
+  const { user } = useAuthentication();
 
+  // --- STATE: UI & Tabs ---
+  const [activeTab, setActiveTab] = useState(() => {
+    return localStorage.getItem("owner_dashboard_active_tab") || "owner";
+  });
   const [isBookingModalOpen, setIsBookingModalOpen] = useState(false);
   const [isAddPetModalOpen, setIsAddPetModalOpen] = useState(false);
   const [selectedDoctorId, setSelectedDoctorId] = useState<string | null>(null);
+
+  // --- STATE: Data ---
   const [appointments, setAppointments] = useState<Appointment[]>([]);
-  const [activeTab, setActiveTab] = useState("owner");
   const [ownerDetails, setOwnerDetails] = useState({
     name: "",
   });
   const [ownerError, setOwnerError] = useState<string | null>(null);
+
+  // --- STATE: Pet Forms ---
   const [newPetDetails, setNewPetDetails] = useState({
     name: "",
     type: "",
@@ -74,7 +83,7 @@ export default function OwnerDashboardPage() {
   });
   const [editPetError, setEditPetError] = useState<string | null>(null);
 
-  const { user } = useAuthentication();
+  // --- HOOKS: Data Fetching ---
   const {
     owner,
     error: fetchOwnerError,
@@ -86,9 +95,13 @@ export default function OwnerDashboardPage() {
   const { createPet, loading: isCreatingPet } = useCreatePet();
   const { updatePet, loading: isUpdatingPet } = useUpdatePet();
   const { updateOwner, loading: isUpdatingOwner } = useUpdateOwner();
-
   const { doctor: detailedDoctor, loading: detailedDoctorLoading } =
     useDoctor(selectedDoctorId);
+
+  // --- EFFECTS ---
+  useEffect(() => {
+    localStorage.setItem("owner_dashboard_active_tab", activeTab);
+  }, [activeTab]);
 
   useEffect(() => {
     if (owner) {
@@ -105,26 +118,6 @@ export default function OwnerDashboardPage() {
     }
   }, [owner]);
 
-  const ownerHasChanges = owner?.name !== ownerDetails.name;
-  const isOwnerDetailsValid = ownerDetails.name.trim().length > 0;
-  const canSaveOwnerDetails = ownerHasChanges && isOwnerDetailsValid;
-
-  const currentPet = owner?.pets?.find((p) => p.id === activeTab);
-  const isPetDetailsValid =
-    editPetDetails.name.trim().length > 0 &&
-    editPetDetails.type.trim().length > 0 &&
-    editPetDetails.breed.trim().length > 0 &&
-    Number(editPetDetails.age) > 0 &&
-    Number(editPetDetails.weight) > 0;
-  const petHasChanges =
-    currentPet &&
-    (currentPet.name !== editPetDetails.name ||
-      currentPet.type !== editPetDetails.type ||
-      currentPet.breed !== editPetDetails.breed ||
-      currentPet.age?.toString() !== editPetDetails.age ||
-      currentPet.weight?.toString() !== editPetDetails.weight);
-  const canSavePetDetails = Boolean(petHasChanges && isPetDetailsValid);
-
   useEffect(() => {
     setEditPetError(null);
     if (activeTab !== "owner" && activeTab !== "appointments") {
@@ -135,8 +128,8 @@ export default function OwnerDashboardPage() {
           name: petToEdit.name ?? "",
           type: petToEdit.type ?? "",
           breed: petToEdit.breed ?? "",
-          age: petToEdit.age ? petToEdit.age.toString() : "",
-          weight: petToEdit.weight ? petToEdit.weight.toString() : "",
+          age: petToEdit.age?.toString() || "",
+          weight: petToEdit.weight?.toString() || "",
         });
       }
     } else {
@@ -145,45 +138,48 @@ export default function OwnerDashboardPage() {
     }
   }, [activeTab, owner?.pets]);
 
-  if (fetchOwnerError) {
-    return (
-      <div className="dashboard-wrapper">
-        Could not load your information. Please try again.
-      </div>
-    );
-  }
+  // -- Handlers & Logic --
+  const handleOpenBookingModal = () => {
+    setSelectedDoctorId(null);
+    setIsBookingModalOpen(true);
+  };
 
-  if (!owner) {
-    return (
-      <Loading
-        isLoading={true}
-        message="Loading..."
-        variant="fullscreen"
-        minDuration={1000}
-      />
-    );
-  }
+  const handleCloseBookingModal = () => {
+    setIsBookingModalOpen(false);
+    setSelectedDoctorId(null);
+  };
 
-  const pets = owner.pets ?? [];
-  const newPetHasChanges = Object.values(newPetDetails).some(
-    (value) => value.trim() !== ""
-  );
-  const isNewPetValid =
-    newPetDetails.name.trim().length > 0 &&
-    newPetDetails.type.trim().length > 0 &&
-    newPetDetails.breed.trim().length > 0 &&
-    Number(newPetDetails.age) > 0 &&
-    Number(newPetDetails.weight) > 0;
-  const patientTabs = [
-    { id: "owner", label: "My Details" },
-    ...pets.map((pet) => ({ id: pet.id, label: pet.name })),
-    { id: "appointments", label: "Appointments" },
-  ];
-  const petsForBookingModal = pets.map((pet) => ({
-    id: pet.id,
-    name: pet.name,
-  })) as unknown as Pet[];
-  const ownerAvatarStorageKey = user?.id ? `avatar-owner-${user.id}` : undefined;
+  const handleBookingSave = async (input: queryInput) => {
+    try {
+      await createAppointment(input);
+      await refetchOwner();
+    } catch (error) {
+      throw error;
+    }
+  };
+
+  const handleAppointmentClick = (
+    appointmentId: string | number,
+    baseStatus: string | null | undefined,
+    datetime: string
+  ) => {
+    const displayStatus = getAppointmentDisplayStatus(baseStatus, datetime);
+    if (displayStatus === "Completed") {
+      navigate(`${appointmentSummaryPath}/${appointmentId}`);
+    }
+    // Patients cannot access Appointment Details (Begin/Confirmed/etc.)
+  };
+
+  const handleDeleteAppointment = async (appointmentId: string) => {
+    try {
+      await removeAppointment({
+        appointmentId,
+      });
+      await refetchOwner();
+    } catch (error) {
+      throw error;
+    }
+  };
 
   const handleOwnerChange = (e: ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -193,15 +189,7 @@ export default function OwnerDashboardPage() {
 
   const handleSaveOwnerDetails = async () => {
     if (!owner?.id) return;
-
     setOwnerError(null);
-
-    const hasChanges = ownerDetails.name !== owner.name;
-
-    if (!hasChanges) {
-      return;
-    }
-
     try {
       await updateOwner({
         ownerId: owner.id,
@@ -234,31 +222,17 @@ export default function OwnerDashboardPage() {
     if (editPetError) setEditPetError(null);
   };
 
-  const validateNewPet = (): boolean => {
-    const { name, type, breed, age, weight } = newPetDetails;
-    if (!name.trim() || !type.trim() || !breed.trim() || !age || !weight) {
-      setNewPetError("Please fill in all required fields.");
-      return false;
-    }
-    if (Number(age) <= 0 || Number(weight) <= 0) {
-      setNewPetError("Age and Weight must be greater than 0.");
-      return false;
-    }
-    return true;
-  };
-
   const handleAddNewPet = async (e: FormEvent) => {
     e.preventDefault();
     setNewPetError(null);
-
-    if (!validateNewPet()) return;
-
+    if (!newPetDetails.name.trim() || !newPetDetails.type.trim() || !newPetDetails.breed.trim() || !newPetDetails.age || !newPetDetails.weight) {
+      setNewPetError("Please fill in all required fields.");
+      return;
+    }
     try {
       await createPet({
         ownerId: user?.id ?? "",
-        name: newPetDetails.name,
-        type: newPetDetails.type,
-        breed: newPetDetails.breed,
+        ...newPetDetails,
         age: Number(newPetDetails.age),
         weight: Number(newPetDetails.weight),
       });
@@ -266,97 +240,90 @@ export default function OwnerDashboardPage() {
       setNewPetDetails({ name: "", type: "", breed: "", age: "", weight: "" });
       await refetchOwner();
     } catch (error) {
-      console.error("Failed to add new pet:", error);
       setNewPetError("Failed to add pet. Please try again.");
     }
-  };
-
-  const validateEditPet = (): boolean => {
-    const { name, type, breed, age, weight } = editPetDetails;
-    if (!name.trim() || !type.trim() || !breed.trim() || !age || !weight) {
-      setEditPetError("Please fill in all required fields.");
-      return false;
-    }
-    if (Number(age) <= 0 || Number(weight) <= 0) {
-      setEditPetError("Age and Weight must be greater than 0.");
-      return false;
-    }
-    return true;
   };
 
   const handleSavePetDetails = async () => {
     if (!editPetId) return;
     setEditPetError(null);
-
-    if (!validateEditPet()) return;
-
-    const originalPet = owner.pets?.find((p) => p.id === editPetId);
-    if (!originalPet) return;
-
-    const hasChanges =
-      editPetDetails.name !== originalPet.name ||
-      editPetDetails.type !== originalPet.type ||
-      editPetDetails.breed !== originalPet.breed ||
-      Number(editPetDetails.age) !== Number(originalPet.age) ||
-      Number(editPetDetails.weight) !== Number(originalPet.weight);
-
-    if (!hasChanges) {
-      return;
-    }
-
     try {
       await updatePet({
         petId: editPetId,
-        name: editPetDetails.name,
-        type: editPetDetails.type,
-        breed: editPetDetails.breed,
+        ...editPetDetails,
         age: Number(editPetDetails.age),
         weight: Number(editPetDetails.weight),
       });
       await refetchOwner();
     } catch (error) {
-      console.error("Failed to update pet details:", error);
       setEditPetError("Failed to update pet. Please try again.");
     }
   };
 
-  const handleDeleteAppointment = async (appointmentId: string) => {
-    try {
-      await removeAppointment({
-        appointmentId,
-      });
-      await refetchOwner();
-    } catch (error) {
-      throw error;
-    }
-  };
+  if (fetchOwnerError) {
+    return (
+      <ProtectedRoute allowedRoles={["owner"]}>
+        <div className="dashboard-wrapper">
+          Could not load your information. Please try again.
+        </div>
+      </ProtectedRoute>
+    );
+  }
 
-  const handleAppointmentClick = (
-    appointmentId: string | number,
-    status: string
-  ) => {
-    if (status !== "Completed") return;
-    navigate(`${appointmentSummaryPath}/${appointmentId}`);
-  };
+  if (!owner) {
+    return (
+      <ProtectedRoute allowedRoles={["owner"]}>
+        <Loading
+          isLoading={true}
+          message="Loading..."
+          variant="fullscreen"
+          minDuration={1000}
+        />
+      </ProtectedRoute>
+    );
+  }
 
-  const handleOpenBookingModal = () => {
-    setSelectedDoctorId(null);
-    setIsBookingModalOpen(true);
-  };
+  const pets = owner.pets ?? [];
+  const patientTabs = [
+    { id: "owner", label: "My Details" },
+    ...pets.map((pet) => ({ id: pet.id, label: pet.name })),
+    { id: "appointments", label: "Appointments" },
+  ];
+  const petsForBookingModal = pets.map((pet) => ({
+    id: pet.id,
+    name: pet.name,
+  })) as unknown as Pet[];
+  const ownerAvatarStorageKey = user?.id ? `avatar-owner-${user.id}` : undefined;
 
-  const handleCloseBookingModal = () => {
-    setIsBookingModalOpen(false);
-    setSelectedDoctorId(null);
-  };
+  const ownerHasChanges = owner?.name !== ownerDetails.name;
+  const isOwnerDetailsValid = ownerDetails.name.trim().length > 0;
+  const canSaveOwnerDetails = ownerHasChanges && isOwnerDetailsValid;
 
-  const handleBookingSave = async (input: queryInput) => {
-    try {
-      await createAppointment(input);
-      await refetchOwner();
-    } catch (error) {
-      throw error;
-    }
-  };
+  const currentPet = owner?.pets?.find((p) => p.id === activeTab);
+  const isPetDetailsValid =
+    editPetDetails.name.trim().length > 0 &&
+    editPetDetails.type.trim().length > 0 &&
+    editPetDetails.breed.trim().length > 0 &&
+    Number(editPetDetails.age) > 0 &&
+    Number(editPetDetails.weight) > 0;
+  const petHasChanges =
+    currentPet &&
+    (currentPet.name !== editPetDetails.name ||
+      currentPet.type !== editPetDetails.type ||
+      currentPet.breed !== editPetDetails.breed ||
+      currentPet.age?.toString() !== editPetDetails.age ||
+      currentPet.weight?.toString() !== editPetDetails.weight);
+  const canSavePetDetails = Boolean(petHasChanges && isPetDetailsValid);
+
+  const newPetHasChanges = Object.values(newPetDetails).some(
+    (value) => value.trim() !== ""
+  );
+  const isNewPetValid =
+    newPetDetails.name.trim().length > 0 &&
+    newPetDetails.type.trim().length > 0 &&
+    newPetDetails.breed.trim().length > 0 &&
+    Number(newPetDetails.age) > 0 &&
+    Number(newPetDetails.weight) > 0;
 
   return (
     <ProtectedRoute allowedRoles={["owner"]}>
@@ -549,13 +516,17 @@ export default function OwnerDashboardPage() {
               <div className="appointments-list">
                 {appointments.length > 0 ? (
                   appointments.map((app) => {
-                    const isCompleted = app.status === "Completed";
+                    const appointmentStatus = app.status ?? "Upcoming";
+                    const isPending = appointmentStatus === "Pending";
+                    const isConfirmed = appointmentStatus === "Confirmed";
+                    const isUpcoming = appointmentStatus === "Upcoming";
+                    const canCancel = isPending || isConfirmed || isUpcoming;
 
                     return (
                       <AppointmentCard
                         key={app.id}
                         id={app.id}
-                        status={app.status}
+                        status={appointmentStatus}
                         doctorName={`Dr. ${app.doctor.name}`}
                         petName={app.patient.name}
                         date={new Date(app.datetime).toLocaleDateString()}
@@ -563,14 +534,12 @@ export default function OwnerDashboardPage() {
                           hour: "2-digit",
                           minute: "2-digit",
                         })}
-                        isDisabled={!isCompleted}
-                        onClick={
-                          isCompleted
-                            ? () => handleAppointmentClick(app.id, app.status)
-                            : undefined
+                        datetime={app.datetime}
+                        onClick={() =>
+                          handleAppointmentClick(app.id, app.status, app.datetime)
                         }
                         onDelete={
-                          isCompleted
+                          canCancel
                             ? () => handleDeleteAppointment(app.id)
                             : undefined
                         }

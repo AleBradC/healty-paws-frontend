@@ -42,6 +42,10 @@ export const BookingModal: FC<BookingModalProps> = ({
   const [selectedServices, setSelectedServices] = useState<string[]>([]);
   const [selectedSlot, setSelectedSlot] = useState<Slot | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
+  const [tempSelectedDoctor, setTempSelectedDoctor] = useState<Doctor | null>(
+    selectedDoctor || null
+  );
+  const [bookingError, setBookingError] = useState<string | null>(null);
 
   const skip = (currentPage - 1) * DOCTORS_PER_PAGE;
   const {
@@ -89,8 +93,8 @@ export const BookingModal: FC<BookingModalProps> = ({
     return (
       <Modal title="Loading..." onClose={onClose}>
         <Loading
-          isLoading={doctorsLoading && !doctors}
-          message="Loading..."
+          isLoading={true}
+          message="Loading doctors..."
           variant="fullscreen"
         />
       </Modal>
@@ -101,7 +105,7 @@ export const BookingModal: FC<BookingModalProps> = ({
     return (
       <Modal title="Error" onClose={onClose}>
         <div className="error-state">
-          <p>Failed to load data. Please try again later.</p>
+          <p>Failed to load doctors. Please try again later.</p>
           <Button text="Close" onClick={onClose} size="md" color="secondary" />
         </div>
       </Modal>
@@ -111,8 +115,10 @@ export const BookingModal: FC<BookingModalProps> = ({
   const maxSteps = workflow.length;
   const totalPages = Math.ceil(totalCount / DOCTORS_PER_PAGE);
 
+
   const handleBookingComplete = async () => {
     if (!selectedDoctor || !selectedPet || !selectedSlot) return;
+    setBookingError(null);
 
     const petDetails = pets.find((p) => p.id === selectedPet);
     const serviceDetails = selectedServices
@@ -121,13 +127,13 @@ export const BookingModal: FC<BookingModalProps> = ({
       )
       .filter((s): s is Service => s !== undefined);
 
-    const appointmentDatetime = `${selectedSlot.date}T${selectedSlot.time}:00`;
+    const appointmentDatetime = selectedSlot.datetime;
 
     const bookingInput: queryInput = {
       doctorId: selectedDoctor.id,
       petId: petDetails!.id,
       appointmentDatetime,
-      status: "Upcoming" as AppointmentStatus,
+      status: "Pending" as AppointmentStatus,
       consultationType:
         serviceDetails.length > 0 ? serviceDetails[0].name : "General",
     };
@@ -135,9 +141,23 @@ export const BookingModal: FC<BookingModalProps> = ({
     try {
       await onBookingSave(bookingInput);
       onClose();
-    } catch (error) {
+    } catch (error: any) {
       console.error("Booking failed:", error);
+      const message = error.message || "Something went wrong. Please try again.";
+      setBookingError(message.replace("CombinedGraphQLErrors: ", ""));
     }
+  };
+
+  const handleNextStep = () => {
+    const currentStepId = workflow[step - 1];
+    if (
+      currentStepId === "selectDoctor" &&
+      tempSelectedDoctor &&
+      onDoctorSelect
+    ) {
+      onDoctorSelect(tempSelectedDoctor);
+    }
+    setStep((s) => s + 1);
   };
 
   const handleNext = () => {
@@ -159,7 +179,7 @@ export const BookingModal: FC<BookingModalProps> = ({
       case "selectPet":
         return !!selectedPet;
       case "selectDoctor":
-        return !!selectedDoctor;
+        return !!tempSelectedDoctor || !!selectedDoctor;
       case "selectSpecialization":
         return !!selectedSpecializationId;
       case "selectServices":
@@ -185,8 +205,8 @@ export const BookingModal: FC<BookingModalProps> = ({
       case "selectDoctor":
         return (
           <StepSelectDoctor
-            selectedDoctor={selectedDoctor}
-            onSelect={onDoctorSelect}
+            selectedDoctor={tempSelectedDoctor || selectedDoctor}
+            onSelect={setTempSelectedDoctor}
             doctors={doctorsForPage as any}
             currentPage={currentPage}
             totalPages={totalPages}
@@ -270,7 +290,7 @@ export const BookingModal: FC<BookingModalProps> = ({
             text={step === maxSteps - 1 ? "Confirm Appointment" : "Next"}
             color="primary"
             size="md"
-            onClick={() => setStep((s) => s + 1)}
+            onClick={handleNextStep}
             disabled={!canProceed()}
           />
         ) : (
@@ -299,6 +319,11 @@ export const BookingModal: FC<BookingModalProps> = ({
       onClose={onClose}
       footerContent={footerContent}
     >
+      {bookingError && (
+        <div className="booking-error-feedback">
+          {bookingError}
+        </div>
+      )}
       {renderStepContent()}
     </Modal>
   );

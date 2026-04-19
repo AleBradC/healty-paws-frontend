@@ -134,6 +134,8 @@ describe('OwnerDashboardPage', () => {
 
   it('clicking Add New Pet opens the add pet modal', async () => {
     renderPage();
+    const detailsTab = await screen.findByRole('button', { name: /my details/i });
+    await userEvent.click(detailsTab);
     const addPetBtn = await screen.findByRole('button', { name: /add new pet/i });
     await userEvent.click(addPetBtn);
     expect(await screen.findByRole('heading', { name: /add a new pet/i })).toBeInTheDocument();

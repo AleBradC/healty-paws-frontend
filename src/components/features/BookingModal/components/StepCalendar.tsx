@@ -17,7 +17,7 @@ export const StepCalendar: FC<StepCalendarProps> = ({
 }) => {
   const bookedSlots = new Set(
     (doctor.appointments ?? [])
-      .filter((appointment) => appointment.status !== "Cancelled")
+      .filter((appointment) => !["Cancel", "Declined"].includes(appointment.status || ""))
       .map((appointment) => {
         const dateObj = new Date(appointment.datetime);
         const date = format(dateObj, "yyyy-MM-dd");
@@ -29,27 +29,30 @@ export const StepCalendar: FC<StepCalendarProps> = ({
       })
   );
 
-  const availability: Record<string, string[]> =
+  const availability: Record<string, Record<string, string>> =
     doctor.availabilities?.reduce((acc, avail) => {
       const dateObj = new Date(avail.available_datetime);
       const date = format(dateObj, "yyyy-MM-dd");
       const time = dateObj.toLocaleTimeString([], {
         hour: "2-digit",
         minute: "2-digit",
+        hour12: false,
       });
-      if (bookedSlots.has(`${date} ${time}`)) {
+      if (dateObj < new Date() || bookedSlots.has(`${date} ${time}`)) {
         return acc;
       }
-      if (!acc[date]) acc[date] = [];
-      acc[date].push(time);
+      if (!acc[date]) acc[date] = {};
+      acc[date][time] = avail.available_datetime;
       return acc;
-    }, {} as Record<string, string[]>) ?? {};
+    }, {} as Record<string, Record<string, string>>) ?? {};
 
   return (
     <Calendar
       availability={availability}
       selectedSlot={selectedSlot}
-      onSelectSlot={(date: any, time: any) => onSelect({ date, time })}
+      onSelectSlot={(date: string, time: string, datetime?: string) =>
+        onSelect({ date, time, datetime: datetime || "" })
+      }
     />
   );
 };

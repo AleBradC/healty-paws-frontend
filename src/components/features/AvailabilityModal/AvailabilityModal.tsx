@@ -36,7 +36,7 @@ export const AvailabilityModal: FC<AvailabilityModalProps> = ({
     normalizeAvailability(availability) !==
     normalizeAvailability(initialAvailability);
 
-  const handleSlotToggle = (date: string, time: string) => {
+  const handleSlotToggle = (date: string, time: string, _iso?: string) => {
     setAvailability((prev) => {
       const newAvailability = { ...prev };
       const daySlots = newAvailability[date] || [];
@@ -52,6 +52,21 @@ export const AvailabilityModal: FC<AvailabilityModalProps> = ({
         delete newAvailability[date];
       }
 
+      return newAvailability;
+    });
+  };
+
+  const handleSelectAll = (date: string, slots: string[]) => {
+    setAvailability((prev) => ({
+      ...prev,
+      [date]: slots,
+    }));
+  };
+
+  const handleClearAll = (date: string) => {
+    setAvailability((prev) => {
+      const newAvailability = { ...prev };
+      delete newAvailability[date];
       return newAvailability;
     });
   };
@@ -83,6 +98,8 @@ export const AvailabilityModal: FC<AvailabilityModalProps> = ({
       <Calendar
         availability={availability}
         onSelectSlot={handleSlotToggle}
+        onSelectAll={handleSelectAll}
+        onClearAll={handleClearAll}
         isEditable={true}
       />
     </Modal>
