@@ -11,7 +11,6 @@
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   gap: 2rem;
   position: relative;
-  overflow: hidden;
 }
 
 .appointment-card.clickable {
@@ -37,21 +36,9 @@
   border-left-color: var(--color-success);
 }
 .appointment-card.status-pending,
-.appointment-card.status-Pending {
-  border-left-color: var(--color-warning);
-}
 .appointment-card.status-upcoming,
 .appointment-card.status-Upcoming {
   border-left-color: var(--color-warning);
-}
-.appointment-card.status-start,
-.appointment-card.status-Start {
-  border-left-color: var(--color-primary-light);
-  background: linear-gradient(to right, rgba(20, 184, 166, 0.05), transparent);
-}
-.appointment-card.status-denied,
-.appointment-card.status-Denied {
-  border-left-color: var(--color-error);
 }
 .appointment-card.status-completed,
 .appointment-card.status-Completed {
@@ -110,16 +97,6 @@
   border-radius: var(--radius-sm);
 }
 
-/* --- Actions Container --- */
-.appointment-actions-container {
-  display: flex;
-  align-items: center;
-  gap: 1.25rem;
-  min-width: 140px;
-  justify-content: flex-end;
-  position: relative;
-}
-
 /* --- Status Pills --- */
 .appointment-status-wrapper {
   display: flex;
@@ -140,76 +117,6 @@
   color: var(--color-text-muted);
 }
 
-.status-and-actions {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-  align-items: flex-end;
-}
-
-.appointment-actions {
-  display: flex;
-  gap: 0.5rem;
-}
-
-.action-btn {
-  padding: 0.25rem 0.75rem;
-  font-size: 0.7rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  border-radius: var(--radius-sm);
-  border: 1px solid transparent;
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-.accept-btn {
-  background: var(--color-primary);
-  color: white;
-  border-radius: var(--radius-md);
-  padding: 0.5rem 1.25rem;
-  font-size: 0.85rem;
-}
-
-.accept-btn:hover {
-  background: var(--color-primary-dark);
-  box-shadow: 0 4px 12px rgba(20, 184, 166, 0.4);
-}
-
-.deny-btn {
-  background: #fef2f2;
-  color: #991b1b;
-  border: 1px solid #fee2e2;
-  border-radius: var(--radius-md);
-  padding: 0.5rem 1.25rem;
-  font-size: 0.85rem;
-}
-
-.deny-btn:hover {
-  background: #fee2e2;
-  border-color: #fecaca;
-  box-shadow: 0 4px 12px rgba(153, 27, 27, 0.2);
-}
-
-/* --- Action Overlay (inline) --- */
-.overlay-actions.inline {
-  display: flex;
-  gap: 0.75rem;
-  align-items: center;
-  z-index: 20;
-}
-
-@keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
-}
-
-@keyframes statusPulse {
-  0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(20, 184, 166, 0.4); }
-  70% { transform: scale(1.03); box-shadow: 0 0 0 8px rgba(20, 184, 166, 0); }
-  100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(20, 184, 166, 0); }
-}
-
 .status-confirmed .appointment-status,
 .status-Confirmed .appointment-status {
   color: var(--color-success);
@@ -218,28 +125,10 @@
 }
 
 .status-pending .appointment-status,
-.status-Pending .appointment-status,
-.status-upcoming .appointment-status,
-.status-Upcoming .appointment-status {
+.status-upcoming .appointment-status {
   color: var(--color-warning);
   background: rgba(245, 158, 11, 0.12);
   border: 1px solid rgba(245, 158, 11, 0.2);
-}
-
-.status-start .appointment-status,
-.status-Start .appointment-status {
-  color: white;
-  background: var(--color-primary-light);
-  border: 1px solid var(--color-primary);
-  box-shadow: 0 0 10px rgba(20, 184, 166, 0.3);
-  animation: statusPulse 2s infinite ease-in-out;
-}
-
-.status-denied .appointment-status,
-.status-Denied .appointment-status {
-  color: var(--color-error);
-  background: rgba(239, 68, 68, 0.12);
-  border: 1px solid rgba(239, 68, 68, 0.2);
 }
 
 .status-completed .appointment-status,
@@ -249,11 +138,27 @@
   border: 1px solid rgba(20, 184, 166, 0.2);
 }
 
-.status-cancelled .appointment-status,
-.status-Cancelled .appointment-status {
+.status-cancelled .appointment-status {
   color: var(--color-error);
   background: rgba(239, 68, 68, 0.12);
   border: 1px solid rgba(239, 68, 68, 0.2);
+}
+
+/* --- Lifecycle Actions & Controls --- */
+.card-controls {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+}
+
+.lifecycle-actions {
+  display: flex;
+  gap: 0.75rem;
+  align-items: center;
+  position: absolute;
+  top: 50%;
+  right: 8rem;
+  transform: translateY(-50%);
 }
 
 /* --- Delete Button --- */
@@ -261,10 +166,10 @@
   background: none;
   border: none;
   color: var(--color-text-muted);
-  font-size: 1.15rem;
+  font-size: 1.25rem;
   cursor: pointer;
-  width: 24px;
-  height: 24px;
+  width: 28px;
+  height: 28px;
   border-radius: 50%;
   display: grid;
   place-items: center;
@@ -272,7 +177,7 @@
   position: absolute;
   top: 0.5rem;
   right: 0.5rem;
-  z-index: 20;
+  z-index: 10;
 }
 
 .delete-appointment-btn:hover {

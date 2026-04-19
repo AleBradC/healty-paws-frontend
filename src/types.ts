@@ -156,6 +156,7 @@ export interface Appointment {
 export interface Slot {
   date: string;
   time: string;
+  datetime: string;
 }
 
 export interface AppointmentPetDetails {

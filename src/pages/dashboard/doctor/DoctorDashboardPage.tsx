@@ -10,6 +10,8 @@ import { getAppointmentDisplayStatus } from "../../../utils/appointment-status";
 import { AppointmentCard } from "../../../components/features/AppointmentCard/AppointmentCard";
 import { AvailabilityModal } from "../../../components/features/AvailabilityModal/AvailabilityModal";
 import { Input } from "../../../components/ui/Input/Input";
+import { Loading } from "../../../components/ui/Loading/Loading";
+import { Modal } from "../../../components/ui/Modal/Modal";
 import { ProtectedRoute } from "../../../router/ProtectedRoute/ProtectedRoute";
 import { Tabs } from "../../../components/ui/Tabs/Tabs";
 import { specializationsData } from "../../../data/specialization";
@@ -33,7 +35,6 @@ import { useAuthentication } from "../../../context/AuthenticationContext";
 import { SpecializationEditor } from "./components/SpecializationEditor";
 import { Button } from "../../../components/ui/Button/Button";
 import { Select } from "../../../components/ui/Select/Select";
-import { Loading } from "../../../components/ui/Loading/Loading";
 import { AvatarImage } from "../../../components/ui/AvatarImage/AvatarImage";
 import { DashboardSection } from "../../../components/ui/DashboardSection/DashboardSection";
 import "./styles.css";
@@ -183,12 +184,14 @@ export default function DoctorDashboardPage() {
 
   if (!doctor) {
     return (
-      <Loading
-        isLoading={true}
-        message="Loading..."
-        variant="fullscreen"
-        minDuration={5000}
-      />
+      <ProtectedRoute allowedRoles={["doctor"]}>
+        <Loading
+          isLoading={true}
+          message="Loading..."
+          variant="fullscreen"
+          minDuration={1000}
+        />
+      </ProtectedRoute>
     );
   }
 
@@ -443,8 +446,6 @@ export default function DoctorDashboardPage() {
     navigate(`${patientSummaryPath}/${patientId}`);
   };
 
-
-
   return (
     <ProtectedRoute allowedRoles={["doctor"]}>
       <div className="dashboard-wrapper">
@@ -639,45 +640,55 @@ export default function DoctorDashboardPage() {
           {activeTab === "appointments" && (
             <DashboardSection title="My Appointments" className="appointments-section">
               <div className="appointments-list">
-                {appointments?.length > 0 ? (
-                  appointments?.map((app) => (
+                {appointments.length > 0 ? (
+                  appointments.map((app) => (
                     (() => {
-                      const appointmentStatus = app.status ?? "Upcoming";
+                      const appointmentStatus: string = app.status ?? "Upcoming";
+                      const isPending = appointmentStatus === "Pending";
+                      const isCompleted = appointmentStatus === "Completed";
                       const isCancelled = appointmentStatus === "Cancelled";
                       const isDenied = appointmentStatus === "Denied";
-                      const isDisabled = isCancelled || isDenied;
+                      const isDisabled = isCancelled || isDenied || isCompleted;
 
                       return (
-                          <AppointmentCard
-                            key={app.id}
-                            id={app.id}
-                            status={appointmentStatus}
-                            doctorName={app.patient?.owner?.name ?? "Unknown Owner"}
-                            petName={app.patient?.name ?? "Unknown Pet"}
-                            date={new Date(app.datetime).toLocaleDateString()}
-                            time={new Date(app.datetime).toLocaleTimeString([], {
-                              hour: "2-digit",
-                              minute: "2-digit",
-                            })}
-                            datetime={app.datetime}
-                            isDisabled={isDisabled}
-                            onClick={
-                              isDisabled
-                                ? undefined
-                                : () =>
-                                    handleAppointmentClick(
-                                      app.id,
-                                      appointmentStatus,
-                                      app.datetime
-                                    )
-                            }
+                        <AppointmentCard
+                          key={app.id}
+                          id={app.id}
+                          status={appointmentStatus}
+                          doctorName={app.patient?.owner?.name ?? "Unknown Owner"}
+                          petName={app.patient?.name ?? "Unknown Pet"}
+                          date={new Date(app.datetime).toLocaleDateString()}
+                          time={new Date(app.datetime).toLocaleTimeString([], {
+                            hour: "2-digit",
+                            minute: "2-digit",
+                          })}
+                          datetime={app.datetime}
+                          isDisabled={isDisabled}
+                          onClick={
+                            isDisabled
+                              ? undefined
+                              : () =>
+                                  handleAppointmentClick(
+                                    app.id,
+                                    appointmentStatus,
+                                    app.datetime
+                                  )
+                          }
                           onDelete={
                             isDisabled
                               ? undefined
                               : () => handleDeleteAppointment(app.id)
                           }
-                          onAccept={() => handleUpdateStatus(app.id, "Confirmed")}
-                          onDeny={() => handleUpdateStatus(app.id, "Denied")}
+                          onAccept={
+                            isPending
+                              ? () => handleUpdateStatus(app.id, "Confirmed")
+                              : undefined
+                          }
+                          onDeny={
+                            isPending
+                              ? () => handleUpdateStatus(app.id, "Denied")
+                              : undefined
+                          }
                         />
                       );
                     })()

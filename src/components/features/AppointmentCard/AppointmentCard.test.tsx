@@ -71,6 +71,38 @@ describe('AppointmentCard', () => {
     expect(onClick).not.toHaveBeenCalled();
   });
 
+  it('renders Accept/Deny buttons when in Pending status with handlers', () => {
+    render(
+      <AppointmentCard 
+        {...defaultProps} 
+        status="Pending" 
+        onAccept={vi.fn()} 
+        onDeny={vi.fn()} 
+      />
+    );
+    expect(screen.getByRole('button', { name: /accept/i })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /deny/i })).toBeInTheDocument();
+  });
+
+  it('calls onAccept and onDeny when buttons are clicked', async () => {
+    const onAccept = vi.fn();
+    const onDeny = vi.fn();
+    render(
+      <AppointmentCard 
+        {...defaultProps} 
+        status="Pending" 
+        onAccept={onAccept} 
+        onDeny={onDeny} 
+      />
+    );
+    
+    await userEvent.click(screen.getByRole('button', { name: /accept/i }));
+    expect(onAccept).toHaveBeenCalledTimes(1);
+    
+    await userEvent.click(screen.getByRole('button', { name: /deny/i }));
+    expect(onDeny).toHaveBeenCalledTimes(1);
+  });
+
   it('applies clickable class when onClick is provided', () => {
     const { container } = render(<AppointmentCard {...defaultProps} onClick={vi.fn()} />);
     expect(container.firstChild).toHaveClass('clickable');

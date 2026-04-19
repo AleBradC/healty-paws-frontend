@@ -1,5 +1,6 @@
 import { type MouseEvent, type FC } from "react";
 import { getAppointmentDisplayStatus } from "../../../utils/appointment-status";
+import { Button } from "../../ui/Button/Button";
 import "./styles.css";
 
 interface AppointmentCardProps {
@@ -9,7 +10,7 @@ interface AppointmentCardProps {
   petName: string;
   date: string;
   time: string;
-  datetime: string; // ISO string for precise status calculation
+  datetime: string;
   isDisabled?: boolean;
   onClick?: () => void;
   onDelete?: () => void;
@@ -31,83 +32,38 @@ export const AppointmentCard: FC<AppointmentCardProps> = ({
   onDeny,
 }) => {
   const displayStatus = getAppointmentDisplayStatus(baseStatus, datetime);
-  
-  const isPending = baseStatus.toLowerCase() === "pending";
-  const isUpcoming = displayStatus.toLowerCase() === "upcoming";
-  const isStart = displayStatus.toLowerCase() === "start";
-  const isCancelled = baseStatus.toLowerCase() === "cancelled";
-  const isDenied = baseStatus.toLowerCase() === "denied";
-
-  const showActions = isPending && (onAccept || onDeny);
   const statusClass = `status-${displayStatus.toLowerCase()}`;
+
+  const isCancelled = displayStatus === "Cancelled";
+  const isDenied = displayStatus === "Denied";
+  const isUpcoming = displayStatus === "Upcoming";
+  const isPending = displayStatus === "Pending";
+  const isConfirmed = displayStatus === "Confirmed";
   
-  // Card is effectively disabled if it's Upcoming (too soon to start but confirmed)
-  // or if manually disabled, or if it's already cancelled/denied.
+  // Disable logic: Cancelled/Denied are always disabled.
+  // Upcoming is disabled to prevent premature consultation access.
   const isDisabled = manuallyDisabled || isUpcoming || isCancelled || isDenied;
+
+  // Show cancel (X) button for Pending, Confirmed, and Upcoming
+  const showActions = (isPending || isConfirmed || isUpcoming) && onDelete;
 
   const cardClasses = `appointment-card ${statusClass} ${
     onClick && !isDisabled ? "clickable" : ""
-  } ${isDisabled || showActions ? "disabled" : ""}`;
+  } ${isDisabled || (isPending && !onDelete) ? "disabled" : ""}`;
 
   const handleDeleteClick = (e: MouseEvent<HTMLButtonElement>) => {
     e.stopPropagation();
     onDelete?.();
   };
 
-  const handleActionClick = (
-    e: MouseEvent<HTMLButtonElement>,
-    action?: () => void
-  ) => {
+  const handleAction = (e: MouseEvent, action?: () => void) => {
     e.stopPropagation();
     action?.();
   };
 
-  const isCancellable = ["confirmed", "upcoming", "pending"].includes(
-    baseStatus.toLowerCase()
-  );
-
   return (
-    <div
-      className={cardClasses}
-      onClick={isDisabled || showActions ? undefined : onClick}
-    >
-      <div className="appointment-details">
-        <span className="primary-name">{doctorName}</span>
-        <span className="secondary-name">For: {petName}</span>
-      </div>
-      <div className="appointment-time">
-        <span>{date}</span>
-        <span>{time}</span>
-      </div>
-
-      <div className="appointment-actions-container">
-        {showActions ? (
-          <div className="overlay-actions inline">
-            {onAccept && (
-              <button
-                className="action-btn accept-btn"
-                onClick={(e) => handleActionClick(e, onAccept)}
-              >
-                Accept
-              </button>
-            )}
-            {onDeny && (
-              <button
-                className="action-btn deny-btn"
-                onClick={(e) => handleActionClick(e, onDeny)}
-              >
-                Deny
-              </button>
-            )}
-          </div>
-        ) : (
-          <div className="appointment-status-wrapper">
-            <span className="appointment-status">{displayStatus}</span>
-          </div>
-        )}
-      </div>
-
-      {onDelete && isCancellable && !showActions && (
+    <div className={cardClasses} onClick={isDisabled ? undefined : onClick}>
+      {showActions && (
         <button
           onClick={handleDeleteClick}
           className="delete-appointment-btn"
@@ -116,6 +72,37 @@ export const AppointmentCard: FC<AppointmentCardProps> = ({
           &times;
         </button>
       )}
+
+      {isPending && onAccept && onDeny && (
+        <div className="lifecycle-actions">
+          <Button 
+            text="Accept" 
+            size="sm" 
+            color="primary" 
+            onClick={(e) => handleAction(e, onAccept)} 
+          />
+          <Button 
+            text="Deny" 
+            size="sm" 
+            color="secondary" 
+            onClick={(e) => handleAction(e, onDeny)} 
+          />
+        </div>
+      )}
+
+      <div className="appointment-details">
+        {doctorName && <span className="primary-name">{doctorName}</span>}
+        <span className="secondary-name">For: {petName}</span>
+      </div>
+      <div className="appointment-time">
+        <span>{date}</span>
+        <span>{time}</span>
+      </div>
+      <div className="appointment-status-wrapper">
+        <span className={`appointment-status ${statusClass}`}>
+          {displayStatus}
+        </span>
+      </div>
     </div>
   );
 };
