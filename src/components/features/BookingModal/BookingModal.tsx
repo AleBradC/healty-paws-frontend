@@ -111,8 +111,11 @@ export const BookingModal: FC<BookingModalProps> = ({
   const maxSteps = workflow.length;
   const totalPages = Math.ceil(totalCount / DOCTORS_PER_PAGE);
 
+  const [bookingError, setBookingError] = useState<string | null>(null);
+
   const handleBookingComplete = async () => {
     if (!selectedDoctor || !selectedPet || !selectedSlot) return;
+    setBookingError(null);
 
     const petDetails = pets.find((p) => p.id === selectedPet);
     const serviceDetails = selectedServices
@@ -127,7 +130,7 @@ export const BookingModal: FC<BookingModalProps> = ({
       doctorId: selectedDoctor.id,
       petId: petDetails!.id,
       appointmentDatetime,
-      status: "Upcoming" as AppointmentStatus,
+      status: "Pending" as AppointmentStatus,
       consultationType:
         serviceDetails.length > 0 ? serviceDetails[0].name : "General",
     };
@@ -135,8 +138,10 @@ export const BookingModal: FC<BookingModalProps> = ({
     try {
       await onBookingSave(bookingInput);
       onClose();
-    } catch (error) {
+    } catch (error: any) {
       console.error("Booking failed:", error);
+      const message = error.message || "Something went wrong. Please try again.";
+      setBookingError(message.replace("CombinedGraphQLErrors: ", ""));
     }
   };
 
@@ -299,6 +304,11 @@ export const BookingModal: FC<BookingModalProps> = ({
       onClose={onClose}
       footerContent={footerContent}
     >
+      {bookingError && (
+        <div className="booking-error-feedback">
+          {bookingError}
+        </div>
+      )}
       {renderStepContent()}
     </Modal>
   );

@@ -69,6 +69,8 @@ export type AppointmentStatus =
   | 'Cancelled'
   | 'Completed'
   | 'Confirmed'
+  | 'Denied'
+  | 'Pending'
   | 'Upcoming';
 
 export type Availability = {

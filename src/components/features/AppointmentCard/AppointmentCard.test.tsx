@@ -10,6 +10,7 @@ describe('AppointmentCard', () => {
     petName: 'Luna',
     date: '2024-06-01',
     time: '10:00',
+    datetime: '2024-06-01T10:00:00Z',
   };
 
   it('renders the pet name', () => {
@@ -56,16 +57,16 @@ describe('AppointmentCard', () => {
     expect(onClick).not.toHaveBeenCalled();
   });
 
-  it('renders the delete button when onDelete is provided', () => {
+  it('renders the cancel button when onDelete is provided', () => {
     render(<AppointmentCard {...defaultProps} onDelete={vi.fn()} />);
-    expect(screen.getByRole('button', { name: /delete appointment/i })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /cancel appointment/i })).toBeInTheDocument();
   });
 
-  it('calls onDelete and stops propagation when delete button is clicked', async () => {
+  it('calls onDelete and stops propagation when cancel button is clicked', async () => {
     const onDelete = vi.fn();
     const onClick = vi.fn();
     render(<AppointmentCard {...defaultProps} onDelete={onDelete} onClick={onClick} />);
-    await userEvent.click(screen.getByRole('button', { name: /delete appointment/i }));
+    await userEvent.click(screen.getByRole('button', { name: /cancel appointment/i }));
     expect(onDelete).toHaveBeenCalledTimes(1);
     expect(onClick).not.toHaveBeenCalled();
   });

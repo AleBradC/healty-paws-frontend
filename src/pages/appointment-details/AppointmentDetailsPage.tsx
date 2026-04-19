@@ -1,5 +1,6 @@
 import { useState, useEffect, type ChangeEvent } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
+import { appointmentSummaryPath } from "../../utils/path";
 import { Input } from "../../components/ui/Input/Input";
 import { ProtectedRoute } from "../../router/ProtectedRoute/ProtectedRoute";
 import { Textarea } from "../../components/ui/Textarea/Textarea";
@@ -19,6 +20,7 @@ import "./styles.css";
 
 export default function AppointmentDetailsPage() {
   const params = useParams();
+  const navigate = useNavigate();
   const appointmentId = params.appointmentId as string;
 
   const {
@@ -324,7 +326,7 @@ export default function AppointmentDetailsPage() {
     try {
       await updateAppointmentDetails(input);
       setHasUnsavedChanges(false);
-      refetchAppointment();
+      navigate(`${appointmentSummaryPath}/${appointmentId}`);
     } catch (e: any) {
       setSaveError(
         e.message || "An unexpected error occurred. Please try again."
