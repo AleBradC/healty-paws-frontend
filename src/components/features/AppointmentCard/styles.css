@@ -64,8 +64,11 @@
 .appointment-card.status-Completed {
   border-left-color: var(--color-primary);
 }
-.appointment-card.status-cancelled,
-.appointment-card.status-Cancelled {
+/* Terminal states: Cancelled or Declined appointments look entirely "dead" */
+.appointment-card.status-cancel.disabled,
+.appointment-card.status-declined.disabled,
+.appointment-card.status-cancel,
+.appointment-card.status-declined {
   border-left-color: var(--color-error);
 }
 
@@ -165,7 +168,7 @@
   border: 1px solid rgba(20, 184, 166, 0.2);
 }
 
-.status-cancelled .appointment-status {
+.status-cancel .appointment-status {
   color: var(--color-error);
   background: rgba(239, 68, 68, 0.12);
   border: 1px solid rgba(239, 68, 68, 0.2);

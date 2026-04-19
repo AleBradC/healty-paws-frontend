@@ -81,7 +81,7 @@ describe('AppointmentCard', () => {
       />
     );
     expect(screen.getByRole('button', { name: /accept/i })).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: /deny/i })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /decline/i })).toBeInTheDocument();
   });
 
   it('calls onAccept and onDeny when buttons are clicked', async () => {
@@ -99,7 +99,7 @@ describe('AppointmentCard', () => {
     await userEvent.click(screen.getByRole('button', { name: /accept/i }));
     expect(onAccept).toHaveBeenCalledTimes(1);
     
-    await userEvent.click(screen.getByRole('button', { name: /deny/i }));
+    await userEvent.click(screen.getByRole('button', { name: /decline/i }));
     expect(onDeny).toHaveBeenCalledTimes(1);
   });
 

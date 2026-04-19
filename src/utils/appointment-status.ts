@@ -12,7 +12,7 @@ import {
  * - If status is not 'Confirmed', return the base status.
  * - If it's more than 2h before: 'Confirmed'
  * - If it's between 5m and 2h before: 'Upcoming' (Disabled in UI)
- * - If it's between 5m before and 1h after: 'Start' (Active/Pulse in UI)
+ * - If it's between 5m before and 1h after: 'Begin' (Active/Pulse in UI)
  * - If it's more than 1h after and base status was 'Confirmed', we currently keep 'Confirmed' or handle terminal states.
  */
 export const getAppointmentDisplayStatus = (
