@@ -34,22 +34,30 @@ export const AppointmentCard: FC<AppointmentCardProps> = ({
   const displayStatus = getAppointmentDisplayStatus(baseStatus, datetime);
   const statusClass = `status-${displayStatus.toLowerCase()}`;
 
-  const isCancelled = displayStatus === "Cancelled";
-  const isDenied = displayStatus === "Denied";
+  const isCancel = displayStatus === "Cancel";
+  const isDeclined = displayStatus === "Declined";
   const isUpcoming = displayStatus === "Upcoming";
   const isPending = displayStatus === "Pending";
   const isConfirmed = displayStatus === "Confirmed";
+  const isAccepted = displayStatus === "Accepted";
+  const isBegin = displayStatus === "Begin";
+  const isCompleted = displayStatus === "Completed";
   
-  // Disable logic: Cancelled/Denied are always disabled.
-  // Upcoming is disabled to prevent premature consultation access.
-  const isDisabled = manuallyDisabled || isUpcoming || isCancelled || isDenied;
+  // Disable logic: Cancel/Declined terminal states are always disabled for consultation access.
+  // Upcoming/Confirmed are disabled until the Begin window opens (<5m).
+  const isDisabled = manuallyDisabled || isUpcoming || isConfirmed || isCancel || isDeclined;
 
-  // Show cancel (X) button for Pending, Confirmed, and Upcoming
-  const showActions = (isPending || isConfirmed || isUpcoming) && onDelete;
+  // Show cancel (X) button for Pending (Patient only), Confirmed, and Upcoming.
+  // Hide it if lifecycle actions (Accept/Decline) are active to avoid UI clutter.
+  // Hide it during the 'Begin' phase as per specific rule.
+  const isLifecycleActive = isPending && onAccept && onDeny;
+  const showActions = (isPending || isConfirmed || isAccepted || isUpcoming) && onDelete && !isLifecycleActive && !isBegin;
 
+  // Clickability logic: Only clickable if it's Begin (Consultation) or Completed (Summary).
+  const isNavigable = isBegin || isCompleted;
   const cardClasses = `appointment-card ${statusClass} ${
-    onClick && !isDisabled ? "clickable" : ""
-  } ${isDisabled || (isPending && !onDelete) ? "disabled" : ""}`;
+    onClick && isNavigable ? "clickable" : ""
+  } ${(!isNavigable && !isPending) ? "disabled" : ""}`;
 
   const handleDeleteClick = (e: MouseEvent<HTMLButtonElement>) => {
     e.stopPropagation();
@@ -62,7 +70,7 @@ export const AppointmentCard: FC<AppointmentCardProps> = ({
   };
 
   return (
-    <div className={cardClasses} onClick={isDisabled ? undefined : onClick}>
+    <div className={cardClasses} onClick={isNavigable ? onClick : undefined}>
       {showActions && (
         <button
           onClick={handleDeleteClick}
@@ -73,22 +81,6 @@ export const AppointmentCard: FC<AppointmentCardProps> = ({
         </button>
       )}
 
-      {isPending && onAccept && onDeny && (
-        <div className="lifecycle-actions">
-          <Button 
-            text="Accept" 
-            size="sm" 
-            color="primary" 
-            onClick={(e) => handleAction(e, onAccept)} 
-          />
-          <Button 
-            text="Deny" 
-            size="sm" 
-            color="secondary" 
-            onClick={(e) => handleAction(e, onDeny)} 
-          />
-        </div>
-      )}
 
       <div className="appointment-details">
         {doctorName && <span className="primary-name">{doctorName}</span>}
@@ -99,9 +91,26 @@ export const AppointmentCard: FC<AppointmentCardProps> = ({
         <span>{time}</span>
       </div>
       <div className="appointment-status-wrapper">
-        <span className={`appointment-status ${statusClass}`}>
-          {displayStatus}
-        </span>
+        {isPending && onAccept && onDeny ? (
+          <div className="lifecycle-actions">
+            <Button
+              text="Accept"
+              size="sm"
+              color="primary"
+              onClick={(e) => handleAction(e, onAccept)}
+            />
+            <Button
+              text="Decline"
+              size="sm"
+              color="secondary"
+              onClick={(e) => handleAction(e, onDeny)}
+            />
+          </div>
+        ) : (
+          <span className={`appointment-status ${statusClass}`}>
+            {displayStatus}
+          </span>
+        )}
       </div>
     </div>
   );

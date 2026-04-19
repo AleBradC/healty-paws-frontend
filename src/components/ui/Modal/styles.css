@@ -67,6 +67,7 @@
   overflow-y: auto;
   min-height: 200px;
   padding-right: 0.5rem; /* Space for scrollbar */
+  padding-bottom: 2rem;
   margin-right: -0.5rem;
   color: var(--color-text-muted);
 }

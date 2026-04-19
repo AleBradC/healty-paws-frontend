@@ -167,6 +167,7 @@ export default function OwnerDashboardPage() {
     if (displayStatus === "Completed") {
       navigate(`${appointmentSummaryPath}/${appointmentId}`);
     }
+    // Patients cannot access Appointment Details (Begin/Confirmed/etc.)
   };
 
   const handleDeleteAppointment = async (appointmentId: string) => {

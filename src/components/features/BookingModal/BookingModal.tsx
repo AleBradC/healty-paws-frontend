@@ -45,6 +45,7 @@ export const BookingModal: FC<BookingModalProps> = ({
   const [tempSelectedDoctor, setTempSelectedDoctor] = useState<Doctor | null>(
     selectedDoctor || null
   );
+  const [bookingError, setBookingError] = useState<string | null>(null);
 
   const skip = (currentPage - 1) * DOCTORS_PER_PAGE;
   const {
@@ -114,7 +115,6 @@ export const BookingModal: FC<BookingModalProps> = ({
   const maxSteps = workflow.length;
   const totalPages = Math.ceil(totalCount / DOCTORS_PER_PAGE);
 
-  const [bookingError, setBookingError] = useState<string | null>(null);
 
   const handleBookingComplete = async () => {
     if (!selectedDoctor || !selectedPet || !selectedSlot) return;

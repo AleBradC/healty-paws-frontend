@@ -15,7 +15,7 @@ interface CalendarProps {
   isEditable?: boolean;
 }
 
-const workdaySlots = generateTimeSlots(9, 17, 30);
+const workdaySlots = generateTimeSlots(9, 18, 30);
 
 export const Calendar: FC<CalendarProps> = ({
   availability,
@@ -43,11 +43,6 @@ export const Calendar: FC<CalendarProps> = ({
           month={month}
           onMonthChange={setMonth}
           disabled={{ before: today }}
-          footer={
-            <p className="calendar-footer">
-              You can select any day from today onwards.
-            </p>
-          }
           className="custom-day-picker"
         />
       </div>
@@ -107,7 +102,7 @@ export const Calendar: FC<CalendarProps> = ({
                 selectedSlot?.time === time;
               const isEditSelected = isEditable && isAvailable;
 
-              const isSlotDisabled = (!isEditable && !isAvailable) || isPastSlot;
+              const isSlotDisabled = isPastSlot;
 
               return (
                 <button
