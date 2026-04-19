@@ -70,6 +70,10 @@ vi.mock('../../../lib/graphql/appointments/useRemoveAppointment', () => ({
   useRemoveAppointment: () => ({ removeAppointment: vi.fn() }),
 }));
 
+vi.mock('../../../lib/graphql/appointments/useUpdateAppointment', () => ({
+  useUpdateAppointment: () => ({ updateAppointmentDetails: vi.fn() }),
+}));
+
 // Mock date-fns format to avoid potential issues
 vi.mock('date-fns', () => ({
   format: (date: Date, fmt: string) =>

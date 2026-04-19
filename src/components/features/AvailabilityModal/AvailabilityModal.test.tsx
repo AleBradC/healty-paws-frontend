@@ -29,6 +29,15 @@ const initialAvailability = {
 };
 
 describe('AvailabilityModal', () => {
+  beforeEach(() => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date('2024-05-31T10:00:00Z'));
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
   it('renders the modal title', () => {
     render(
       <AvailabilityModal

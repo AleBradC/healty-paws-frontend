@@ -10,7 +10,7 @@ describe('AppointmentCard', () => {
     petName: 'Luna',
     date: '2024-06-01',
     time: '10:00',
-    datetime: '2024-06-01T10:00:00Z',
+    datetime: new Date().toISOString(),
   };
 
   it('renders the pet name', () => {
@@ -45,7 +45,7 @@ describe('AppointmentCard', () => {
 
   it('calls onClick when the card is clicked (not disabled)', async () => {
     const onClick = vi.fn();
-    render(<AppointmentCard {...defaultProps} onClick={onClick} />);
+    render(<AppointmentCard {...defaultProps} status="Completed" onClick={onClick} />);
     await userEvent.click(screen.getByText(/Luna/));
     expect(onClick).toHaveBeenCalledTimes(1);
   });
@@ -103,8 +103,8 @@ describe('AppointmentCard', () => {
     expect(onDeny).toHaveBeenCalledTimes(1);
   });
 
-  it('applies clickable class when onClick is provided', () => {
-    const { container } = render(<AppointmentCard {...defaultProps} onClick={vi.fn()} />);
+  it('applies clickable class when onClick is provided and navigable', () => {
+    const { container } = render(<AppointmentCard {...defaultProps} status="Completed" onClick={vi.fn()} />);
     expect(container.firstChild).toHaveClass('clickable');
   });
 
