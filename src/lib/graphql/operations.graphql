@@ -39,8 +39,8 @@ query GetOwner($id: ID!) {
   }
 }
 
-query GetDoctors($limit: Int, $skip: Int) {
-  doctors(limit: $limit, skip: $skip) {
+query GetDoctors($limit: Int, $skip: Int, $name: String) {
+  doctors(limit: $limit, skip: $skip, name: $name) {
     items {
       id
       name

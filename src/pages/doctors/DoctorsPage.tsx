@@ -11,6 +11,8 @@ import type { Pet } from "../../types";
 import { DOCTORS_PER_PAGE } from "../../utils/constants";
 import { useAuthentication } from "../../context/AuthenticationContext";
 import { Button } from "../../components/ui/Button/Button";
+import { Input } from "../../components/ui/Input/Input";
+import { useEffect } from "react";
 import "./styles.css";
 
 interface DoctorSummary {
@@ -34,13 +36,24 @@ const DoctorsPage = () => {
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
+  const [search, setSearch] = useState("");
+  const [debouncedSearch, setDebouncedSearch] = useState("");
+
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedSearch(search);
+      setCurrentPage(1); // Reset to first page on search
+    }, 300);
+
+    return () => clearTimeout(handler);
+  }, [search]);
 
   const skip = (currentPage - 1) * DOCTORS_PER_PAGE;
   const {
     doctors: doctorsList,
     loading: doctorsLoading,
     error: doctorsError,
-  } = useDoctors(DOCTORS_PER_PAGE, skip);
+  } = useDoctors(DOCTORS_PER_PAGE, skip, debouncedSearch);
 
   const [selectedDoctorId, setSelectedDoctorId] = useState<string | null>(null);
   const { doctor: detailedDoctor, loading: detailedDoctorLoading } =
@@ -83,6 +96,25 @@ const DoctorsPage = () => {
     <ProtectedRoute allowedRoles={["owner"]}>
       <div className="doctors-page-wrapper">
         <h1 className="doctors-page-title">Our Doctors</h1>
+
+        <div className="search-container">
+          <Input
+            placeholder="Search by name or clinic..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="doctor-search-input"
+            fullWidth={false}
+          />
+          {search && (
+            <Button
+              size="sm"
+              onClick={() => setSearch("")}
+              text="Clear"
+              className="clear-search-btn"
+            />
+          )}
+        </div>
+
         <div className="doctors-list-container">
           <div
             className={`doctors-list ${doctorsLoading ? "content-dimmed" : ""}`}

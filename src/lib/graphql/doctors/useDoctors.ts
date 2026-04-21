@@ -4,8 +4,8 @@ import {
   type GetDoctorsQueryVariables,
 } from "../../../generated/graphql";
 
-export const useDoctors = (limit: number, skip: number) => {
-  const variables: GetDoctorsQueryVariables = { limit, skip };
+export const useDoctors = (limit: number, skip: number, name?: string) => {
+  const variables: GetDoctorsQueryVariables = { limit, skip, name };
   const { data, loading, error, previousData } = useQuery(GetDoctorsDocument, {
     variables,
     fetchPolicy: "cache-first",

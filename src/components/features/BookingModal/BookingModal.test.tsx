@@ -6,7 +6,7 @@ import type { Pet, Doctor } from '../../../types';
 
 // Mock the GraphQL hook so no Apollo client is needed
 vi.mock('../../../lib/graphql/doctors/useDoctors', () => ({
-  useDoctors: () => ({
+  useDoctors: vi.fn().mockReturnValue({
     doctors: { items: [], totalCount: 0 },
     loading: false,
     error: null,

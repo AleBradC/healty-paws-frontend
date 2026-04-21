@@ -1,7 +1,8 @@
-import { describe, it, expect, vi } from 'vitest';
-import { render, screen, act } from '@testing-library/react';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { render, screen, act, fireEvent } from '@testing-library/react';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
 import DoctorsPage from './DoctorsPage';
+import { useDoctors } from '../../lib/graphql/doctors/useDoctors';
 
 vi.mock('../../router/ProtectedRoute/ProtectedRoute', () => ({
   ProtectedRoute: ({ children }: any) => <>{children}</>,
@@ -24,8 +25,6 @@ vi.mock('../../lib/graphql/appointments/useCreateAppointment', () => ({
   useCreateAppointment: () => ({ createAppointment: vi.fn() }),
 }));
 
-import { useDoctors } from '../../lib/graphql/doctors/useDoctors';
-
 vi.mock('../../components/features/BookingModal/BookingModal', () => ({
   BookingModal: () => <div data-testid="booking-modal" />,
 }));
@@ -41,7 +40,12 @@ function renderPage() {
 }
 
 describe('DoctorsPage', () => {
-  it('renders the page heading', async () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    vi.useRealTimers();
+  });
+
+  it('renders the page heading and search input', async () => {
     (useDoctors as any).mockReturnValue({
       doctors: { items: [], totalCount: 0 },
       loading: false,
@@ -50,6 +54,63 @@ describe('DoctorsPage', () => {
     renderPage();
     await act(async () => {});
     expect(screen.getByRole('heading', { name: /our doctors/i })).toBeInTheDocument();
+    expect(screen.getByPlaceholderText(/search by name or clinic/i)).toBeInTheDocument();
+  });
+
+  it('updates search and calls useDoctors with debounced value', async () => {
+    vi.useFakeTimers();
+    (useDoctors as any).mockReturnValue({
+      doctors: { items: [], totalCount: 0 },
+      loading: false,
+      error: null,
+    });
+
+    renderPage();
+    await act(async () => {});
+
+    const input = screen.getByPlaceholderText(/search by name or clinic/i);
+    fireEvent.change(input, { target: { value: 'Pop' } });
+
+    // useDoctors should NOT be called with 'Pop' immediately due to debounce
+    expect(useDoctors).not.toHaveBeenCalledWith(expect.any(Number), expect.any(Number), 'Pop');
+
+    await act(async () => {
+      vi.advanceTimersByTime(300);
+    });
+
+    expect(useDoctors).toHaveBeenCalledWith(expect.any(Number), expect.any(Number), 'Pop');
+  });
+
+  it('clears search when clear button is clicked', async () => {
+    vi.useFakeTimers();
+    (useDoctors as any).mockReturnValue({
+      doctors: { items: [], totalCount: 0 },
+      loading: false,
+      error: null,
+    });
+
+    renderPage();
+    await act(async () => {});
+
+    const input = screen.getByPlaceholderText(/search by name or clinic/i);
+    fireEvent.change(input, { target: { value: 'Pop' } });
+
+    await act(async () => {
+      vi.advanceTimersByTime(300);
+    });
+
+    const clearButton = screen.getByRole('button', { name: /clear/i });
+    await act(async () => {
+      fireEvent.click(clearButton);
+    });
+
+    expect(input).toHaveValue('');
+    
+    await act(async () => {
+      vi.advanceTimersByTime(300);
+    });
+
+    expect(useDoctors).toHaveBeenLastCalledWith(expect.any(Number), expect.any(Number), '');
   });
 
   it('renders DoctorCards for each doctor with specializations', async () => {
