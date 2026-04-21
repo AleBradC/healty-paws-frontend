@@ -197,7 +197,16 @@ describe('DoctorsPage', () => {
 
   it('renders pagination controls', async () => {
     (useDoctors as any).mockReturnValue({
-      doctors: { items: [], totalCount: 0 },
+      doctors: {
+        items: [
+          {
+            id: 'd1',
+            name: 'Dr. Pop',
+            specializations: [{ name: 'General' }],
+          },
+        ],
+        totalCount: 1,
+      },
       loading: false,
       error: null,
     });
