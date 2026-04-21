@@ -36,7 +36,7 @@ export const AppointmentCard: FC<AppointmentCardProps> = ({
   const isPending = baseStatus === "Pending";
   const isUpcoming = displayStatus === "Upcoming";
   const isConfirmed = displayStatus === "Confirmed";
-  const isTerminal = ["Cancel", "Declined"].includes(baseStatus);
+  const isTerminal = ["Cancelled", "Denied"].includes(baseStatus);
   
   const statusDisabled = isUpcoming || isConfirmed || isTerminal;
   const isDisabled = manuallyDisabled || statusDisabled;
@@ -56,8 +56,8 @@ export const AppointmentCard: FC<AppointmentCardProps> = ({
     action?.();
   };
 
-  // Only show delete button if it's NOT in 'Begin' phase and not currently in action phase
-  const showDelete = onDelete && displayStatus !== "Begin" && !onAccept && !onDeny;
+  // Only show delete button if it's NOT in 'Start' phase and not currently in action phase
+  const showDelete = onDelete && displayStatus !== "Start" && !onAccept && !onDeny;
 
   return (
     <div className={cardClasses} onClick={isDisabled ? undefined : onClick}>
