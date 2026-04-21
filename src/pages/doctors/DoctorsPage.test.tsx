@@ -3,6 +3,7 @@ import { render, screen, act, fireEvent } from '@testing-library/react';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
 import DoctorsPage from './DoctorsPage';
 import { useDoctors } from '../../lib/graphql/doctors/useDoctors';
+import { useSpecializations } from '../../lib/graphql/doctors/useSpecializations';
 
 vi.mock('../../router/ProtectedRoute/ProtectedRoute', () => ({
   ProtectedRoute: ({ children }: any) => <>{children}</>,
@@ -14,6 +15,9 @@ vi.mock('../../context/AuthenticationContext', () => ({
 
 vi.mock('../../lib/graphql/doctors/useDoctors', () => ({
   useDoctors: vi.fn(),
+}));
+vi.mock('../../lib/graphql/doctors/useSpecializations', () => ({
+  useSpecializations: vi.fn(),
 }));
 vi.mock('../../lib/graphql/doctors/useDoctor', () => ({
   useDoctor: () => ({ doctor: null, loading: false }),
@@ -51,10 +55,37 @@ describe('DoctorsPage', () => {
       loading: false,
       error: null,
     });
+    (useSpecializations as any).mockReturnValue({
+      specializations: [],
+      loading: false,
+      error: null,
+    });
     renderPage();
     await act(async () => {});
     expect(screen.getByRole('heading', { name: /our doctors/i })).toBeInTheDocument();
     expect(screen.getByPlaceholderText(/search by name or clinic/i)).toBeInTheDocument();
+  });
+
+  it('updates search and calls useDoctors with specialization filter', async () => {
+    vi.useFakeTimers();
+    (useDoctors as any).mockReturnValue({
+      doctors: { items: [], totalCount: 0 },
+      loading: false,
+      error: null,
+    });
+    (useSpecializations as any).mockReturnValue({
+      specializations: [{ id: 's1', name: 'Surgery' }],
+      loading: false,
+      error: null,
+    });
+
+    renderPage();
+    await act(async () => {});
+
+    const specSelect = screen.getByRole('combobox');
+    fireEvent.change(specSelect, { target: { value: 's1' } });
+
+    expect(useDoctors).toHaveBeenCalledWith(expect.any(Number), expect.any(Number), '', 's1');
   });
 
   it('updates search and calls useDoctors with debounced value', async () => {
@@ -137,6 +168,11 @@ describe('DoctorsPage', () => {
       loading: false,
       error: null,
     });
+    (useSpecializations as any).mockReturnValue({
+      specializations: [],
+      loading: false,
+      error: null,
+    });
     renderPage();
     await act(async () => {});
     expect(screen.getByRole('heading', { name: 'Dr. Pop' })).toBeInTheDocument();
@@ -149,6 +185,11 @@ describe('DoctorsPage', () => {
       loading: false,
       error: new Error('Network error'),
     });
+    (useSpecializations as any).mockReturnValue({
+      specializations: [],
+      loading: false,
+      error: null,
+    });
     renderPage();
     await act(async () => {});
     expect(screen.getByText(/data unavailable/i)).toBeInTheDocument();
@@ -157,6 +198,11 @@ describe('DoctorsPage', () => {
   it('renders pagination controls', async () => {
     (useDoctors as any).mockReturnValue({
       doctors: { items: [], totalCount: 0 },
+      loading: false,
+      error: null,
+    });
+    (useSpecializations as any).mockReturnValue({
+      specializations: [],
       loading: false,
       error: null,
     });
