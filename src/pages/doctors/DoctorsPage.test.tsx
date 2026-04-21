@@ -103,13 +103,13 @@ describe('DoctorsPage', () => {
     fireEvent.change(input, { target: { value: 'Pop' } });
 
     // useDoctors should NOT be called with 'Pop' immediately due to debounce
-    expect(useDoctors).not.toHaveBeenCalledWith(expect.any(Number), expect.any(Number), 'Pop');
+    expect(useDoctors).not.toHaveBeenCalledWith(expect.any(Number), expect.any(Number), 'Pop', '');
 
     await act(async () => {
       vi.advanceTimersByTime(300);
     });
 
-    expect(useDoctors).toHaveBeenCalledWith(expect.any(Number), expect.any(Number), 'Pop');
+    expect(useDoctors).toHaveBeenCalledWith(expect.any(Number), expect.any(Number), 'Pop', '');
   });
 
   it('clears search when clear button is clicked', async () => {
@@ -141,7 +141,7 @@ describe('DoctorsPage', () => {
       vi.advanceTimersByTime(300);
     });
 
-    expect(useDoctors).toHaveBeenLastCalledWith(expect.any(Number), expect.any(Number), '');
+    expect(useDoctors).toHaveBeenLastCalledWith(expect.any(Number), expect.any(Number), '', '');
   });
 
   it('renders DoctorCards for each doctor with specializations', async () => {
