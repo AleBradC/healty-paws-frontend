@@ -40,7 +40,7 @@ export const getAppointmentDisplayStatus = (
   const endWindow = addHours(appDate, 1); // 1h after
 
   if (isAfter(now, startWindow) && isBefore(now, endWindow)) {
-    return "Begin";
+    return "Start";
   }
 
   return baseStatus;
