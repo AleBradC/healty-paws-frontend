@@ -95,7 +95,7 @@ describe('LoginPage', () => {
     // Build a minimal JWT with role=owner
     const payload = btoa(JSON.stringify({ id: '1', username: 'u', role: 'owner' }));
     const token = `header.${payload}.sig`;
-    (axios.post as any).mockResolvedValue({ data: { accessToken: token } });
+    (axios.post as any).mockResolvedValue({ data: { data: { accessToken: token } } });
 
     renderLoginPage();
     await userEvent.type(screen.getByLabelText('Email'), 'test@example.com');
@@ -111,7 +111,7 @@ describe('LoginPage', () => {
   it('navigates to /dashboard/doctor for doctor role', async () => {
     const payload = btoa(JSON.stringify({ id: '2', username: 'doc', role: 'doctor' }));
     const token = `header.${payload}.sig`;
-    (axios.post as any).mockResolvedValue({ data: { accessToken: token } });
+    (axios.post as any).mockResolvedValue({ data: { data: { accessToken: token } } });
 
     renderLoginPage();
     await userEvent.type(screen.getByLabelText('Email'), 'doc@example.com');

@@ -63,9 +63,9 @@ export default function LoginPage() {
         password,
       });
 
-      login(data.accessToken);
+      login(data.data.accessToken);
 
-      const payload = JSON.parse(atob(data.accessToken.split(".")[1]));
+      const payload = JSON.parse(atob(data.data.accessToken.split(".")[1]));
       const userRole = payload.role;
 
       if (userRole === "owner") {
