@@ -17,7 +17,7 @@
     "@apollo/client": "^4.0.9",
     "axios": "^1.13.2",
     "date-fns": "^4.1.0",
-    "graphql": "^16.12.0",
+    "graphql": "^16.14.0",
     "jwt-decode": "^4.0.0",
     "react": "^19.2.0",
     "react-day-picker": "^9.11.3",
