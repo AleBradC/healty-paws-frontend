@@ -14,7 +14,7 @@
     "test:coverage": "vitest run --coverage"
   },
   "dependencies": {
-    "@apollo/client": "^4.0.9",
+    "@apollo/client": "^4.1.9",
     "axios": "^1.13.2",
     "date-fns": "^4.1.0",
     "graphql": "^16.12.0",
