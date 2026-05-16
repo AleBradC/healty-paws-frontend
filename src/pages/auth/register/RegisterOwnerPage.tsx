@@ -31,7 +31,7 @@ export default function RegisterOwnerPage() {
     ownerData.name.trim().length > 0 &&
     ownerData.email.trim().length > 0 &&
     /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(ownerData.email) &&
-    ownerData.password.length >= 6 &&
+    ownerData.password.length >= 8 &&
     ownerData.confirmPassword.length > 0 &&
     ownerData.password === ownerData.confirmPassword;
   const canSubmitStep2 =
@@ -66,8 +66,8 @@ export default function RegisterOwnerPage() {
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(ownerData.email))
       return "Please enter a valid email address.";
     if (!ownerData.password) return "Password is required.";
-    if (ownerData.password.length < 6)
-      return "Password must be at least 6 characters.";
+    if (ownerData.password.length < 8)
+      return "Password must be at least 8 characters.";
     if (!ownerData.confirmPassword) return "Please confirm your password.";
     if (ownerData.password !== ownerData.confirmPassword)
       return "Passwords do not match.";

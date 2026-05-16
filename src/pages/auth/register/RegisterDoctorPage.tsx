@@ -39,7 +39,7 @@ export default function RegisterDoctorPage() {
     formData.name.trim().length > 0 &&
     formData.email.trim().length > 0 &&
     /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email) &&
-    formData.password.length >= 6 &&
+    formData.password.length >= 8 &&
     formData.confirmPassword.length > 0 &&
     formData.password === formData.confirmPassword &&
     formData.specialization.trim().length > 0 &&

@@ -20,7 +20,7 @@ export default function ResetPasswordPage() {
   const [error, setError] = useState<string | undefined>(undefined);
   const canSendResetCode = email.trim().length > 0;
   const canVerifyCode = code.trim().length === 6;
-  const canResetPassword = newPassword.length >= 6;
+  const canResetPassword = newPassword.length >= 8;
 
   const handleRedirect = (path: string) => navigate(path);
 
@@ -90,8 +90,8 @@ export default function ResetPasswordPage() {
       setError("Please enter a new password.");
       return;
     }
-    if (newPassword.length < 6) {
-      setError("Password must be at least 6 characters.");
+    if (newPassword.length < 8) {
+      setError("Password must be at least 8 characters.");
       return;
     }
 
@@ -265,7 +265,7 @@ export default function ResetPasswordPage() {
                 minLength={6}
               />
               <p className="auth-note">
-                Password must be at least 6 characters
+                Password must be at least 8 characters
                 <br />
                 <button
                   type="button"
