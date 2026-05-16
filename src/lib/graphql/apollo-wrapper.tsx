@@ -1,5 +1,7 @@
 import { ApolloClient, InMemoryCache, HttpLink, from } from "@apollo/client";
 import { onError } from "@apollo/client/link/error";
+import { API_BASE_URL, logoutEndpoint } from "../../api/endpoint";
+import { authLoginPath } from "../../utils/path";
 
 // The httpOnly cookie is sent automatically with every same-origin request —
 // no manual Authorization header needed.
@@ -8,15 +10,40 @@ const httpLink = new HttpLink({
   credentials: "include",
 });
 
-// On a 401 the access token has expired or is invalid — redirect to login
-// so the user can re-authenticate rather than staying in a broken state.
-const errorLink = onError(({ networkError }) => {
+// When auth fails, clear the cookie server-side and redirect to login.
+// Short-circuit when already on the login page to avoid redirect loops on
+// failed POST /login calls.
+const isAlreadyOnLogin = () =>
+  window.location.pathname.startsWith(authLoginPath);
+
+const handleUnauthenticated = () => {
+  if (isAlreadyOnLogin()) return;
+
+  // Best-effort server-side cookie clear. Fire-and-forget — errorLink stays sync.
+  fetch(`${API_BASE_URL}${logoutEndpoint}`, {
+    method: "POST",
+    credentials: "include",
+  }).catch(() => {});
+
+  window.location.href = authLoginPath;
+};
+
+// Two auth-failure shapes to handle:
+//  1. GraphQL resolvers throwing UNAUTHENTICATED — comes through graphQLErrors,
+//     HTTP status is 200, so networkError is null.
+//  2. REST cookie-auth failures — surface as a network error with status 401.
+const errorLink = onError(({ graphQLErrors, networkError }) => {
+  if (graphQLErrors?.some((e) => e.extensions?.code === "UNAUTHENTICATED")) {
+    handleUnauthenticated();
+    return;
+  }
+
   if (
     networkError &&
     "statusCode" in networkError &&
-    networkError.statusCode === 401
+    (networkError as { statusCode: number }).statusCode === 401
   ) {
-    window.location.href = "/login";
+    handleUnauthenticated();
   }
 });
 
