@@ -1,12 +1,13 @@
 import { ApolloClient, InMemoryCache, HttpLink, from } from "@apollo/client";
 import { onError } from "@apollo/client/link/error";
-import { API_BASE_URL, logoutEndpoint } from "../../api/endpoint";
+import { API_BASE_URL, graphqlEndpoint, logoutEndpoint } from "../../api/endpoint";
 import { authLoginPath } from "../../utils/path";
 
 // The httpOnly cookie is sent automatically with every same-origin request —
-// no manual Authorization header needed.
+// no manual Authorization header needed. URL is built from the shared
+// API_BASE_URL constant so config changes happen in one place.
 const httpLink = new HttpLink({
-  uri: "http://localhost/graphql",
+  uri: `${API_BASE_URL}${graphqlEndpoint}`,
   credentials: "include",
 });
 
