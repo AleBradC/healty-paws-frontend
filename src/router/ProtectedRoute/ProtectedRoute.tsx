@@ -12,7 +12,7 @@ export const ProtectedRoute: FC<ProtectedRouteProps> = ({
   children,
   allowedRoles,
 }) => {
-  const { isLoggedIn, user } = useAuthentication();
+  const { isLoggedIn, user, isLoading } = useAuthentication();
   const navigate = useNavigate();
   const [isClient, setIsClient] = useState(false);
 
@@ -21,7 +21,7 @@ export const ProtectedRoute: FC<ProtectedRouteProps> = ({
   }, []);
 
   useEffect(() => {
-    if (!isClient) {
+    if (!isClient || isLoading) {
       return;
     }
 
@@ -37,7 +37,7 @@ export const ProtectedRoute: FC<ProtectedRouteProps> = ({
     ) {
       navigate(homePath);
     }
-  }, [isClient, isLoggedIn, user, navigate, allowedRoles]);
+  }, [isClient, isLoading, isLoggedIn, user, navigate, allowedRoles]);
 
   let isAuthorized = false;
   if (isLoggedIn && user) {
@@ -47,7 +47,7 @@ export const ProtectedRoute: FC<ProtectedRouteProps> = ({
         : true;
   }
 
-  if (!isClient || !isAuthorized) {
+  if (!isClient || isLoading || !isAuthorized) {
     return null;
   }
 
