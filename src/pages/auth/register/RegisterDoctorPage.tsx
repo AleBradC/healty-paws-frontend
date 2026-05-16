@@ -6,7 +6,7 @@ import {
 } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
-import { API_BASE_URL, registerEndpoint } from "../../../api/endpoint";
+import { API_BASE_URL, registerDoctorEndpoint } from "../../../api/endpoint";
 import { Input } from "../../../components/ui/Input/Input";
 import { specializationsData } from "../../../data/specialization";
 import { successPagePath, homePath } from "../../../utils/path";
@@ -173,7 +173,6 @@ export default function RegisterDoctorPage() {
     setIsSubmitting(true);
 
     const payload = {
-      role: "doctor",
       doctor: {
         name: formData.name,
         email: formData.email,
@@ -195,7 +194,7 @@ export default function RegisterDoctorPage() {
 
     try {
       const response = await axios.post(
-        `${API_BASE_URL}${registerEndpoint}`,
+        `${API_BASE_URL}${registerDoctorEndpoint}`,
         payload
       );
 

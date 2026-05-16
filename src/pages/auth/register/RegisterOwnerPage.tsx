@@ -1,7 +1,7 @@
 import { useState, type FormEvent, type ChangeEvent } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
-import { API_BASE_URL, registerEndpoint } from "../../../api/endpoint";
+import { API_BASE_URL, registerOwnerEndpoint } from "../../../api/endpoint";
 import { Input } from "../../../components/ui/Input/Input";
 import type { RegisterOwnerPayload } from "../../../types";
 import { successPagePath, homePath } from "../../../utils/path";
@@ -122,11 +122,11 @@ export default function RegisterOwnerPage() {
     setIsSubmitting(true);
 
     const payload = {
-      role: "owner",
       owner: {
         name: ownerData.name,
         email: ownerData.email,
         password: ownerData.password,
+        confirmPassword: ownerData.confirmPassword,
       },
       pet: {
         name: petData.name,
@@ -139,7 +139,7 @@ export default function RegisterOwnerPage() {
 
     try {
       const response = await axios.post(
-        `${API_BASE_URL}${registerEndpoint}`,
+        `${API_BASE_URL}${registerOwnerEndpoint}`,
         payload
       );
 
