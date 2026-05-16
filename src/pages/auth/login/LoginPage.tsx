@@ -58,15 +58,17 @@ export default function LoginPage() {
     setIsSubmitting(true);
 
     try {
-      const { data } = await axios.post(`${API_BASE_URL}${loginEndpoint}`, {
-        email,
-        password,
-      });
+      const { data } = await axios.post(
+        `${API_BASE_URL}${loginEndpoint}`,
+        { email, password },
+        { withCredentials: true }
+      );
 
-      login(data.data.accessToken);
+      // Token is now an httpOnly cookie set by the server — never touches JS.
+      // Use role and id returned in the response body to update auth state.
+      login(data.data.id, data.data.role);
 
-      const payload = JSON.parse(atob(data.data.accessToken.split(".")[1]));
-      const userRole = payload.role;
+      const userRole = data.data.role;
 
       if (userRole === "owner") {
         navigate("/dashboard/owner");

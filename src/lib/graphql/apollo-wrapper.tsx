@@ -1,20 +1,23 @@
 import { ApolloClient, InMemoryCache, HttpLink, from } from "@apollo/client";
-import { setContext } from "@apollo/client/link/context";
+import { onError } from "@apollo/client/link/error";
 
+// The httpOnly cookie is sent automatically with every same-origin request —
+// no manual Authorization header needed.
 const httpLink = new HttpLink({
   uri: "http://localhost/graphql",
+  credentials: "include",
 });
 
-const authLink = setContext((_, { headers }) => {
-  // get the authentication token from local storage if it exists
-  const token = localStorage.getItem("accessToken");
-  // return the headers to the context so httpLink can read them
-  return {
-    headers: {
-      ...headers,
-      authorization: token ? `Bearer ${token}` : "",
-    },
-  };
+// On a 401 the access token has expired or is invalid — redirect to login
+// so the user can re-authenticate rather than staying in a broken state.
+const errorLink = onError(({ networkError }) => {
+  if (
+    networkError &&
+    "statusCode" in networkError &&
+    networkError.statusCode === 401
+  ) {
+    window.location.href = "/login";
+  }
 });
 
 const cache = new InMemoryCache({
@@ -35,7 +38,7 @@ const cache = new InMemoryCache({
 });
 
 const apolloClient = new ApolloClient({
-  link: authLink.concat(httpLink),
+  link: from([errorLink, httpLink]),
   cache,
 });
 

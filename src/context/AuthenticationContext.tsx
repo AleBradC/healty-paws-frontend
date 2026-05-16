@@ -5,7 +5,7 @@ import {
   useEffect,
   type ReactNode,
 } from "react";
-import { jwtDecode } from "jwt-decode";
+import { API_BASE_URL, sessionEndpoint, logoutEndpoint } from "../api/endpoint";
 
 interface User {
   id: string;
@@ -17,7 +17,7 @@ interface AuthenticationContextType {
   isLoggedIn: boolean;
   user: User | null;
   isLoading: boolean;
-  login: (token: string) => void;
+  login: (id: string, role: string) => void;
   logout: () => void;
 }
 
@@ -34,37 +34,37 @@ export const AuthenticationProvider = ({
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
+  // On mount, restore session by calling /me. The httpOnly cookie is sent
+  // automatically — no localStorage token read needed.
   useEffect(() => {
-    try {
-      const token = localStorage.getItem("accessToken");
-      if (token) {
-        const decodedUser: User = jwtDecode(token);
-        setUser(decodedUser);
-        setIsLoggedIn(true);
-      }
-    } catch (error) {
-      console.error("Invalid token:", error);
-      localStorage.removeItem("accessToken");
-      setUser(null);
-      setIsLoggedIn(false);
-    } finally {
-      setIsLoading(false);
-    }
+    fetch(`${API_BASE_URL}${sessionEndpoint}`, { credentials: "include" })
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => {
+        if (data?.data) {
+          setUser({
+            id: data.data.id,
+            username: data.data.email ?? "",
+            role: data.data.role,
+          });
+          setIsLoggedIn(true);
+        }
+      })
+      .catch(() => {})
+      .finally(() => setIsLoading(false));
   }, []);
 
-  const login = (token: string) => {
-    localStorage.setItem("accessToken", token);
-    try {
-      const decodedUser: User = jwtDecode(token);
-      setUser(decodedUser);
-      setIsLoggedIn(true);
-    } catch (error) {
-      console.error("Failed to decode token:", error);
-    }
+  // Called after a successful POST /login — cookie is already set by the server.
+  const login = (id: string, role: string) => {
+    setUser({ id, username: "", role });
+    setIsLoggedIn(true);
   };
 
+  // Clears the httpOnly cookie server-side, then resets local state.
   const logout = () => {
-    localStorage.removeItem("accessToken");
+    fetch(`${API_BASE_URL}${logoutEndpoint}`, {
+      method: "POST",
+      credentials: "include",
+    }).catch(() => {});
     setUser(null);
     setIsLoggedIn(false);
   };
