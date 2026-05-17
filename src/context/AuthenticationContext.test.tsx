@@ -3,7 +3,7 @@ import { render, screen, act } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { AuthenticationProvider, useAuthentication } from './AuthenticationContext';
 
-// A helper component that calls useAuthentication and displays state
+// Helper consumer that exposes context state to the DOM and exercises login/logout.
 function AuthConsumer() {
   const { isLoggedIn, user, isLoading, login, logout } = useAuthentication();
   return (
@@ -11,91 +11,152 @@ function AuthConsumer() {
       <p data-testid="is-logged-in">{String(isLoggedIn)}</p>
       <p data-testid="user">{user ? user.username : 'null'}</p>
       <p data-testid="is-loading">{String(isLoading)}</p>
-      <button onClick={() => login('1', 'owner')}>
-        Login
-      </button>
+      <button onClick={() => login('1', 'owner')}>Login</button>
       <button onClick={logout}>Logout</button>
     </div>
   );
 }
 
-// A minimal valid JWT (header.payload.signature) — payload: {id:"1",username:"testuser",role:"owner"}
-const VALID_TOKEN = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjEiLCJ1c2VybmFtZSI6InRlc3R1c2VyIiwicm9sZSI6Im93bmVyIn0.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c';
+// Minimal mock of the global fetch API. Each test sets a per-call queue of
+// responses so the session-restore call on mount and any logout call can be
+// validated independently.
+type MockResponse = {
+  ok: boolean;
+  status: number;
+  json?: () => Promise<unknown>;
+};
+
+const fetchMock = vi.fn();
+
+function queueResponse(res: MockResponse) {
+  fetchMock.mockResolvedValueOnce({
+    ok: res.ok,
+    status: res.status,
+    json: res.json ?? (async () => ({})),
+  });
+}
 
 describe('AuthenticationContext', () => {
   beforeEach(() => {
-    localStorage.clear();
+    fetchMock.mockReset();
+    vi.stubGlobal('fetch', fetchMock);
   });
 
-  it('starts with isLoggedIn=false and user=null when no token is stored', async () => {
+  afterEach(() => {
+    vi.unstubAllGlobals();
+  });
+
+  it('starts with isLoggedIn=false and user=null when /session returns 401', async () => {
+    // 1st call: /session → 401, 2nd call (eviction): /logout → 200
+    queueResponse({ ok: false, status: 401 });
+    queueResponse({ ok: true, status: 200 });
+
     render(
       <AuthenticationProvider>
         <AuthConsumer />
       </AuthenticationProvider>
     );
     await act(async () => {});
+
     expect(screen.getByTestId('is-logged-in')).toHaveTextContent('false');
     expect(screen.getByTestId('user')).toHaveTextContent('null');
   });
 
   it('isLoading becomes false after initialization', async () => {
+    queueResponse({ ok: false, status: 401 });
+    queueResponse({ ok: true, status: 200 });
+
     render(
       <AuthenticationProvider>
         <AuthConsumer />
       </AuthenticationProvider>
     );
     await act(async () => {});
+
     expect(screen.getByTestId('is-loading')).toHaveTextContent('false');
   });
 
-  it('reads an existing valid token from localStorage and sets isLoggedIn=true', async () => {
-    localStorage.setItem('accessToken', VALID_TOKEN);
+  it('hydrates from /session when the cookie is valid and sets isLoggedIn=true', async () => {
+    queueResponse({
+      ok: true,
+      status: 200,
+      json: async () => ({
+        status: 'success',
+        data: { id: '1', email: 'testuser@example.com', role: 'owner' },
+      }),
+    });
+
     render(
       <AuthenticationProvider>
         <AuthConsumer />
       </AuthenticationProvider>
     );
     await act(async () => {});
+
     expect(screen.getByTestId('is-logged-in')).toHaveTextContent('true');
-    expect(screen.getByTestId('user')).toHaveTextContent('testuser');
+    expect(screen.getByTestId('user')).toHaveTextContent('testuser@example.com');
   });
 
-  it('login() sets isLoggedIn=true and stores the token', async () => {
+  it('login() sets isLoggedIn=true and stores the user in context', async () => {
+    queueResponse({ ok: false, status: 401 });
+    queueResponse({ ok: true, status: 200 });
+
     render(
       <AuthenticationProvider>
         <AuthConsumer />
       </AuthenticationProvider>
     );
     await act(async () => {});
+
     await userEvent.click(screen.getByRole('button', { name: 'Login' }));
+
     expect(screen.getByTestId('is-logged-in')).toHaveTextContent('true');
-    expect(localStorage.getItem('accessToken')).toBeTruthy();
   });
 
-  it('logout() clears the token and resets state', async () => {
-    localStorage.setItem('accessToken', VALID_TOKEN);
+  it('logout() calls the logout endpoint and resets state', async () => {
+    // Hydrate logged-in first
+    queueResponse({
+      ok: true,
+      status: 200,
+      json: async () => ({
+        status: 'success',
+        data: { id: '1', email: 'testuser@example.com', role: 'owner' },
+      }),
+    });
+    // Logout call when the user clicks "Logout"
+    queueResponse({ ok: true, status: 200 });
+
     render(
       <AuthenticationProvider>
         <AuthConsumer />
       </AuthenticationProvider>
     );
     await act(async () => {});
+
     await userEvent.click(screen.getByRole('button', { name: 'Logout' }));
+    await act(async () => {});
+
     expect(screen.getByTestId('is-logged-in')).toHaveTextContent('false');
     expect(screen.getByTestId('user')).toHaveTextContent('null');
-    expect(localStorage.getItem('accessToken')).toBeNull();
+
+    // Last call should be the POST to the logout endpoint.
+    const lastCall = fetchMock.mock.calls.at(-1);
+    expect(lastCall?.[0]).toMatch(/\/api\/auth\/logout$/);
+    expect(lastCall?.[1]).toMatchObject({ method: 'POST', credentials: 'include' });
   });
 
-  it('handles an invalid token gracefully', async () => {
-    localStorage.setItem('accessToken', 'not-a-valid-jwt');
+  it('handles a network failure during /session gracefully', async () => {
+    fetchMock.mockRejectedValueOnce(new Error('network down'));
+
     render(
       <AuthenticationProvider>
         <AuthConsumer />
       </AuthenticationProvider>
     );
     await act(async () => {});
+
     expect(screen.getByTestId('is-logged-in')).toHaveTextContent('false');
-    expect(localStorage.getItem('accessToken')).toBeNull();
+    expect(screen.getByTestId('is-loading')).toHaveTextContent('false');
   });
 
   it('useAuthentication throws when used outside AuthenticationProvider', () => {
