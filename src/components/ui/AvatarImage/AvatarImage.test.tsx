@@ -67,4 +67,44 @@ describe('AvatarImage', () => {
     const img = screen.getByAltText('A');
     expect(img).not.toHaveAttribute('role', 'button');
   });
+
+  it('opens the file picker when "Change Photo" is clicked', async () => {
+    render(<AvatarImage alt="A" editable />);
+    // The hidden <input type="file"> doesn't expose a friendly query, so
+    // grab it via querySelector and spy on its click().
+    const fileInput = document.querySelector(
+      'input[type="file"]'
+    ) as HTMLInputElement;
+    const clickSpy = vi.spyOn(fileInput, 'click');
+    await userEvent.click(
+      screen.getByRole('button', { name: /change photo/i })
+    );
+    expect(clickSpy).toHaveBeenCalledTimes(1);
+  });
+
+  it('reads an uploaded image and persists it to localStorage', async () => {
+    render(<AvatarImage alt="A" editable storageKey="avatar-key" />);
+    const fileInput = document.querySelector(
+      'input[type="file"]'
+    ) as HTMLInputElement;
+    const file = new File(['x'], 'pic.png', { type: 'image/png' });
+    await userEvent.upload(fileInput, file);
+
+    expect(mockReadAsDataURL).toHaveBeenCalledWith(file);
+    expect(screen.getByAltText('A')).toHaveAttribute(
+      'src',
+      'data:image/png;base64,abc'
+    );
+    expect(localStorage.getItem('avatar-key')).toBe('data:image/png;base64,abc');
+  });
+
+  it('ignores non-image file types', async () => {
+    render(<AvatarImage alt="A" editable />);
+    const fileInput = document.querySelector(
+      'input[type="file"]'
+    ) as HTMLInputElement;
+    const txt = new File(['x'], 'note.txt', { type: 'text/plain' });
+    await userEvent.upload(fileInput, txt);
+    expect(mockReadAsDataURL).not.toHaveBeenCalled();
+  });
 });

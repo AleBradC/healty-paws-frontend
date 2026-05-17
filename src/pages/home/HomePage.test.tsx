@@ -1,5 +1,6 @@
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, act } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { MemoryRouter } from 'react-router-dom';
 import HomePage from './HomePage';
 
@@ -7,9 +8,10 @@ vi.mock('../../context/AuthenticationContext', () => ({
   useAuthentication: vi.fn(),
 }));
 
+const mockNavigate = vi.fn();
 vi.mock('react-router-dom', async (importOriginal) => {
   const actual = await importOriginal<typeof import('react-router-dom')>();
-  return { ...actual, useNavigate: () => vi.fn() };
+  return { ...actual, useNavigate: () => mockNavigate };
 });
 
 import { useAuthentication } from '../../context/AuthenticationContext';
@@ -23,6 +25,8 @@ function renderHomePage() {
 }
 
 describe('HomePage', () => {
+  beforeEach(() => mockNavigate.mockClear());
+
   it('always renders the testimonials section', async () => {
     (useAuthentication as any).mockReturnValue({ isLoggedIn: false, isLoading: false });
     renderHomePage();
@@ -65,5 +69,31 @@ describe('HomePage', () => {
     renderHomePage();
     await act(async () => {});
     expect(screen.getByRole('heading', { level: 1 })).toBeInTheDocument();
+  });
+
+  it('navigates to the owner registration path when "Join as a Pet Parent" is clicked', async () => {
+    (useAuthentication as any).mockReturnValue({
+      isLoggedIn: false,
+      isLoading: false,
+    });
+    renderHomePage();
+    await act(async () => {});
+    await userEvent.click(
+      screen.getByRole('button', { name: /join as a pet parent/i })
+    );
+    expect(mockNavigate).toHaveBeenCalledWith('/auth/register/owner');
+  });
+
+  it('navigates to the doctor registration path when "Register as Doctor" is clicked', async () => {
+    (useAuthentication as any).mockReturnValue({
+      isLoggedIn: false,
+      isLoading: false,
+    });
+    renderHomePage();
+    await act(async () => {});
+    await userEvent.click(
+      screen.getByRole('button', { name: /register as doctor/i })
+    );
+    expect(mockNavigate).toHaveBeenCalledWith('/auth/register/doctor');
   });
 });

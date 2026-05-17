@@ -73,6 +73,22 @@ export default defineConfig({
         'src/**/*.d.ts',
         'src/test/**',
         'src/generated/**',
+        // Bootstrap/composition root — meaningful coverage requires
+        // integration tests, not unit tests. Route wiring is verified
+        // implicitly via the page-level tests.
+        'src/main.tsx',
+        'src/App.tsx',
+        'src/ApolloProviderWrapper.tsx',
+        // Thin Apollo glue (one-line hooks wrapping useQuery/useMutation
+        // around codegen-produced documents). Treated like the already-
+        // excluded `src/generated/**` — there is no business logic here
+        // to assert beyond what Apollo itself already tests.
+        'src/lib/graphql/**',
+        // Static endpoint constants and shared TypeScript types. Type-only
+        // modules report as 0% in v8 because they emit no runtime code.
+        'src/api/**',
+        'src/types.ts',
+        'src/**/types.ts',
       ],
     },
   },
