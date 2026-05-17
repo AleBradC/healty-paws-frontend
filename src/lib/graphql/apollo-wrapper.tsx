@@ -1,5 +1,6 @@
 import { ApolloClient, InMemoryCache, HttpLink, from } from "@apollo/client";
-import { onError } from "@apollo/client/link/error";
+import { ErrorLink } from "@apollo/client/link/error";
+import { CombinedGraphQLErrors, ServerError } from "@apollo/client/errors";
 import { API_BASE_URL, graphqlEndpoint, logoutEndpoint } from "../../api/endpoint";
 import { authLoginPath } from "../../utils/path";
 
@@ -29,21 +30,21 @@ const handleUnauthenticated = () => {
   window.location.href = authLoginPath;
 };
 
-// Two auth-failure shapes to handle:
-//  1. GraphQL resolvers throwing UNAUTHENTICATED — comes through graphQLErrors,
-//     HTTP status is 200, so networkError is null.
-//  2. REST cookie-auth failures — surface as a network error with status 401.
-const errorLink = onError(({ graphQLErrors, networkError }) => {
-  if (graphQLErrors?.some((e) => e.extensions?.code === "UNAUTHENTICATED")) {
+// Two auth-failure shapes to handle (Apollo Client v4 surfaces both through a
+// single `error` field, narrowed via the static `is()` helpers):
+//  1. GraphQL resolvers throwing UNAUTHENTICATED — wrapped in CombinedGraphQLErrors,
+//     HTTP status is 200.
+//  2. REST cookie-auth failures — wrapped in ServerError with statusCode 401.
+const errorLink = new ErrorLink(({ error }) => {
+  if (
+    CombinedGraphQLErrors.is(error) &&
+    error.errors.some((e) => e.extensions?.code === "UNAUTHENTICATED")
+  ) {
     handleUnauthenticated();
     return;
   }
 
-  if (
-    networkError &&
-    "statusCode" in networkError &&
-    (networkError as { statusCode: number }).statusCode === 401
-  ) {
+  if (ServerError.is(error) && error.statusCode === 401) {
     handleUnauthenticated();
   }
 });

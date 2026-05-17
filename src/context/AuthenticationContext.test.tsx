@@ -11,7 +11,7 @@ function AuthConsumer() {
       <p data-testid="is-logged-in">{String(isLoggedIn)}</p>
       <p data-testid="user">{user ? user.username : 'null'}</p>
       <p data-testid="is-loading">{String(isLoading)}</p>
-      <button onClick={() => login('eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjEiLCJ1c2VybmFtZSI6InRlc3R1c2VyIiwicm9sZSI6Im93bmVyIn0.abc')}>
+      <button onClick={() => login('1', 'owner')}>
         Login
       </button>
       <button onClick={logout}>Logout</button>
