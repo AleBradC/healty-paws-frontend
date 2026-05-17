@@ -13,6 +13,9 @@ dist-ssr
 *.local
 *.tsbuildinfo
 
+# Environment variables — only the .example template is committed.
+.env
+
 # Test coverage output
 coverage/
 
