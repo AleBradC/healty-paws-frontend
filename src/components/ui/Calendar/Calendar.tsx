@@ -98,19 +98,23 @@ export const Calendar: FC<CalendarProps> = ({
                 ? (availableSlotsForDay as string[]).includes(time)
                 : !!(availableSlotsForDay as Record<string, string>)[time];
               const isBookingSelected =
+                !isEditable &&
+                isAvailable &&
                 selectedSlot?.date === formattedDate &&
                 selectedSlot?.time === time;
               const isEditSelected = isEditable && isAvailable;
 
-              const isSlotDisabled = isPastSlot;
+              const isSlotDisabled = isPastSlot || (!isEditable && !isAvailable);
 
               return (
                 <button
                   key={time}
                   disabled={isSlotDisabled}
-                  className={`time-slot ${isEditable ? "editable" : ""} ${
-                    isAvailable ? "available" : ""
-                  } ${isBookingSelected || isEditSelected ? "selected" : ""}`}
+                  className={`time-slot ${
+                    isEditable && !isSlotDisabled ? "editable" : ""
+                  } ${isAvailable ? "available" : ""} ${
+                    isBookingSelected || isEditSelected ? "selected" : ""
+                  }`}
                   onClick={() => {
                     const iso = Array.isArray(availableSlotsForDay)
                       ? ""
