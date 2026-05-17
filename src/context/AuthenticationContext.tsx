@@ -6,7 +6,10 @@ import {
   type ReactNode,
 } from "react";
 import { API_BASE_URL, sessionEndpoint, logoutEndpoint } from "../api/endpoint";
+import apolloClient from "../lib/graphql/apollo-wrapper";
 import type { ApiResponse } from "../types";
+
+type SessionData = SessionResponse | null;
 
 type SessionResponse = { id: string; email: string; role: string };
 
@@ -37,11 +40,10 @@ export const AuthenticationProvider = ({
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  // On mount, restore session by calling /session. The httpOnly cookie is sent
-  // automatically. Since the JWT is httpOnly we can't decode exp client-side —
-  // the server is the source of truth. A 401 means the token is expired or
-  // invalid, in which case we proactively evict the stale cookie so subsequent
-  // requests don't keep carrying it.
+  // On mount, ask the server about the current session. The endpoint is
+  // state-inquiry: it always returns 200 with `data` set to the user when
+  // there is a valid session and null otherwise. The server itself evicts
+  // stale cookies, so the client just reads the answer.
   useEffect(() => {
     let cancelled = false;
 
@@ -51,27 +53,17 @@ export const AuthenticationProvider = ({
           credentials: "include",
         });
 
-        if (cancelled) return;
+        if (cancelled || !res.ok) return;
 
-        if (res.ok) {
-          const body = (await res.json()) as ApiResponse<SessionResponse>;
-          if (!cancelled && body.data) {
-            setUser({
-              id: body.data.id,
-              username: body.data.email ?? "",
-              role: body.data.role,
-            });
-            setIsLoggedIn(true);
-          }
-        } else if (res.status === 401) {
-          // Token expired or invalid — clear the stale cookie server-side.
-          fetch(`${API_BASE_URL}${logoutEndpoint}`, {
-            method: "POST",
-            credentials: "include",
-          }).catch(() => {});
-        }
-        // Other status codes (5xx, etc.) — stay silent, user is treated as
-        // logged-out and can retry.
+        const body = (await res.json()) as ApiResponse<SessionData>;
+        if (cancelled || !body.data) return;
+
+        setUser({
+          id: body.data.id,
+          username: body.data.email ?? "",
+          role: body.data.role,
+        });
+        setIsLoggedIn(true);
       } catch {
         // Network failure — stay silent, treat as logged-out.
       } finally {
@@ -90,12 +82,15 @@ export const AuthenticationProvider = ({
     setIsLoggedIn(true);
   };
 
-  // Clears the httpOnly cookie server-side, then resets local state.
+  // Clears the httpOnly cookie server-side, drops Apollo's in-memory cache
+  // so the next user can't read the previous session's data from a cache
+  // hit, then resets React state.
   const logout = () => {
     fetch(`${API_BASE_URL}${logoutEndpoint}`, {
       method: "POST",
       credentials: "include",
     }).catch(() => {});
+    apolloClient.clearStore().catch(() => {});
     setUser(null);
     setIsLoggedIn(false);
   };

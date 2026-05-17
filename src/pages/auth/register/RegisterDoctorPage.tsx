@@ -1,218 +1,133 @@
-import {
-  useState,
-  type FormEvent,
-  type ChangeEvent,
-  useEffect,
-} from "react";
+import { useEffect, useState } from "react";
 import axios from "axios";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
+import { useForm, useFieldArray, useWatch } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { API_BASE_URL, registerDoctorEndpoint } from "../../../api/endpoint";
 import { Input } from "../../../components/ui/Input/Input";
 import { specializationsData } from "../../../data/specialization";
 import { successPagePath, homePath } from "../../../utils/path";
 import { Select } from "../../../components/ui/Select/Select";
 import { Button } from "../../../components/ui/Button/Button";
-import { Link } from "react-router-dom";
+import {
+  registerDoctorFormSchema,
+  type RegisterDoctorFormValues,
+} from "../../../lib/validation/registration";
+import { PASSWORD_RULE_TEXT } from "../../../lib/validation/auth";
 import "../styles.css";
 
-interface ServicePrice {
-  name: string;
-  price: string;
-}
+const STEP_1_FIELDS = [
+  "name",
+  "email",
+  "password",
+  "confirmPassword",
+  "specialization",
+  "clinicName",
+  "clinicAddress",
+] as const;
 
 export default function RegisterDoctorPage() {
   const navigate = useNavigate();
-  const [step, setStep] = useState<number>(1);
-  const [formData, setFormData] = useState({
-    name: "",
-    email: "",
-    password: "",
-    confirmPassword: "",
-    specialization: "",
-    clinicName: "",
-    clinicAddress: "",
-  });
-  const [services, setServices] = useState<ServicePrice[]>([]);
-  const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
-  const [error, setError] = useState<string | undefined>();
-  const canProceedStep1 =
-    formData.name.trim().length > 0 &&
-    formData.email.trim().length > 0 &&
-    /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email) &&
-    formData.password.length >= 8 &&
-    formData.confirmPassword.length > 0 &&
-    formData.password === formData.confirmPassword &&
-    formData.specialization.trim().length > 0 &&
-    formData.clinicName.trim().length > 0 &&
-    formData.clinicAddress.trim().length > 0;
-  const canSubmitStep2 =
-    services.length > 0 &&
-    services.every(
-      (service) => service.price.trim().length > 0 && Number(service.price) > 0
-    );
+  const [step, setStep] = useState<1 | 2>(1);
+  const [serverError, setServerError] = useState<string | undefined>();
 
   const specializationOptions = specializationsData.map((spec) => ({
     value: spec.name,
     label: spec.name,
   }));
 
+  const {
+    control,
+    register,
+    handleSubmit,
+    trigger,
+    formState: { errors, isSubmitting },
+  } = useForm<RegisterDoctorFormValues>({
+    resolver: zodResolver(registerDoctorFormSchema),
+    mode: "onChange",
+    defaultValues: {
+      name: "",
+      email: "",
+      password: "",
+      confirmPassword: "",
+      specialization: "",
+      clinicName: "",
+      clinicAddress: "",
+      services: [],
+    },
+  });
+
+  const { fields, replace } = useFieldArray({ control, name: "services" });
+  const specialization = useWatch({ control, name: "specialization" });
+
+  // Replace the services array whenever specialization changes. This keeps
+  // the visible service prompts in sync with the selected specialty and
+  // wipes any prior prices (the prior services don't belong to the new
+  // specialty).
   useEffect(() => {
-    if (!formData.specialization) {
-      setServices([]);
+    if (!specialization) {
+      replace([]);
       return;
     }
-    const selectedSpec = specializationsData.find(
-      (spec) => spec.name === formData.specialization
+    const selected = specializationsData.find(
+      (spec) => spec.name === specialization
     );
-
-    if (selectedSpec) {
-      const initialServices = selectedSpec.services.map((service) => ({
+    if (!selected) {
+      replace([]);
+      return;
+    }
+    replace(
+      selected.services.map((service) => ({
         name: service.name,
-        price: "",
-      }));
-      setServices(initialServices);
-    }
-  }, [formData.specialization]);
-
-  const handleChange = (
-    e: ChangeEvent<HTMLInputElement | HTMLSelectElement>
-  ) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
-    if (error) setError(undefined);
-  };
-
-  const handleServicePriceChange = (
-    e: ChangeEvent<HTMLInputElement>,
-    serviceName: string
-  ) => {
-    const { value } = e.target;
-    setServices((prevServices) =>
-      prevServices.map((service) =>
-        service.name === serviceName ? { ...service, price: value } : service
-      )
+        // NaN gets surfaced as a "required" message by the schema; using
+        // 0 would let an empty form silently pass the >0 check on bypass.
+        price: NaN,
+      }))
     );
-    if (error) setError(undefined);
+  }, [specialization, replace]);
+
+  const handleNext = async () => {
+    setServerError(undefined);
+    const valid = await trigger(STEP_1_FIELDS, { shouldFocus: true });
+    if (valid) setStep(2);
   };
 
-  const validateStep1 = (): string | null => {
-    const allEmpty =
-      !formData.name &&
-      !formData.email &&
-      !formData.password &&
-      !formData.confirmPassword &&
-      !formData.specialization &&
-      !formData.clinicName &&
-      !formData.clinicAddress;
-    if (allEmpty) return "Please fill in all required fields.";
-
-    if (!formData.name.trim()) return "Full name is required.";
-    if (!formData.email.trim()) return "Email address is required.";
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email))
-      return "Please enter a valid email address.";
-    if (!formData.password) return "Password is required.";
-    if (formData.password.length < 6)
-      return "Password must be at least 6 characters.";
-    if (!formData.confirmPassword) return "Please confirm your password.";
-    if (formData.password !== formData.confirmPassword)
-      return "Passwords do not match.";
-    if (!formData.specialization) return "Please select a specialization.";
-    if (!formData.clinicName.trim()) return "Clinic name is required.";
-    if (!formData.clinicAddress.trim()) return "Clinic address is required.";
-
-    return null;
-  };
-
-  const validateStep2 = (): string | null => {
-    if (services.length === 0)
-      return "No services available for the selected specialization.";
-
-    const allPricesEmpty = services.every(
-      (s) => !s.price || s.price.trim() === ""
-    );
-    if (allPricesEmpty) return "Please set prices for all services.";
-
-    for (const service of services) {
-      if (!service.price || service.price.trim() === "") {
-        return `Please set a price for "${service.name}".`;
-      }
-      const price = Number(service.price);
-      if (isNaN(price) || price <= 0) {
-        return `Please set a valid price (greater than 0) for "${service.name}".`;
-      }
-    }
-    return null;
-  };
-
-  const handleNext = () => {
-    setError(undefined);
-    const validationError = validateStep1();
-    if (validationError) {
-      setError(validationError);
-      return;
-    }
-    setStep(2);
-  };
-
-  const handleBack = () => {
-    setError(undefined);
-    setStep(1);
-  };
-
-  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    if (step !== 2) return;
-
-    setError(undefined);
-    const validationError = validateStep2();
-    if (validationError) {
-      setError(validationError);
-      return;
-    }
-
-    setIsSubmitting(true);
-
+  const onSubmit = handleSubmit(async (values) => {
+    setServerError(undefined);
     const payload = {
       doctor: {
-        name: formData.name,
-        email: formData.email,
-        password: formData.password,
-        confirmPassword: formData.confirmPassword,
-        clinicName: formData.clinicName,
-        clinicAddress: formData.clinicAddress,
+        name: values.name,
+        email: values.email,
+        password: values.password,
+        confirmPassword: values.confirmPassword,
+        clinicName: values.clinicName,
+        clinicAddress: values.clinicAddress,
         specializations: [
           {
-            name: formData.specialization,
-            services: services.map((service) => ({
-              name: service.name,
-              price: Number(service.price),
-            })),
+            name: values.specialization,
+            services: values.services,
           },
         ],
       },
     };
-
     try {
       const response = await axios.post(
         `${API_BASE_URL}${registerDoctorEndpoint}`,
         payload
       );
-
       if (response.status === 201) {
         navigate(successPagePath);
       } else {
-        throw new Error("An unexpected response was received from the server.");
+        throw new Error("Unexpected response.");
       }
-    } catch (err: any) {
+    } catch (err) {
       if (axios.isAxiosError(err) && err.response) {
-        setError(err.response.data.message || "Registration failed.");
+        setServerError(err.response.data.message || "Registration failed.");
       } else {
-        setError("An unexpected error occurred. Please try again.");
+        setServerError("An unexpected error occurred. Please try again.");
       }
-    } finally {
-      setIsSubmitting(false);
     }
-  };
+  });
 
   return (
     <div className="auth-page">
@@ -221,8 +136,8 @@ export default function RegisterDoctorPage() {
           ×
         </Link>
         <h1 className="auth-title">Doctor Registration</h1>
-        {error && <p className="global-error">{error}</p>}
-        <form className="auth-form" onSubmit={handleSubmit}>
+        {serverError && <p className="global-error">{serverError}</p>}
+        <form className="auth-form" onSubmit={onSubmit} noValidate>
           {step === 1 && (
             <div className="form-step">
               <h2 className="auth-subtitle">
@@ -230,54 +145,48 @@ export default function RegisterDoctorPage() {
               </h2>
               <section className="form-section">
                 <Input
-                  name="name"
                   label="Full Name"
-                  value={formData.name}
-                  onChange={handleChange}
+                  error={errors.name?.message}
+                  {...register("name")}
                 />
                 <Input
-                  name="email"
                   label="Email Address"
                   type="email"
-                  value={formData.email}
-                  onChange={handleChange}
+                  error={errors.email?.message}
+                  {...register("email")}
                 />
                 <Input
-                  name="password"
                   label="Password"
                   type="password"
                   showToggle
-                  value={formData.password}
-                  onChange={handleChange}
+                  hint={PASSWORD_RULE_TEXT}
+                  error={errors.password?.message}
+                  {...register("password")}
                 />
                 <Input
-                  name="confirmPassword"
                   label="Confirm Password"
                   type="password"
                   showToggle
-                  value={formData.confirmPassword}
-                  onChange={handleChange}
+                  error={errors.confirmPassword?.message}
+                  {...register("confirmPassword")}
                 />
               </section>
               <section className="form-section">
                 <Select
                   label="Specialization"
-                  name="specialization"
                   options={specializationOptions}
-                  value={formData.specialization}
-                  onChange={handleChange}
+                  error={errors.specialization?.message}
+                  {...register("specialization")}
                 />
                 <Input
-                  name="clinicName"
                   label="Veterinary Clinic Name"
-                  value={formData.clinicName}
-                  onChange={handleChange}
+                  error={errors.clinicName?.message}
+                  {...register("clinicName")}
                 />
                 <Input
-                  name="clinicAddress"
                   label="Clinic Address"
-                  value={formData.clinicAddress}
-                  onChange={handleChange}
+                  error={errors.clinicAddress?.message}
+                  {...register("clinicAddress")}
                 />
               </section>
               <div className="auth-actions flex-end">
@@ -287,7 +196,6 @@ export default function RegisterDoctorPage() {
                   size="md"
                   onClick={handleNext}
                   type="button"
-                  disabled={!canProceedStep1}
                 />
               </div>
             </div>
@@ -300,30 +208,37 @@ export default function RegisterDoctorPage() {
                   Please select the prices for the services you offer.
                 </p>
                 <div className="services-list">
-                  {services.map((service) => (
-                    <div key={service.name} className="service-price-item">
-                      <label htmlFor={service.name}>{service.name}</label>
+                  {fields.map((field, index) => (
+                    <div key={field.id} className="service-price-item">
+                      <label htmlFor={`service-${field.id}`}>
+                        {field.name}
+                      </label>
                       <Input
-                        id={service.name}
-                        name={service.name}
+                        id={`service-${field.id}`}
                         type="number"
                         placeholder="0.00"
                         step="0.01"
                         min="0.01"
-                        value={service.price}
-                        onChange={(e) =>
-                          handleServicePriceChange(e, service.name)
-                        }
+                        error={errors.services?.[index]?.price?.message}
+                        {...register(`services.${index}.price`, {
+                          valueAsNumber: true,
+                        })}
                       />
                     </div>
                   ))}
                 </div>
+                {errors.services?.message && (
+                  <p className="global-error">{errors.services.message}</p>
+                )}
               </section>
               <div className="auth-actions">
                 <Button
                   text="Back"
                   color="secondary"
-                  onClick={handleBack}
+                  onClick={() => {
+                    setServerError(undefined);
+                    setStep(1);
+                  }}
                   size="md"
                   type="button"
                 />
@@ -332,7 +247,7 @@ export default function RegisterDoctorPage() {
                   color="primary"
                   type="submit"
                   size="md"
-                  disabled={isSubmitting || !canSubmitStep2}
+                  disabled={isSubmitting}
                 />
               </div>
             </div>

@@ -1,4 +1,4 @@
-import { useId, type FC, type SelectHTMLAttributes } from "react";
+import { forwardRef, useId, type SelectHTMLAttributes } from "react";
 import "./styles.css";
 
 export interface SelectOption {
@@ -12,55 +12,67 @@ interface SelectProps extends SelectHTMLAttributes<HTMLSelectElement> {
   className?: string;
   title?: string;
   hideDefaultPlaceholder?: boolean;
+  error?: string;
 }
 
-export const Select: FC<SelectProps> = ({
-  title,
-  label,
-  options,
-  value,
-  name,
-  onChange,
-  required = false,
-  disabled = false,
-  className = "",
-  hideDefaultPlaceholder = false,
-  ...props
-}) => {
-  const generatedId = useId();
-  const selectId = props.id || name || generatedId;
+export const Select = forwardRef<HTMLSelectElement, SelectProps>(
+  (
+    {
+      title,
+      label,
+      options,
+      required = false,
+      disabled = false,
+      className = "",
+      hideDefaultPlaceholder = false,
+      error,
+      ...props
+    },
+    ref
+  ) => {
+    const generatedId = useId();
+    const selectId = props.id || props.name || generatedId;
+    const errorId = error ? `${selectId}-error` : undefined;
 
-  return (
-  <div className="select-container">
-    {title && (
-      <label htmlFor={selectId} className="select-label">
-        {title}
-      </label>
-    )}
-    <div className="select-wrapper">
-      <select
-        id={selectId}
-        name={name}
-        value={value}
-        onChange={onChange}
-        required={required}
-        disabled={disabled}
-        className={`select-input ${className}`}
-        {...props}
-      >
-        {!hideDefaultPlaceholder && (
-          <option value="" disabled>
-            Select {label.toLowerCase()}...
-          </option>
+    return (
+      <div className="select-container">
+        {title && (
+          <label htmlFor={selectId} className="select-label">
+            {title}
+          </label>
         )}
-        {options.map((option) => (
-          <option key={option.value} value={option.value}>
-            {option.label}
-          </option>
-        ))}
-      </select>
-      <span className="select-arrow" aria-hidden="true" />
-    </div>
-  </div>
+        <div className="select-wrapper">
+          <select
+            ref={ref}
+            id={selectId}
+            required={required}
+            disabled={disabled}
+            aria-invalid={!!error || undefined}
+            aria-describedby={errorId}
+            className={`select-input ${className}`}
+            {...props}
+          >
+            {!hideDefaultPlaceholder && (
+              <option value="" disabled>
+                Select {label.toLowerCase()}...
+              </option>
+            )}
+            {options.map((option) => (
+              <option key={option.value} value={option.value}>
+                {option.label}
+              </option>
+            ))}
+          </select>
+          <span className="select-arrow" aria-hidden="true" />
+        </div>
+        {error && (
+          <div id={errorId} className="input-error-text">
+            {error}
+          </div>
+        )}
+      </div>
+    );
+  }
 );
-};
+
+Select.displayName = "Select";
