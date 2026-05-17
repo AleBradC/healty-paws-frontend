@@ -170,6 +170,15 @@ export default function DoctorDashboardPage() {
     (spec) => !existingSpecNames?.includes(spec?.name)
   );
   const appointments = doctor?.appointments ?? [];
+  const completedPatientIds = new Set(
+    appointments
+      .filter((app) => app.status === "Completed")
+      .map((app) => app.patient?.id)
+      .filter((id): id is string => Boolean(id))
+  );
+  const patientsWithCompletedConsultation = (doctor?.patients ?? []).filter(
+    (patient) => completedPatientIds.has(patient.id)
+  );
   const doctorAvatarStorageKey = user?.id
     ? `avatar-doctor-${user.id}`
     : undefined;
@@ -703,21 +712,25 @@ export default function DoctorDashboardPage() {
           {activeTab === "patients" && (
             <DashboardSection title="My Patients" className="patients-list-section">
               <div className="patient-list">
-                {doctor?.patients?.map((patient: { id: string; name: string; owner?: { name: string } | null }) => (
-                  <div
-                    key={patient.id}
-                    className="patient-card"
-                    onClick={() => handlePatientClick(patient.id)}
-                  >
-                    <div className="patient-info">
-                      <span className="patient-name">
-                        {patient.owner?.name}
-                      </span>
-                      <span className="pet-info"> (Pet: {patient.name})</span>
+                {patientsWithCompletedConsultation.length > 0 ? (
+                  patientsWithCompletedConsultation.map((patient: { id: string; name: string; owner?: { name: string } | null }) => (
+                    <div
+                      key={patient.id}
+                      className="patient-card"
+                      onClick={() => handlePatientClick(patient.id)}
+                    >
+                      <div className="patient-info">
+                        <span className="patient-name">
+                          {patient.owner?.name}
+                        </span>
+                        <span className="pet-info"> (Pet: {patient.name})</span>
+                      </div>
+                      <Button text="View Details" color="secondary" size="sm" />
                     </div>
-                    <Button text="View Details" color="secondary" size="sm" />
-                  </div>
-                ))}
+                  ))
+                ) : (
+                  <p>You don't have any patients yet. Patients will appear here after their consultation is completed.</p>
+                )}
               </div>
             </DashboardSection>
           )}
