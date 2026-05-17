@@ -6,6 +6,9 @@ import {
   type ReactNode,
 } from "react";
 import { API_BASE_URL, sessionEndpoint, logoutEndpoint } from "../api/endpoint";
+import type { ApiResponse } from "../types";
+
+type SessionResponse = { id: string; email: string; role: string };
 
 interface User {
   id: string;
@@ -51,12 +54,12 @@ export const AuthenticationProvider = ({
         if (cancelled) return;
 
         if (res.ok) {
-          const data = await res.json();
-          if (!cancelled && data?.data) {
+          const body = (await res.json()) as ApiResponse<SessionResponse>;
+          if (!cancelled && body.data) {
             setUser({
-              id: data.data.id,
-              username: data.data.email ?? "",
-              role: data.data.role,
+              id: body.data.id,
+              username: body.data.email ?? "",
+              role: body.data.role,
             });
             setIsLoggedIn(true);
           }

@@ -11,7 +11,10 @@ import {
   authRegisterPath,
   homePath,
 } from "../../../utils/path";
+import type { ApiResponse } from "../../../types";
 import "../styles.css";
+
+type LoginResponse = { id: string; role: string };
 
 export default function LoginPage() {
   const navigate = useNavigate();
@@ -58,7 +61,7 @@ export default function LoginPage() {
     setIsSubmitting(true);
 
     try {
-      const { data } = await axios.post(
+      const { data: body } = await axios.post<ApiResponse<LoginResponse>>(
         `${API_BASE_URL}${loginEndpoint}`,
         { email, password },
         { withCredentials: true }
@@ -66,13 +69,17 @@ export default function LoginPage() {
 
       // Token is now an httpOnly cookie set by the server — never touches JS.
       // Use role and id returned in the response body to update auth state.
-      login(data.data.id, data.data.role);
+      const session = body.data;
+      if (!session) {
+        setError("Login failed. Please try again.");
+        return;
+      }
 
-      const userRole = data.data.role;
+      login(session.id, session.role);
 
-      if (userRole === "owner") {
+      if (session.role === "owner") {
         navigate("/dashboard/owner");
-      } else if (userRole === "doctor") {
+      } else if (session.role === "doctor") {
         navigate("/dashboard/doctor");
       } else {
         navigate(homePath);
