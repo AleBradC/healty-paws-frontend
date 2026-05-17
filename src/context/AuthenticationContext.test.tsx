@@ -46,10 +46,14 @@ describe('AuthenticationContext', () => {
     vi.unstubAllGlobals();
   });
 
-  it('starts with isLoggedIn=false and user=null when /session returns 401', async () => {
-    // 1st call: /session → 401, 2nd call (eviction): /logout → 200
-    queueResponse({ ok: false, status: 401 });
-    queueResponse({ ok: true, status: 200 });
+  it('starts with isLoggedIn=false and user=null when /session returns data:null', async () => {
+    // /session is a state-inquiry endpoint: always 200, data is null when
+    // there is no valid session.
+    queueResponse({
+      ok: true,
+      status: 200,
+      json: async () => ({ status: 'success', data: null }),
+    });
 
     render(
       <AuthenticationProvider>
@@ -63,8 +67,11 @@ describe('AuthenticationContext', () => {
   });
 
   it('isLoading becomes false after initialization', async () => {
-    queueResponse({ ok: false, status: 401 });
-    queueResponse({ ok: true, status: 200 });
+    queueResponse({
+      ok: true,
+      status: 200,
+      json: async () => ({ status: 'success', data: null }),
+    });
 
     render(
       <AuthenticationProvider>
@@ -98,8 +105,11 @@ describe('AuthenticationContext', () => {
   });
 
   it('login() sets isLoggedIn=true and stores the user in context', async () => {
-    queueResponse({ ok: false, status: 401 });
-    queueResponse({ ok: true, status: 200 });
+    queueResponse({
+      ok: true,
+      status: 200,
+      json: async () => ({ status: 'success', data: null }),
+    });
 
     render(
       <AuthenticationProvider>

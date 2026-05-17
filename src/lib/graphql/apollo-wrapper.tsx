@@ -27,6 +27,12 @@ const handleUnauthenticated = () => {
     credentials: "include",
   }).catch(() => {});
 
+  // Evict cached PII from the in-memory store so the next user (or the same
+  // user re-authenticating) cannot see the previous session's data via a
+  // cache-only read. Errors are ignored — the full-page navigation below
+  // discards everything anyway, this is belt-and-braces for the race window.
+  apolloClient.clearStore().catch(() => {});
+
   window.location.href = authLoginPath;
 };
 
