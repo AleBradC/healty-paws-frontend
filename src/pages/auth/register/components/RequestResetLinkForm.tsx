@@ -1,8 +1,14 @@
-import { useCallback, useState, type ChangeEvent, type FormEvent } from "react";
+import { useState } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { Input } from "../../../../components/ui/Input/Input";
 import { Button } from "../../../../components/ui/Button/Button";
 import { AuthInfoScreen } from "./AuthInfoScreen";
 import { useRequestPasswordReset } from "./useResetPasswordApi";
+import {
+  requestResetSchema,
+  type RequestResetFormValues,
+} from "../../../../lib/validation/auth";
 
 export interface RequestResetLinkFormProps {
   onBackToLogin: () => void;
@@ -11,30 +17,24 @@ export interface RequestResetLinkFormProps {
 export function RequestResetLinkForm({
   onBackToLogin,
 }: RequestResetLinkFormProps) {
-  const [email, setEmail] = useState("");
   const [submittedEmail, setSubmittedEmail] = useState<string | null>(null);
   const { submit, isLoading, error, clearError } = useRequestPasswordReset();
 
-  const canSubmit = email.trim().length > 0 && !isLoading;
+  const {
+    register,
+    handleSubmit,
+    formState: { errors, isValid },
+  } = useForm<RequestResetFormValues>({
+    resolver: zodResolver(requestResetSchema),
+    mode: "onChange",
+    defaultValues: { email: "" },
+  });
 
-  const handleEmailChange = useCallback(
-    (e: ChangeEvent<HTMLInputElement>) => {
-      setEmail(e.target.value);
-      clearError();
-    },
-    [clearError]
-  );
-
-  const handleSubmit = useCallback(
-    async (e: FormEvent<HTMLFormElement>) => {
-      e.preventDefault();
-      const trimmed = email.trim();
-      if (!trimmed) return;
-      const result = await submit(trimmed);
-      if (result.ok) setSubmittedEmail(trimmed);
-    },
-    [email, submit]
-  );
+  const onSubmit = handleSubmit(async ({ email }) => {
+    const trimmed = email.trim();
+    const result = await submit(trimmed);
+    if (result.ok) setSubmittedEmail(trimmed);
+  });
 
   if (submittedEmail) {
     return (
@@ -61,15 +61,16 @@ export function RequestResetLinkForm({
         password.
       </p>
       {error && <p className="global-error">{error}</p>}
-      <form className="auth-form" onSubmit={handleSubmit} noValidate>
+      <form className="auth-form" onSubmit={onSubmit} noValidate>
         <Input
           label="Email Address"
           type="email"
-          name="email"
           autoComplete="email"
           placeholder="Enter your email address"
-          value={email}
-          onChange={handleEmailChange}
+          error={errors.email?.message}
+          {...register("email", {
+            onChange: () => error && clearError(),
+          })}
         />
         <div className="auth-actions centered">
           <Button
@@ -77,7 +78,7 @@ export function RequestResetLinkForm({
             color="primary"
             size="lg"
             type="submit"
-            disabled={!canSubmit}
+            disabled={!isValid || isLoading}
           />
         </div>
         <div className="auth-links">

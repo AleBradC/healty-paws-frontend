@@ -1,6 +1,8 @@
-import { useState, type FormEvent } from "react";
+import { useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { API_BASE_URL, loginEndpoint } from "../../../api/endpoint";
 import { Input } from "../../../components/ui/Input/Input";
 import { PublicRoute } from "../../../router/PublicRoute/PublicRoute";
@@ -12,6 +14,10 @@ import {
   homePath,
 } from "../../../utils/path";
 import type { ApiResponse } from "../../../types";
+import {
+  loginSchema,
+  type LoginFormValues,
+} from "../../../lib/validation/auth";
 import "../styles.css";
 
 type LoginResponse = { id: string; role: string };
@@ -19,47 +25,29 @@ type LoginResponse = { id: string; role: string };
 export default function LoginPage() {
   const navigate = useNavigate();
   const { login } = useAuthentication();
-  const [email, setEmail] = useState<string>("");
-  const [password, setPassword] = useState<string>("");
-  const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
+  const [serverError, setServerError] = useState<string | undefined>();
 
-  const [error, setError] = useState<string | undefined>();
-  const canSubmitLogin =
-    email.trim().length > 0 &&
-    /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) &&
-    password.length >= 6;
+  const {
+    register,
+    handleSubmit,
+    watch,
+    formState: { errors, isSubmitting },
+  } = useForm<LoginFormValues>({
+    resolver: zodResolver(loginSchema),
+    mode: "onChange",
+    defaultValues: { email: "", password: "" },
+  });
 
-  const validateForm = (): string | null => {
-    if (!email.trim() && !password) {
-      return "Please fill in all required fields.";
-    }
-    if (!email.trim()) {
-      return "Email is required.";
-    }
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-      return "Please enter a valid email address.";
-    }
-    if (!password) {
-      return "Password is required.";
-    }
-    if (password.length < 6) {
-      return "Password must be at least 6 characters.";
-    }
-    return null;
-  };
+  // Gate the submit button on emptiness so it matches the old UX (disabled
+  // until the user has typed something in both fields). Zod handles message
+  // generation once they start interacting.
+  const values = watch();
+  const hasValues = Boolean(values.email && values.password);
+  const hasErrors = Boolean(errors.email || errors.password);
+  const canSubmit = hasValues && !hasErrors && !isSubmitting;
 
-  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    setError(undefined);
-
-    const validationError = validateForm();
-    if (validationError) {
-      setError(validationError);
-      return;
-    }
-
-    setIsSubmitting(true);
-
+  const onSubmit = handleSubmit(async ({ email, password }) => {
+    setServerError(undefined);
     try {
       const { data: body } = await axios.post<ApiResponse<LoginResponse>>(
         `${API_BASE_URL}${loginEndpoint}`,
@@ -67,11 +55,9 @@ export default function LoginPage() {
         { withCredentials: true }
       );
 
-      // Token is now an httpOnly cookie set by the server — never touches JS.
-      // Use role and id returned in the response body to update auth state.
       const session = body.data;
       if (!session) {
-        setError("Login failed. Please try again.");
+        setServerError("Login failed. Please try again.");
         return;
       }
 
@@ -84,56 +70,46 @@ export default function LoginPage() {
       } else {
         navigate(homePath);
       }
-    } catch (err: any) {
+    } catch (err) {
       if (axios.isAxiosError(err) && err.response) {
-        setError(
+        setServerError(
           err.response.data.message ||
             "Login failed. Please check your credentials."
         );
       } else {
-        setError("An unexpected error occurred. Please try again.");
+        setServerError("An unexpected error occurred. Please try again.");
       }
-    } finally {
-      setIsSubmitting(false);
     }
-  };
-
-  const handleRedirect = (path: string) => {
-    navigate(path);
-  };
+  });
 
   return (
     <PublicRoute>
       <div className="auth-page">
         <div className="auth-card">
           <h1 className="auth-title">Login</h1>
-          {error && <p className="global-error">{error}</p>}
+          {serverError && <p className="global-error">{serverError}</p>}
 
-          <form className="auth-form" onSubmit={handleSubmit}>
+          <form className="auth-form" onSubmit={onSubmit} noValidate>
             <Input
               label="Email"
               type="email"
-              name="email"
               placeholder="Email"
               autoComplete="email"
-              value={email}
-              onChange={(e) => {
-                setEmail(e.target.value);
-                if (error) setError(undefined);
-              }}
+              error={errors.email?.message}
+              {...register("email", {
+                onChange: () => serverError && setServerError(undefined),
+              })}
             />
             <Input
               label="Password"
               type="password"
-              name="password"
               placeholder="Password"
               autoComplete="current-password"
               showToggle
-              value={password}
-              onChange={(e) => {
-                setPassword(e.target.value);
-                if (error) setError(undefined);
-              }}
+              error={errors.password?.message}
+              {...register("password", {
+                onChange: () => serverError && setServerError(undefined),
+              })}
             />
 
             <div className="auth-actions">
@@ -142,12 +118,12 @@ export default function LoginPage() {
                 color="accent"
                 size="lg"
                 type="submit"
-                disabled={isSubmitting || !canSubmitLogin}
+                disabled={!canSubmit}
               />
             </div>
             <div className="auth-links">
               <Button
-                onClick={() => handleRedirect(authResetPasswordPath)}
+                onClick={() => navigate(authResetPasswordPath)}
                 text="Forgot password?"
                 className="auth-inline-link"
                 type="button"
@@ -155,7 +131,7 @@ export default function LoginPage() {
               <div>
                 <p className="auth-note">Don't have an account?</p>
                 <Button
-                  onClick={() => handleRedirect(authRegisterPath)}
+                  onClick={() => navigate(authRegisterPath)}
                   text="Register"
                   className="auth-inline-link"
                   type="button"

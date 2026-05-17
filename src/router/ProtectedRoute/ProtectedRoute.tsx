@@ -1,10 +1,16 @@
 import { type FC, type ReactNode, useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { Outlet, useNavigate } from "react-router-dom";
 import { useAuthentication } from "../../context/AuthenticationContext";
 import { homePath } from "../../utils/path";
 
 interface ProtectedRouteProps {
-  children: ReactNode;
+  // When used as a layout route in React Router (i.e. <Route element={...}>),
+  // children is undefined and the component renders <Outlet/>. When used as
+  // a per-page wrapper (the original pattern), the explicit children are
+  // rendered. Both modes coexist so route-level guards in App.tsx can act as
+  // the source of truth while individual pages keep their defensive wrapper
+  // as a second line of defense.
+  children?: ReactNode;
   allowedRoles?: string[];
 }
 
@@ -51,5 +57,5 @@ export const ProtectedRoute: FC<ProtectedRouteProps> = ({
     return null;
   }
 
-  return <>{children}</>;
+  return <>{children ?? <Outlet />}</>;
 };

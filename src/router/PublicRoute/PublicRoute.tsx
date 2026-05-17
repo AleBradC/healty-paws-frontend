@@ -1,10 +1,12 @@
 import { type FC, type ReactNode, useEffect, useState } from "react";
 import { useAuthentication } from "../../context/AuthenticationContext";
-import { useNavigate } from "react-router-dom";
+import { Outlet, useNavigate } from "react-router-dom";
 import { homePath } from "../../utils/path";
 
 interface PublicRouteProps {
-  children: ReactNode;
+  // Optional so the component works both as a per-page wrapper and as a
+  // route-level layout via <Route element={<PublicRoute />}>.
+  children?: ReactNode;
 }
 
 export const PublicRoute: FC<PublicRouteProps> = ({ children }) => {
@@ -26,5 +28,5 @@ export const PublicRoute: FC<PublicRouteProps> = ({ children }) => {
     return null;
   }
 
-  return <>{children}</>;
+  return <>{children ?? <Outlet />}</>;
 };

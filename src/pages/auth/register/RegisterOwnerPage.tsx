@@ -1,163 +1,102 @@
-import { useState, type FormEvent, type ChangeEvent } from "react";
+import { useState } from "react";
 import axios from "axios";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { API_BASE_URL, registerOwnerEndpoint } from "../../../api/endpoint";
 import { Input } from "../../../components/ui/Input/Input";
-import type { RegisterOwnerPayload } from "../../../types";
-import { successPagePath, homePath } from "../../../utils/path";
 import { Button } from "../../../components/ui/Button/Button";
-import { Link } from "react-router-dom";
+import { successPagePath, homePath } from "../../../utils/path";
+import {
+  registerOwnerFormSchema,
+  type RegisterOwnerFormValues,
+} from "../../../lib/validation/registration";
+import { PASSWORD_RULE_TEXT } from "../../../lib/validation/auth";
 import "../styles.css";
+
+// Field groups for per-step validation. Using `Path<...>` would be more
+// strict but the literal tuples are clearer at the call site and the
+// schema is small.
+const STEP_1_FIELDS = [
+  "name",
+  "email",
+  "password",
+  "confirmPassword",
+] as const;
+
+const STEP_2_FIELDS = [
+  "pet.name",
+  "pet.type",
+  "pet.breed",
+  "pet.age",
+  "pet.weight",
+] as const;
 
 export default function RegisterOwnerPage() {
   const navigate = useNavigate();
-  const [step, setStep] = useState<number>(1);
-  const [ownerData, setOwnerData] = useState<RegisterOwnerPayload["owner"]>({
-    name: "",
-    email: "",
-    password: "",
-    confirmPassword: "",
-  });
-  const [petData, setPetData] = useState<RegisterOwnerPayload["pet"]>({
-    name: "",
-    type: "",
-    breed: "",
-    age: 0,
-    weight: 0,
-  });
-  const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
-  const [error, setError] = useState<string | null>(null);
-  const canProceedStep1 =
-    ownerData.name.trim().length > 0 &&
-    ownerData.email.trim().length > 0 &&
-    /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(ownerData.email) &&
-    ownerData.password.length >= 8 &&
-    ownerData.confirmPassword.length > 0 &&
-    ownerData.password === ownerData.confirmPassword;
-  const canSubmitStep2 =
-    petData.name.trim().length > 0 &&
-    petData.type.trim().length > 0 &&
-    petData.breed.trim().length > 0 &&
-    Number(petData.age) > 0 &&
-    Number(petData.weight) > 0;
+  const [step, setStep] = useState<1 | 2>(1);
+  const [serverError, setServerError] = useState<string | null>(null);
 
-  const handleOwnerChange = (e: ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setOwnerData((prev) => ({ ...prev, [name]: value }));
-    if (error) setError(null);
-  };
-
-  const handlePetChange = (e: ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setPetData((prev) => ({ ...prev, [name]: value }));
-    if (error) setError(null);
-  };
-
-  const validateStep1 = (): string | null => {
-    const allEmpty =
-      !ownerData.name &&
-      !ownerData.email &&
-      !ownerData.password &&
-      !ownerData.confirmPassword;
-    if (allEmpty) return "Please fill in all required fields.";
-
-    if (!ownerData.name.trim()) return "Your name is required.";
-    if (!ownerData.email.trim()) return "Your email is required.";
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(ownerData.email))
-      return "Please enter a valid email address.";
-    if (!ownerData.password) return "Password is required.";
-    if (ownerData.password.length < 8)
-      return "Password must be at least 8 characters.";
-    if (!ownerData.confirmPassword) return "Please confirm your password.";
-    if (ownerData.password !== ownerData.confirmPassword)
-      return "Passwords do not match.";
-    return null;
-  };
-
-  const validateStep2 = (): string | null => {
-    const allEmpty =
-      !petData.name &&
-      !petData.type &&
-      !petData.breed &&
-      !petData.age &&
-      !petData.weight;
-    if (allEmpty) return "Please fill in all required pet details.";
-
-    if (!petData.name.trim()) return "Pet's name is required.";
-    if (!petData.type.trim()) return "Pet type is required.";
-    if (!petData.breed.trim()) return "Pet's breed is required.";
-    if (!petData.age || petData.age <= 0)
-      return "Pet's age must be greater than 0.";
-    if (!petData.weight || petData.weight <= 0)
-      return "Pet's weight must be greater than 0.";
-    return null;
-  };
-
-  const handleNext = () => {
-    setError(null);
-    const validationError = validateStep1();
-    if (validationError) {
-      setError(validationError);
-      return;
-    }
-    setStep(2);
-  };
-
-  const handleBack = () => {
-    setError(null);
-    setStep(1);
-  };
-
-  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    if (step !== 2) return;
-
-    setError(null);
-    const validationError = validateStep2();
-    if (validationError) {
-      setError(validationError);
-      return;
-    }
-
-    setIsSubmitting(true);
-
-    const payload = {
-      owner: {
-        name: ownerData.name,
-        email: ownerData.email,
-        password: ownerData.password,
-        confirmPassword: ownerData.confirmPassword,
-      },
+  const {
+    register,
+    handleSubmit,
+    trigger,
+    formState: { errors, isSubmitting },
+  } = useForm<RegisterOwnerFormValues>({
+    resolver: zodResolver(registerOwnerFormSchema),
+    mode: "onChange",
+    defaultValues: {
+      name: "",
+      email: "",
+      password: "",
+      confirmPassword: "",
       pet: {
-        name: petData.name,
-        type: petData.type,
-        breed: petData.breed,
-        age: Number(petData.age),
-        weight: Number(petData.weight),
+        name: "",
+        type: "",
+        breed: "",
+        // RHF + `valueAsNumber: true` turn an empty text input into NaN at
+        // submit time; the schema's refine catches that and surfaces a
+        // "required" message instead of a misleading type error.
+        age: NaN,
+        weight: NaN,
       },
-    };
+    },
+  });
 
+  const handleNext = async () => {
+    setServerError(null);
+    const valid = await trigger(STEP_1_FIELDS, { shouldFocus: true });
+    if (valid) setStep(2);
+  };
+
+  const onSubmit = handleSubmit(async (values) => {
+    setServerError(null);
     try {
       const response = await axios.post(
         `${API_BASE_URL}${registerOwnerEndpoint}`,
-        payload
+        {
+          owner: {
+            name: values.name,
+            email: values.email,
+            password: values.password,
+            confirmPassword: values.confirmPassword,
+          },
+          pet: values.pet,
+        }
       );
-
       if (response.status === 201) {
         navigate(successPagePath);
       } else {
-        throw new Error("An unexpected response was received from the server.");
+        throw new Error("Unexpected response.");
       }
-    } catch (err: any) {
+    } catch (err) {
       if (axios.isAxiosError(err) && err.response) {
-        setError(err.response.data.message || "Registration failed.");
+        setServerError(err.response.data.message || "Registration failed.");
       } else {
-        setError("An unexpected error occurred. Please try again.");
+        setServerError("An unexpected error occurred. Please try again.");
       }
-    } finally {
-      setIsSubmitting(false);
     }
-  };
+  });
 
   return (
     <div className="auth-page">
@@ -166,39 +105,36 @@ export default function RegisterOwnerPage() {
           ×
         </Link>
         <h1 className="auth-title">Registration</h1>
-        {error && <p className="global-error">{error}</p>}
-        <form className="auth-form" onSubmit={handleSubmit}>
+        {serverError && <p className="global-error">{serverError}</p>}
+        <form className="auth-form" onSubmit={onSubmit} noValidate>
           {step === 1 && (
             <div className="form-step">
               <h2 className="auth-subtitle">Your Details</h2>
               <Input
-                name="name"
                 label="Your Name"
-                value={ownerData.name}
-                onChange={handleOwnerChange}
+                error={errors.name?.message}
+                {...register("name")}
               />
               <Input
-                name="email"
                 label="Your Email"
                 type="email"
-                value={ownerData.email}
-                onChange={handleOwnerChange}
+                error={errors.email?.message}
+                {...register("email")}
               />
               <Input
-                name="password"
                 label="Password"
                 type="password"
+                hint={PASSWORD_RULE_TEXT}
                 showToggle
-                value={ownerData.password}
-                onChange={handleOwnerChange}
+                error={errors.password?.message}
+                {...register("password")}
               />
               <Input
-                name="confirmPassword"
                 label="Confirm Password"
                 type="password"
                 showToggle
-                value={ownerData.confirmPassword}
-                onChange={handleOwnerChange}
+                error={errors.confirmPassword?.message}
+                {...register("confirmPassword")}
               />
               <div className="auth-actions align-end">
                 <Button
@@ -207,7 +143,6 @@ export default function RegisterOwnerPage() {
                   size="md"
                   onClick={handleNext}
                   type="button"
-                  disabled={!canProceedStep1}
                 />
               </div>
             </div>
@@ -216,46 +151,44 @@ export default function RegisterOwnerPage() {
             <div className="form-step">
               <h2 className="auth-subtitle">Your Pet's Details</h2>
               <Input
-                name="name"
                 label="Pet's Name"
-                value={petData.name}
-                onChange={handlePetChange}
+                error={errors.pet?.name?.message}
+                {...register("pet.name")}
               />
               <Input
-                name="type"
                 label="Pet Type (e.g., Dog, Cat)"
-                value={petData.type}
-                onChange={handlePetChange}
+                error={errors.pet?.type?.message}
+                {...register("pet.type")}
               />
               <Input
-                name="breed"
                 label="Pet's Breed"
-                value={petData.breed}
-                onChange={handlePetChange}
+                error={errors.pet?.breed?.message}
+                {...register("pet.breed")}
               />
               <Input
-                name="age"
                 label="Pet's Age (years)"
                 type="number"
                 min="1"
-                value={petData.age}
-                onChange={handlePetChange}
+                error={errors.pet?.age?.message}
+                {...register("pet.age", { valueAsNumber: true })}
               />
               <Input
-                name="weight"
                 label="Pet's Weight (kg)"
                 type="number"
                 step="0.1"
                 min="0.1"
-                value={petData.weight}
-                onChange={handlePetChange}
+                error={errors.pet?.weight?.message}
+                {...register("pet.weight", { valueAsNumber: true })}
               />
               <div className="auth-actions">
                 <Button
                   text="Back"
                   color="secondary"
                   size="md"
-                  onClick={handleBack}
+                  onClick={() => {
+                    setServerError(null);
+                    setStep(1);
+                  }}
                   type="button"
                 />
                 <Button
@@ -263,7 +196,7 @@ export default function RegisterOwnerPage() {
                   color="accent"
                   type="submit"
                   size="md"
-                  disabled={isSubmitting || !canSubmitStep2}
+                  disabled={isSubmitting}
                 />
               </div>
             </div>

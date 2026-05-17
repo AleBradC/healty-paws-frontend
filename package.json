@@ -6,6 +6,7 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
+    "analyze": "ANALYZE=1 vite build && echo 'Open dist/bundle-report.html'",
     "generate": "graphql-codegen",
     "lint": "eslint .",
     "preview": "vite preview",
@@ -15,13 +16,16 @@
   },
   "dependencies": {
     "@apollo/client": "^4.0.9",
+    "@hookform/resolvers": "5.2.2",
     "axios": "^1.13.2",
     "date-fns": "^4.1.0",
     "graphql": "^16.12.0",
     "react": "^19.2.0",
     "react-day-picker": "^9.11.3",
     "react-dom": "^19.2.0",
-    "react-router-dom": "^7.9.6"
+    "react-hook-form": "7.76.0",
+    "react-router-dom": "^7.9.6",
+    "zod": "4.4.3"
   },
   "devDependencies": {
     "@eslint/js": "^9.39.1",
@@ -43,6 +47,7 @@
     "eslint-plugin-react-refresh": "^0.4.24",
     "globals": "^16.5.0",
     "jsdom": "^27.0.1",
+    "rollup-plugin-visualizer": "7.0.1",
     "typescript": "~5.9.3",
     "typescript-eslint": "^8.46.4",
     "vite": "^7.2.4",

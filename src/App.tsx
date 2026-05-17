@@ -5,6 +5,8 @@ import { Header } from "./components/features/Header/Header";
 import { AuthenticationProvider } from "./context/AuthenticationContext";
 import { Loading } from "./components/ui/Loading/Loading";
 import { Footer } from "./components/features/Footer/Footer";
+import { ProtectedRoute } from "./router/ProtectedRoute/ProtectedRoute";
+import { PublicRoute } from "./router/PublicRoute/PublicRoute";
 
 const HomePage = lazy(() => import("./pages/home/HomePage"));
 const DoctorsPage = lazy(() => import("./pages/doctors/DoctorsPage"));
@@ -63,53 +65,65 @@ function App() {
               }
             >
               <Routes>
-                {/* Public Routes */}
+                {/* Public — anyone can land here, logged in or not. */}
                 <Route path="/" element={<HomePage />} />
-                <Route path="/doctors" element={<DoctorsPage />} />
 
-                {/* Auth Routes */}
-                <Route path="/auth/login" element={<LoginPage />} />
-                <Route path="/auth/register" element={<RegisterRolePage />} />
-                <Route
-                  path="/auth/register/doctor"
-                  element={<RegisterDoctorPage />}
-                />
-                <Route
-                  path="/auth/register/owner"
-                  element={<RegisterOwnerPage />}
-                />
-                <Route
-                  path="/auth/register/success"
-                  element={<RegistrationSuccessPage />}
-                />
-                <Route
-                  path="/auth/reset-password"
-                  element={<ResetPasswordPage />}
-                />
+                {/* Public-only — redirect to home if already logged in.
+                    Grouped under a parent layout route so a new auth page
+                    automatically inherits the guard. */}
+                <Route element={<PublicRoute />}>
+                  <Route path="/auth/login" element={<LoginPage />} />
+                  <Route path="/auth/register" element={<RegisterRolePage />} />
+                  <Route
+                    path="/auth/register/doctor"
+                    element={<RegisterDoctorPage />}
+                  />
+                  <Route
+                    path="/auth/register/owner"
+                    element={<RegisterOwnerPage />}
+                  />
+                  <Route
+                    path="/auth/register/success"
+                    element={<RegistrationSuccessPage />}
+                  />
+                  <Route
+                    path="/auth/reset-password"
+                    element={<ResetPasswordPage />}
+                  />
+                </Route>
 
-                {/* Protected Dashboard Routes */}
-                <Route
-                  path="/dashboard/doctor"
-                  element={<DoctorDashboardPage />}
-                />
-                <Route
-                  path="/dashboard/owner"
-                  element={<OwnerDashboardPage />}
-                />
+                {/* Any authenticated user — both owners and doctors. */}
+                <Route element={<ProtectedRoute />}>
+                  <Route
+                    path="/appointment-summary/:appointmentId"
+                    element={<AppointmentSummaryPage />}
+                  />
+                </Route>
 
-                {/* Detailed Views */}
-                <Route
-                  path="/appointment-summary/:appointmentId"
-                  element={<AppointmentSummaryPage />}
-                />
-                <Route
-                  path="/appointment-details/:appointmentId"
-                  element={<AppointmentDetailsPage />}
-                />
-                <Route
-                  path="/patient-summary/:petId"
-                  element={<PatientSummaryPage />}
-                />
+                {/* Owner-only. */}
+                <Route element={<ProtectedRoute allowedRoles={["owner"]} />}>
+                  <Route path="/doctors" element={<DoctorsPage />} />
+                  <Route
+                    path="/dashboard/owner"
+                    element={<OwnerDashboardPage />}
+                  />
+                </Route>
+
+                {/* Doctor-only. */}
+                <Route element={<ProtectedRoute allowedRoles={["doctor"]} />}>
+                  <Route
+                    path="/dashboard/doctor"
+                    element={<DoctorDashboardPage />}
+                  />
+                  <Route
+                    path="/appointment-details/:appointmentId"
+                    element={<AppointmentDetailsPage />}
+                  />
+                  <Route
+                    path="/patient-summary/:petId"
+                    element={<PatientSummaryPage />}
+                  />
+                </Route>
 
                 <Route
                   path="*"

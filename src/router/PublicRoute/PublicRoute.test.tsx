@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, act } from '@testing-library/react';
-import { MemoryRouter } from 'react-router-dom';
+import { MemoryRouter, Route, Routes } from 'react-router-dom';
 import { PublicRoute } from './PublicRoute';
 
 vi.mock('../../context/AuthenticationContext', () => ({
@@ -45,5 +45,20 @@ describe('PublicRoute', () => {
     renderPublic();
     await act(async () => {});
     expect(mockNavigate).toHaveBeenCalledWith('/');
+  });
+
+  it('renders the outlet child when used as a layout route and user is logged out', async () => {
+    (useAuthentication as any).mockReturnValue({ isLoggedIn: false });
+    render(
+      <MemoryRouter initialEntries={['/auth/login']}>
+        <Routes>
+          <Route element={<PublicRoute />}>
+            <Route path="/auth/login" element={<p>Public Content</p>} />
+          </Route>
+        </Routes>
+      </MemoryRouter>
+    );
+    await act(async () => {});
+    expect(screen.getByText('Public Content')).toBeInTheDocument();
   });
 });
