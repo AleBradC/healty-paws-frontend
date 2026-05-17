@@ -5,7 +5,10 @@ import {
   useEffect,
   type ReactNode,
 } from "react";
-import { jwtDecode } from "jwt-decode";
+import { API_BASE_URL, sessionEndpoint, logoutEndpoint } from "../api/endpoint";
+import type { ApiResponse } from "../types";
+
+type SessionResponse = { id: string; email: string; role: string };
 
 interface User {
   id: string;
@@ -17,7 +20,7 @@ interface AuthenticationContextType {
   isLoggedIn: boolean;
   user: User | null;
   isLoading: boolean;
-  login: (token: string) => void;
+  login: (id: string, role: string) => void;
   logout: () => void;
 }
 
@@ -34,37 +37,65 @@ export const AuthenticationProvider = ({
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
+  // On mount, restore session by calling /session. The httpOnly cookie is sent
+  // automatically. Since the JWT is httpOnly we can't decode exp client-side —
+  // the server is the source of truth. A 401 means the token is expired or
+  // invalid, in which case we proactively evict the stale cookie so subsequent
+  // requests don't keep carrying it.
   useEffect(() => {
-    try {
-      const token = localStorage.getItem("accessToken");
-      if (token) {
-        const decodedUser: User = jwtDecode(token);
-        setUser(decodedUser);
-        setIsLoggedIn(true);
+    let cancelled = false;
+
+    (async () => {
+      try {
+        const res = await fetch(`${API_BASE_URL}${sessionEndpoint}`, {
+          credentials: "include",
+        });
+
+        if (cancelled) return;
+
+        if (res.ok) {
+          const body = (await res.json()) as ApiResponse<SessionResponse>;
+          if (!cancelled && body.data) {
+            setUser({
+              id: body.data.id,
+              username: body.data.email ?? "",
+              role: body.data.role,
+            });
+            setIsLoggedIn(true);
+          }
+        } else if (res.status === 401) {
+          // Token expired or invalid — clear the stale cookie server-side.
+          fetch(`${API_BASE_URL}${logoutEndpoint}`, {
+            method: "POST",
+            credentials: "include",
+          }).catch(() => {});
+        }
+        // Other status codes (5xx, etc.) — stay silent, user is treated as
+        // logged-out and can retry.
+      } catch {
+        // Network failure — stay silent, treat as logged-out.
+      } finally {
+        if (!cancelled) setIsLoading(false);
       }
-    } catch (error) {
-      console.error("Invalid token:", error);
-      localStorage.removeItem("accessToken");
-      setUser(null);
-      setIsLoggedIn(false);
-    } finally {
-      setIsLoading(false);
-    }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
-  const login = (token: string) => {
-    localStorage.setItem("accessToken", token);
-    try {
-      const decodedUser: User = jwtDecode(token);
-      setUser(decodedUser);
-      setIsLoggedIn(true);
-    } catch (error) {
-      console.error("Failed to decode token:", error);
-    }
+  // Called after a successful POST /login — cookie is already set by the server.
+  const login = (id: string, role: string) => {
+    setUser({ id, username: "", role });
+    setIsLoggedIn(true);
   };
 
+  // Clears the httpOnly cookie server-side, then resets local state.
   const logout = () => {
-    localStorage.removeItem("accessToken");
+    fetch(`${API_BASE_URL}${logoutEndpoint}`, {
+      method: "POST",
+      credentials: "include",
+    }).catch(() => {});
     setUser(null);
     setIsLoggedIn(false);
   };

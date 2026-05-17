@@ -180,3 +180,13 @@ export interface ActiveTreatmentInput {
   start_date: string;
   end_date: string;
 }
+
+// Mirrors healthy-paws-service/src/types.ts ApiResponse. Keep in sync — these
+// two are the contract between the REST endpoints and the SPA. `unknown`
+// (not `any`) forces unwrapping through the generic so the payload shape is
+// declared at the call site.
+export interface ApiResponse<T = unknown> {
+  status: "success" | "error";
+  message?: string;
+  data?: T;
+}
