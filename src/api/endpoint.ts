@@ -8,4 +8,6 @@ export const registerDoctorEndpoint = "/api/auth/register/doctor";
 export const loginEndpoint = "/api/auth/login";
 export const logoutEndpoint = "/api/auth/logout";
 export const sessionEndpoint = "/api/auth/session";
+export const forgotPasswordEndpoint = "/api/auth/reset-password/request";
+export const resetPasswordEndpoint = "/api/auth/reset-password/reset";
 export const graphqlEndpoint = "/graphql";
