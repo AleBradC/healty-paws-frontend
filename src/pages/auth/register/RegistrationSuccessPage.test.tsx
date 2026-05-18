@@ -21,14 +21,19 @@ function renderPage() {
 describe('RegistrationSuccessPage', () => {
   beforeEach(() => mockNavigate.mockClear());
 
-  it('renders the success heading', () => {
+  // After F-16, registration no longer completes the account creation flow —
+  // it kicks off the verification mail and asks the user to check their inbox.
+  it('renders the check-your-email heading', () => {
     renderPage();
-    expect(screen.getByText(/registration complete/i)).toBeInTheDocument();
+    expect(screen.getByText(/check your email/i)).toBeInTheDocument();
   });
 
-  it('renders the thank-you message', () => {
+  it('explains the verification link expiry', () => {
     renderPage();
-    expect(screen.getByText(/thank you for joining healthy paws/i)).toBeInTheDocument();
+    expect(
+      screen.getByText(/we've sent you a verification link/i)
+    ).toBeInTheDocument();
+    expect(screen.getByText(/expires in 24 hours/i)).toBeInTheDocument();
   });
 
   it('renders the Proceed to Login button', () => {

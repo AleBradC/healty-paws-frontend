@@ -3,8 +3,18 @@ import { ErrorLink } from "@apollo/client/link/error";
 import { RetryLink } from "@apollo/client/link/retry";
 import { createPersistedQueryLink } from "@apollo/client/link/persisted-queries";
 import { CombinedGraphQLErrors, ServerError } from "@apollo/client/errors";
+import * as Sentry from "@sentry/react";
 import { API_BASE_URL, graphqlEndpoint, logoutEndpoint } from "../../api/endpoint";
 import { authLoginPath } from "../../utils/path";
+
+// User-facing error codes that the UI explicitly handles. Don't ship these
+// to Sentry — they're product behaviour, not bugs.
+const EXPECTED_GRAPHQL_CODES = new Set([
+  "UNAUTHENTICATED",
+  "FORBIDDEN",
+  "BAD_USER_INPUT",
+  "EMAIL_NOT_VERIFIED",
+]);
 
 // SHA-256 implementation used by the persisted-queries link. The browser's
 // native SubtleCrypto avoids pulling in a JS hashing dependency.
@@ -81,7 +91,7 @@ const handleUnauthenticated = () => {
 //  1. GraphQL resolvers throwing UNAUTHENTICATED — wrapped in CombinedGraphQLErrors,
 //     HTTP status is 200.
 //  2. REST cookie-auth failures — wrapped in ServerError with statusCode 401.
-const errorLink = new ErrorLink(({ error }) => {
+const errorLink = new ErrorLink(({ error, operation }) => {
   if (
     CombinedGraphQLErrors.is(error) &&
     error.errors.some((e) => e.extensions?.code === "UNAUTHENTICATED")
@@ -92,7 +102,33 @@ const errorLink = new ErrorLink(({ error }) => {
 
   if (ServerError.is(error) && error.statusCode === 401) {
     handleUnauthenticated();
+    return;
   }
+
+  // Forward unclassified errors to Sentry with operation context so we can
+  // see *which* query/mutation failed without leaking variables (may contain
+  // PII or auth credentials).
+  if (CombinedGraphQLErrors.is(error)) {
+    for (const e of error.errors) {
+      const code = e.extensions?.code as string | undefined;
+      if (code && EXPECTED_GRAPHQL_CODES.has(code)) continue;
+      Sentry.captureException(e, {
+        tags: {
+          source: "apollo",
+          operation: operation.operationName ?? "anonymous",
+          code: code ?? "UNKNOWN",
+        },
+      });
+    }
+    return;
+  }
+
+  Sentry.captureException(error, {
+    tags: {
+      source: "apollo-network",
+      operation: operation.operationName ?? "anonymous",
+    },
+  });
 });
 
 const cache = new InMemoryCache({

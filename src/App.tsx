@@ -27,6 +27,9 @@ const RegistrationSuccessPage = lazy(
 const ResetPasswordPage = lazy(
   () => import("./pages/auth/register/ResetPasswordPage")
 );
+const VerifyEmailPage = lazy(
+  () => import("./pages/auth/verify-email/VerifyEmailPage")
+);
 // Dashboard Pages
 const DoctorDashboardPage = lazy(
   () => import("./pages/dashboard/doctor/DoctorDashboardPage")
@@ -67,6 +70,13 @@ function App() {
               <Routes>
                 {/* Public — anyone can land here, logged in or not. */}
                 <Route path="/" element={<HomePage />} />
+
+                {/* Verify-email is intentionally NOT under PublicRoute.
+                    A logged-in user clicking the link from a second account
+                    (e.g. a family member's signup) still needs to land here
+                    and consume the token; redirecting them to "/" would
+                    silently break verification. */}
+                <Route path="/auth/verify-email" element={<VerifyEmailPage />} />
 
                 {/* Public-only — redirect to home if already logged in.
                     Grouped under a parent layout route so a new auth page
