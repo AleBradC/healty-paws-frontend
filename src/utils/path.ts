@@ -21,4 +21,3 @@ export const appointmentDetailsPath = "/appointment-details";
 export const appointmentSummaryPath = "/appointment-summary";
 export const dashboardPatientPath = "/dashboard/owner";
 export const dashboardDoctorPath = "/dashboard/doctor";
-export const successPagePath = "/auth/register/success";

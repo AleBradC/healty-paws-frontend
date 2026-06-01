@@ -6,7 +6,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { API_BASE_URL, registerDoctorEndpoint } from "../../../api/endpoint";
 import { Input } from "../../../components/ui/Input/Input";
 import { specializationsData } from "../../../data/specialization";
-import { successPagePath, homePath } from "../../../utils/path";
+import { authLoginPath, homePath } from "../../../utils/path";
 import { Select } from "../../../components/ui/Select/Select";
 import { Button } from "../../../components/ui/Button/Button";
 import {
@@ -116,7 +116,7 @@ export default function RegisterDoctorPage() {
         payload
       );
       if (response.status === 201) {
-        navigate(successPagePath);
+        navigate(authLoginPath);
       } else {
         throw new Error("Unexpected response.");
       }

@@ -6,7 +6,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { API_BASE_URL, registerOwnerEndpoint } from "../../../api/endpoint";
 import { Input } from "../../../components/ui/Input/Input";
 import { Button } from "../../../components/ui/Button/Button";
-import { successPagePath, homePath } from "../../../utils/path";
+import { authLoginPath, homePath } from "../../../utils/path";
 import {
   registerOwnerFormSchema,
   type RegisterOwnerFormValues,
@@ -85,7 +85,7 @@ export default function RegisterOwnerPage() {
         }
       );
       if (response.status === 201) {
-        navigate(successPagePath);
+        navigate(authLoginPath);
       } else {
         throw new Error("Unexpected response.");
       }

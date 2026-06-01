@@ -21,9 +21,7 @@ const RegisterDoctorPage = lazy(
 const RegisterOwnerPage = lazy(
   () => import("./pages/auth/register/RegisterOwnerPage")
 );
-const RegistrationSuccessPage = lazy(
-  () => import("./pages/auth/register/RegistrationSuccessPage")
-);
+
 const ResetPasswordPage = lazy(
   () => import("./pages/auth/register/ResetPasswordPage")
 );
@@ -92,10 +90,7 @@ function App() {
                     path="/auth/register/owner"
                     element={<RegisterOwnerPage />}
                   />
-                  <Route
-                    path="/auth/register/success"
-                    element={<RegistrationSuccessPage />}
-                  />
+
                   <Route
                     path="/auth/reset-password"
                     element={<ResetPasswordPage />}
