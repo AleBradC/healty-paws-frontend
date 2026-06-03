@@ -7,7 +7,6 @@ export const authRegisterPath = "/auth/register";
 export const authRegisterDoctorPath = "/auth/register/doctor";
 export const authRegisterPatientPath = "/auth/register/owner";
 export const authResetPasswordPath = "/auth/reset-password";
-export const authVerifyEmailPath = "/auth/verify-email";
 
 // Static & Informational Pages
 export const aboutPath = "/about";

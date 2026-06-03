@@ -10,6 +10,5 @@ export const logoutEndpoint = "/api/auth/logout";
 export const sessionEndpoint = "/api/auth/session";
 export const forgotPasswordEndpoint = "/api/auth/reset-password/request";
 export const resetPasswordEndpoint = "/api/auth/reset-password/reset";
-export const verifyEmailEndpoint = "/api/auth/verify-email";
 export const resendVerificationEndpoint = "/api/auth/resend-verification";
 export const graphqlEndpoint = "/graphql";

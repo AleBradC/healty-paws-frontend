@@ -13,38 +13,35 @@ const DoctorsPage = lazy(() => import("./pages/doctors/DoctorsPage"));
 // Auth Pages
 const LoginPage = lazy(() => import("./pages/auth/login/LoginPage"));
 const RegisterRolePage = lazy(
-  () => import("./pages/auth/register/RegisterRolePage")
+  () => import("./pages/auth/register/RegisterRolePage"),
 );
 const RegisterDoctorPage = lazy(
-  () => import("./pages/auth/register/RegisterDoctorPage")
+  () => import("./pages/auth/register/RegisterDoctorPage"),
 );
 const RegisterOwnerPage = lazy(
-  () => import("./pages/auth/register/RegisterOwnerPage")
+  () => import("./pages/auth/register/RegisterOwnerPage"),
 );
 
 const ResetPasswordPage = lazy(
-  () => import("./pages/auth/register/ResetPasswordPage")
-);
-const VerifyEmailPage = lazy(
-  () => import("./pages/auth/verify-email/VerifyEmailPage")
+  () => import("./pages/auth/register/ResetPasswordPage"),
 );
 // Dashboard Pages
 const DoctorDashboardPage = lazy(
-  () => import("./pages/dashboard/doctor/DoctorDashboardPage")
+  () => import("./pages/dashboard/doctor/DoctorDashboardPage"),
 );
 const OwnerDashboardPage = lazy(
-  () => import("./pages/dashboard/owner/OwnerDashboardPage")
+  () => import("./pages/dashboard/owner/OwnerDashboardPage"),
 );
 
 // Appointment & Patient Pages
 const AppointmentDetailsPage = lazy(
-  () => import("./pages/appointment-details/AppointmentDetailsPage")
+  () => import("./pages/appointment-details/AppointmentDetailsPage"),
 );
 const AppointmentSummaryPage = lazy(
-  () => import("./pages/appointment-summary/AppointmentSummaryPage")
+  () => import("./pages/appointment-summary/AppointmentSummaryPage"),
 );
 const PatientSummaryPage = lazy(
-  () => import("./pages/patient-summary/PatientSummaryPage")
+  () => import("./pages/patient-summary/PatientSummaryPage"),
 );
 
 function App() {
@@ -66,19 +63,7 @@ function App() {
               }
             >
               <Routes>
-                {/* Public — anyone can land here, logged in or not. */}
                 <Route path="/" element={<HomePage />} />
-
-                {/* Verify-email is intentionally NOT under PublicRoute.
-                    A logged-in user clicking the link from a second account
-                    (e.g. a family member's signup) still needs to land here
-                    and consume the token; redirecting them to "/" would
-                    silently break verification. */}
-                <Route path="/auth/verify-email" element={<VerifyEmailPage />} />
-
-                {/* Public-only — redirect to home if already logged in.
-                    Grouped under a parent layout route so a new auth page
-                    automatically inherits the guard. */}
                 <Route element={<PublicRoute />}>
                   <Route path="/auth/login" element={<LoginPage />} />
                   <Route path="/auth/register" element={<RegisterRolePage />} />
