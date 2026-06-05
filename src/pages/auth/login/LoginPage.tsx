@@ -6,7 +6,6 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import {
   API_BASE_URL,
   loginEndpoint,
-  resendVerificationEndpoint,
 } from "../../../api/endpoint";
 import { Input } from "../../../components/ui/Input/Input";
 import { PublicRoute } from "../../../router/PublicRoute/PublicRoute";
@@ -30,16 +29,6 @@ export default function LoginPage() {
   const navigate = useNavigate();
   const { login } = useAuthentication();
   const [serverError, setServerError] = useState<string | undefined>();
-  // When the backend returns 403 EMAIL_NOT_VERIFIED, we surface a CTA that
-  // re-sends the verification link to the email the user just typed. We store
-  // the email here (rather than just reading from the form values) so the
-  // CTA still works after the user has cleared/modified the field.
-  const [needsVerification, setNeedsVerification] = useState<{
-    email: string;
-  } | null>(null);
-  const [resendInfo, setResendInfo] = useState<string | undefined>();
-  const [resending, setResending] = useState(false);
-
   const {
     register,
     handleSubmit,
@@ -50,31 +39,6 @@ export default function LoginPage() {
     mode: "onChange",
     defaultValues: { email: "", password: "" },
   });
-
-  const handleResendVerification = async () => {
-    if (!needsVerification || resending) return;
-    setResending(true);
-    setResendInfo(undefined);
-    try {
-      const { data } = await axios.post(
-        `${API_BASE_URL}${resendVerificationEndpoint}`,
-        { email: needsVerification.email }
-      );
-      setResendInfo(
-        data?.message ??
-          "If this email is registered and unverified, a new link has been sent."
-      );
-    } catch (err) {
-      if (axios.isAxiosError(err) && err.response?.data?.message) {
-        setResendInfo(err.response.data.message);
-      } else {
-        setResendInfo("Could not send a new link. Please try again later.");
-      }
-    } finally {
-      setResending(false);
-    }
-  };
-
   // Gate the submit button on emptiness so it matches the old UX (disabled
   // until the user has typed something in both fields). Zod handles message
   // generation once they start interacting.
@@ -85,8 +49,6 @@ export default function LoginPage() {
 
   const onSubmit = handleSubmit(async ({ email, password }) => {
     setServerError(undefined);
-    setNeedsVerification(null);
-    setResendInfo(undefined);
     try {
       const { data: body } = await axios.post<ApiResponse<LoginResponse>>(
         `${API_BASE_URL}${loginEndpoint}`,
@@ -111,21 +73,10 @@ export default function LoginPage() {
       }
     } catch (err) {
       if (axios.isAxiosError(err) && err.response) {
-        // 403 is the dedicated unverified-email status. Switch the UI from
-        // "wrong creds" to a resend prompt so the user has a one-click
-        // recovery path. The email is captured from the form values.
-        if (err.response.status === 403) {
-          setNeedsVerification({ email });
-          setServerError(
-            err.response.data.message ??
-              "Please verify your email address before signing in."
-          );
-        } else {
-          setServerError(
-            err.response.data.message ||
-              "Login failed. Please check your credentials."
-          );
-        }
+        setServerError(
+          err.response.data.message ||
+            "Login failed. Please check your credentials."
+        );
       } else {
         setServerError("An unexpected error occurred. Please try again.");
       }
@@ -138,23 +89,6 @@ export default function LoginPage() {
         <div className="auth-card">
           <h1 className="auth-title">Login</h1>
           {serverError && <p className="global-error">{serverError}</p>}
-          {needsVerification && (
-            <div className="auth-form" style={{ marginBottom: "1rem" }}>
-              <Button
-                text={resending ? "Sending…" : "Resend verification email"}
-                color="accent"
-                size="md"
-                type="button"
-                onClick={handleResendVerification}
-                disabled={resending}
-              />
-              {resendInfo && (
-                <p className="auth-note" style={{ marginTop: "0.5rem" }}>
-                  {resendInfo}
-                </p>
-              )}
-            </div>
-          )}
 
           <form className="auth-form" onSubmit={onSubmit} noValidate>
             <Input

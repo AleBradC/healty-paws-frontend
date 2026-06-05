@@ -514,41 +514,45 @@ export default function OwnerDashboardPage() {
                 />
               </div>
               <div className="appointments-list">
-                {appointments.length > 0 ? (
-                  appointments.map((app) => {
-                    const appointmentStatus = app.status ?? "Upcoming";
-                    const isPending = appointmentStatus === "Pending";
-                    const isConfirmed = appointmentStatus === "Confirmed";
-                    const isUpcoming = appointmentStatus === "Upcoming";
-                    const canCancel = isPending || isConfirmed || isUpcoming;
+                {(() => {
+                  const visibleAppointments = appointments.filter(
+                    (app) => getAppointmentDisplayStatus(app.status, app.datetime) !== "Start"
+                  );
+                  if (visibleAppointments.length > 0) {
+                    return visibleAppointments.map((app) => {
+                      const appointmentStatus = app.status ?? "Upcoming";
+                      const isPending = appointmentStatus === "Pending";
+                      const isConfirmed = appointmentStatus === "Confirmed";
+                      const isUpcoming = appointmentStatus === "Upcoming";
+                      const canCancel = isPending || isConfirmed || isUpcoming;
 
-                    return (
-                      <AppointmentCard
-                        key={app.id}
-                        id={app.id}
-                        status={appointmentStatus}
-                        doctorName={`Dr. ${app.doctor.name}`}
-                        petName={app.patient.name}
-                        date={new Date(app.datetime).toLocaleDateString()}
-                        time={new Date(app.datetime).toLocaleTimeString([], {
-                          hour: "2-digit",
-                          minute: "2-digit",
-                        })}
-                        datetime={app.datetime}
-                        onClick={() =>
-                          handleAppointmentClick(app.id, app.status, app.datetime)
-                        }
-                        onDelete={
-                          canCancel
-                            ? () => handleDeleteAppointment(app.id)
-                            : undefined
-                        }
-                      />
-                    );
-                  })
-                ) : (
-                  <p>You have no upcoming appointments.</p>
-                )}
+                      return (
+                        <AppointmentCard
+                          key={app.id}
+                          id={app.id}
+                          status={appointmentStatus}
+                          doctorName={`Dr. ${app.doctor.name}`}
+                          petName={app.patient.name}
+                          date={new Date(app.datetime).toLocaleDateString()}
+                          time={new Date(app.datetime).toLocaleTimeString([], {
+                            hour: "2-digit",
+                            minute: "2-digit",
+                          })}
+                          datetime={app.datetime}
+                          onClick={() =>
+                            handleAppointmentClick(app.id, app.status, app.datetime)
+                          }
+                          onDelete={
+                            canCancel
+                              ? () => handleDeleteAppointment(app.id)
+                              : undefined
+                          }
+                        />
+                      );
+                    });
+                  }
+                  return <p>You have no upcoming appointments.</p>;
+                })()}
               </div>
             </DashboardSection>
           )}

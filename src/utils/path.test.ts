@@ -17,5 +17,4 @@ describe('path constants', () => {
   it('appointmentSummaryPath', () => expect(paths.appointmentSummaryPath).toBe('/appointment-summary'));
   it('dashboardPatientPath', () => expect(paths.dashboardPatientPath).toBe('/dashboard/owner'));
   it('dashboardDoctorPath', () => expect(paths.dashboardDoctorPath).toBe('/dashboard/doctor'));
-  it('successPagePath', () => expect(paths.successPagePath).toBe('/auth/register/success'));
 });

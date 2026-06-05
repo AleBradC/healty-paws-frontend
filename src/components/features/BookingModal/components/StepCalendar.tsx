@@ -17,7 +17,7 @@ export const StepCalendar: FC<StepCalendarProps> = ({
 }) => {
   const bookedSlots = new Set(
     (doctor.appointments ?? [])
-      .filter((appointment) => !["Cancel", "Declined"].includes(appointment.status || ""))
+      .filter((appointment) => !["Cancelled", "Denied"].includes(appointment.status || ""))
       .map((appointment) => {
         const dateObj = new Date(appointment.datetime);
         const date = format(dateObj, "yyyy-MM-dd");

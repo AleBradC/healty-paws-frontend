@@ -440,12 +440,12 @@ export default function DoctorDashboardPage() {
       case "Completed":
         navigate(`${appointmentSummaryPath}/${appointmentId}`);
         return;
-      case "Begin":
+      case "Start":
         navigate(`${appointmentDetailsPath}/${appointmentId}`);
         return;
       case "Confirmed":
       case "Upcoming":
-      case "Cancel":
+      case "Cancelled":
       default:
         return;
     }
@@ -655,9 +655,9 @@ export default function DoctorDashboardPage() {
                       const appointmentStatus: string = app.status ?? "Upcoming";
                       const isPending = appointmentStatus === "Pending";
                       const isCompleted = appointmentStatus === "Completed";
-                      const isCancel = appointmentStatus === "Cancel";
-                      const isDeclined = appointmentStatus === "Declined";
-                      const isDisabled = isCancel || isDeclined;
+                      const isCancelled = appointmentStatus === "Cancelled";
+                      const isDenied = appointmentStatus === "Denied";
+                      const isDisabled = isCancelled || isDenied;
 
                       return (
                         <AppointmentCard
@@ -695,7 +695,7 @@ export default function DoctorDashboardPage() {
                           }
                           onDeny={
                             isPending
-                              ? () => handleUpdateStatus(app.id, "Declined")
+                              ? () => handleUpdateStatus(app.id, "Denied")
                               : undefined
                           }
                         />

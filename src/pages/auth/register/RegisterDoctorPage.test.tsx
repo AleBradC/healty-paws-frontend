@@ -129,7 +129,7 @@ describe('RegisterDoctorPage', () => {
     await act(async () => {});
 
     expect(post).toHaveBeenCalledTimes(1);
-    expect(mockNavigate).toHaveBeenCalledWith('/auth/register/success');
+    expect(mockNavigate).toHaveBeenCalledWith('/auth/login');
   });
 
   it('surfaces a server error message', async () => {
