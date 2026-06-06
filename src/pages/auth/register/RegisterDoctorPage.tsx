@@ -41,7 +41,7 @@ export default function RegisterDoctorPage() {
     register,
     handleSubmit,
     trigger,
-    formState: { errors, isSubmitting },
+    formState: { errors, isSubmitting, touchedFields, isSubmitted },
   } = useForm<RegisterDoctorFormValues>({
     resolver: zodResolver(registerDoctorFormSchema),
     mode: "onChange",
@@ -59,6 +59,7 @@ export default function RegisterDoctorPage() {
 
   const { fields, replace } = useFieldArray({ control, name: "services" });
   const specialization = useWatch({ control, name: "specialization" });
+  const servicesWatch = useWatch({ control, name: "services" });
 
   // Replace the services array whenever specialization changes. This keeps
   // the visible service prompts in sync with the selected specialty and
@@ -219,7 +220,13 @@ export default function RegisterDoctorPage() {
                         placeholder="0.00"
                         step="0.01"
                         min="0.01"
-                        error={errors.services?.[index]?.price?.message}
+                        error={
+                          touchedFields.services?.[index]?.price ||
+                          isSubmitted ||
+                          (servicesWatch && !Number.isNaN(servicesWatch[index]?.price))
+                            ? errors.services?.[index]?.price?.message
+                            : undefined
+                        }
                         {...register(`services.${index}.price`, {
                           valueAsNumber: true,
                         })}

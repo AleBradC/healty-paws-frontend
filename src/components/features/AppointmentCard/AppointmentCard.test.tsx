@@ -71,7 +71,7 @@ describe('AppointmentCard', () => {
     expect(onClick).not.toHaveBeenCalled();
   });
 
-  it('renders Accept/Deny buttons when in Pending status with handlers', () => {
+  it('renders Accept/Deny buttons when in Pending status with handlers and hides the status text', () => {
     render(
       <AppointmentCard 
         {...defaultProps} 
@@ -82,6 +82,13 @@ describe('AppointmentCard', () => {
     );
     expect(screen.getByRole('button', { name: /accept/i })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /decline/i })).toBeInTheDocument();
+    expect(screen.queryByText('Pending')).not.toBeInTheDocument();
+  });
+
+  it('shows the Pending status text when no action handlers are provided (owner view)', () => {
+    render(<AppointmentCard {...defaultProps} status="Pending" />);
+    expect(screen.getByText('Pending')).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: /accept/i })).not.toBeInTheDocument();
   });
 
   it('calls onAccept and onDeny when buttons are clicked', async () => {

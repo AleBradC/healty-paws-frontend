@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen, act } from '@testing-library/react';
+import { render, screen, act, fireEvent } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { MemoryRouter } from 'react-router-dom';
 import RegisterDoctorPage from './RegisterDoctorPage';
@@ -130,6 +130,29 @@ describe('RegisterDoctorPage', () => {
 
     expect(post).toHaveBeenCalledTimes(1);
     expect(mockNavigate).toHaveBeenCalledWith('/auth/login');
+  });
+
+  it('does not display validation errors on price inputs initially on step 2, but displays them when typing invalid values or clearing', async () => {
+    renderPage();
+    await fillStep1();
+    await userEvent.click(screen.getByRole('button', { name: /next/i }));
+
+    await screen.findByRole('heading', { name: /services & pricing/i });
+    
+    // Initially, there should be no error messages visible
+    expect(screen.queryByText(/Price is required/i)).not.toBeInTheDocument();
+    expect(screen.queryByText(/Price must be greater than 0/i)).not.toBeInTheDocument();
+
+    const priceInputs = screen.getAllByRole('spinbutton') as HTMLInputElement[];
+    
+    // Type an invalid price (0) in the first input
+    await userEvent.type(priceInputs[0], '0');
+    expect(await screen.findByText(/Price must be greater than 0/i)).toBeInTheDocument();
+
+    // Clear the input to trigger required error
+    await userEvent.clear(priceInputs[0]);
+    fireEvent.blur(priceInputs[0]);
+    expect(await screen.findByText(/Price is required/i)).toBeInTheDocument();
   });
 
   it('surfaces a server error message', async () => {

@@ -70,7 +70,10 @@ export const AppointmentCard: FC<AppointmentCardProps> = ({
         <span>{time}</span>
       </div>
       <div className="appointment-status-wrapper">
-        <span className="appointment-status">{displayStatus}</span>
+        {/* Hide the status badge when doctor lifecycle actions are visible */}
+        {!(isPending && (onAccept || onDeny)) && (
+          <span className="appointment-status">{displayStatus}</span>
+        )}
         
         {/* Approve/Deny Buttons for Doctors on Pending status */}
         {isPending && (onAccept || onDeny) && (
