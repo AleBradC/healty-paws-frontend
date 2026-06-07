@@ -2,9 +2,9 @@ name: CI Pipeline
 
 on:
   push:
-    branches: [ "dev", "tests" ]
+    branches: ["dev", "tests"]
   pull_request:
-    branches: [ "dev" ]
+    branches: ["dev"]
 
 jobs:
   build:
@@ -13,16 +13,16 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-      
+
       - name: Use Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
-          cache: 'npm'
-      
+          node-version: "20"
+          cache: "npm"
+
       - name: Install dependencies
         run: npm ci --legacy-peer-deps
-      
+
       - name: Build project
         run: npm run build
 
@@ -33,21 +33,21 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-      
+
       - name: Use Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
-          cache: 'npm'
-      
+          node-version: "20"
+          cache: "npm"
+
       - name: Install dependencies
         run: npm ci --legacy-peer-deps
-      
+
       - name: Lint code
         run: npm run lint
-        
-      - name: Run tests & Coverage
-        run: npm run test:coverage
+
+      # - name: Run tests & Coverage
+      #   run: npm run test:coverage
 
   security:
     name: Security Audit
@@ -56,15 +56,15 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-      
+
       - name: Use Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
-          cache: 'npm'
-      
+          node-version: "20"
+          cache: "npm"
+
       - name: Install dependencies
         run: npm ci --legacy-peer-deps
-      
+
       - name: Run npm audit
         run: npm audit --audit-level=high

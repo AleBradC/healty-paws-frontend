@@ -150,14 +150,14 @@ describe('DoctorsPage', () => {
         items: [
           {
             id: 'd1',
-            name: 'Dr. Pop',
+            name: 'Pop',
             clinic_name: 'Clinic A',
             clinic_address: '1 St',
             specializations: [{ name: 'Dermatology' }],
           },
           {
             id: 'd2',
-            name: 'Dr. Ionescu',
+            name: 'Ionescu',
             clinic_name: 'Clinic B',
             clinic_address: '2 St',
             specializations: [{ name: 'Surgery' }],
@@ -201,7 +201,7 @@ describe('DoctorsPage', () => {
         items: [
           {
             id: 'd1',
-            name: 'Dr. Pop',
+            name: 'Pop',
             specializations: [{ name: 'General' }],
           },
         ],

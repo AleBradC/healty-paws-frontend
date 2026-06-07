@@ -32,7 +32,7 @@ export const DoctorCard: FC<DoctorCardProps> = ({
       />
     </div>
     <div className="doctor-details">
-      <h3 className="doctor-name">{name}</h3>
+      <h3 className="doctor-name">Dr. {name}</h3>
       <p className="doctor-specialization">{specializations}</p>
       <div className="doctor-location">
         <p className="doctor-clinic">{clinic}</p>

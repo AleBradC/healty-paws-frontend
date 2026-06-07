@@ -5,7 +5,7 @@ import { DoctorCard } from './DoctorCard';
 
 const defaultProps = {
   id: 'doc-1',
-  name: 'Dr. Elena Pop',
+  name: 'Elena Pop',
   specializations: 'Dermatology',
   clinic: 'PawsClinic',
   address: '123 Main St',
@@ -36,7 +36,7 @@ describe('DoctorCard', () => {
 
   it('renders the doctor image with correct alt text', () => {
     render(<DoctorCard {...defaultProps} />);
-    expect(screen.getByAltText('Photo of Dr. Elena Pop')).toHaveAttribute('src', '/doc.png');
+    expect(screen.getByAltText('Photo of Elena Pop')).toHaveAttribute('src', '/doc.png');
   });
 
   it('calls onSelect with the doctor id when "Choose this Doctor" is clicked', async () => {
