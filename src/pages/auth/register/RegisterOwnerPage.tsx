@@ -41,10 +41,11 @@ export default function RegisterOwnerPage() {
     register,
     handleSubmit,
     trigger,
+    watch,
     formState: { errors, isSubmitting },
   } = useForm<RegisterOwnerFormValues>({
     resolver: zodResolver(registerOwnerFormSchema),
-    mode: "onChange",
+    mode: "all",
     defaultValues: {
       name: "",
       email: "",
@@ -63,10 +64,19 @@ export default function RegisterOwnerPage() {
     },
   });
 
+  const password = watch("password");
+  const confirmPassword = watch("confirmPassword");
+  const isMismatch = Boolean(confirmPassword && password !== confirmPassword);
+
+  const step1Values = watch(STEP_1_FIELDS);
+  const isStep1Complete = step1Values.every(Boolean);
+  const hasStep1Errors = STEP_1_FIELDS.some((field) => !!errors[field]) || isMismatch;
+  const canProceedToStep2 = isStep1Complete && !hasStep1Errors;
+
   const handleNext = async () => {
     setServerError(null);
     const valid = await trigger(STEP_1_FIELDS, { shouldFocus: true });
-    if (valid) setStep(2);
+    if (valid && !isMismatch) setStep(2);
   };
 
   const onSubmit = handleSubmit(async (values) => {
@@ -133,7 +143,7 @@ export default function RegisterOwnerPage() {
                 label="Confirm Password"
                 type="password"
                 showToggle
-                error={errors.confirmPassword?.message}
+                error={isMismatch ? "Passwords do not match." : errors.confirmPassword?.message}
                 {...register("confirmPassword")}
               />
               <div className="auth-actions align-end">
@@ -143,6 +153,7 @@ export default function RegisterOwnerPage() {
                   size="md"
                   onClick={handleNext}
                   type="button"
+                  disabled={!canProceedToStep2}
                 />
               </div>
             </div>
@@ -196,7 +207,7 @@ export default function RegisterOwnerPage() {
                   color="accent"
                   type="submit"
                   size="md"
-                  disabled={isSubmitting}
+                  disabled={isSubmitting || Object.keys(errors).length > 0}
                 />
               </div>
             </div>

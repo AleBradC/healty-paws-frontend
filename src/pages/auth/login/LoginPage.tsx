@@ -36,7 +36,7 @@ export default function LoginPage() {
     formState: { errors, isSubmitting },
   } = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
-    mode: "onChange",
+    mode: "all",
     defaultValues: { email: "", password: "" },
   });
   // Gate the submit button on emptiness so it matches the old UX (disabled
