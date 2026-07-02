@@ -21,44 +21,26 @@ This application can be run standalone for development or as part of the [Health
 - **Node.js:** v20 or later (v23.6.0 recommended)
 - **npm:** v10 or later
 
-### Setup Options
+### Setup & Running the Project
 
-#### Option A: Running with Docker (Recommended)
-If you want to run the full stack (Frontend + Backend + DB), use the [Wrapper Repository](https://github.com/AleBradC/healthy-paws-wrapper):
-```bash
-docker-compose up --build
-```
+This project is configured to run exclusively via Docker Compose alongside the backend and database. You should run the full stack using the [Healthy Paws Wrapper](https://github.com/AleBradC/healthy-paws-wrapper) repository.
 
-#### Option B: Standalone Development
-
-1. Navigate to the project directory:
+1. Clone and navigate to the wrapper repository:
    ```bash
-   cd healty-paws-frontend
+   git clone https://github.com/AleBradC/healthy-paws-wrapper.git
+   cd healthy-paws-wrapper
    ```
-2. Install dependencies:
+2. Start the entire stack:
    ```bash
-   npm install --legacy-peer-deps
+   docker-compose up --build
    ```
-   *Note: `--legacy-peer-deps` is required due to specific version requirements for the testing suite.*
 
-### Running the App
+### Accessing the Application
 
-- **Development Mode:**
-  ```bash
-  npm run dev
-  ```
-  The application will be available at `http://localhost:5173`.
-  *Note: When running standalone, it will attempt to connect to the backend at `http://localhost:8080` or via the gateway if configured.*
+Once the Docker stack is running, the Nginx gateway routes traffic automatically on port 80:
 
-- **Build for Production:**
-  ```bash
-  npm run build
-  ```
-
-- **Preview Production Build:**
-  ```bash
-  npm run preview
-  ```
+- **Frontend App:** [http://localhost](http://localhost)
+- **Apollo Server (GraphQL Sandbox):** [http://localhost/graphql](http://localhost/graphql)
 
 ---
 
