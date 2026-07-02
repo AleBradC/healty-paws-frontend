@@ -8,9 +8,7 @@ const config: CodegenConfig = {
     "src/generated/": {
       preset: "client",
       config: {
-        // Use string union types instead of enums to be compatible with erasableSyntaxOnly
         enumsAsTypes: true,
-        // Use type-only imports to satisfy verbatimModuleSyntax
         useTypeImports: true,
         documentMode: "documentNode",
       },

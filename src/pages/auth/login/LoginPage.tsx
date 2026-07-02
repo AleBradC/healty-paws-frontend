@@ -39,9 +39,6 @@ export default function LoginPage() {
     mode: "all",
     defaultValues: { email: "", password: "" },
   });
-  // Gate the submit button on emptiness so it matches the old UX (disabled
-  // until the user has typed something in both fields). Zod handles message
-  // generation once they start interacting.
   const values = watch();
   const hasValues = Boolean(values.email && values.password);
   const hasErrors = Boolean(errors.email || errors.password);

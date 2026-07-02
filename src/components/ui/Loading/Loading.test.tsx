@@ -33,7 +33,6 @@ describe('Loading', () => {
     expect(screen.getByText('Loading...')).toBeInTheDocument();
 
     rerender(<Loading isLoading={false} message="Loading..." minDuration={500} />);
-    // Still visible within minDuration
     expect(screen.getByText('Loading...')).toBeInTheDocument();
 
     act(() => {

@@ -117,7 +117,6 @@ describe('AppointmentDetailsPage', () => {
     });
     renderPage();
     await act(async () => {});
-    // When status=Completed, needsStatusUpdate=false and no data diff → canSaveAll=false
     const saveBtn = screen.getByRole('button', { name: /saved/i });
     expect(saveBtn).toBeDisabled();
   });

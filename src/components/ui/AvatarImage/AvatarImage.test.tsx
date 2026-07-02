@@ -3,7 +3,6 @@ import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { AvatarImage } from './AvatarImage';
 
-// jsdom doesn't implement FileReader.readAsDataURL, so we mock it
 const mockReadAsDataURL = vi.fn();
 vi.stubGlobal('FileReader', class {
   onload: ((e: any) => void) | null = null;
@@ -63,15 +62,12 @@ describe('AvatarImage', () => {
 
   it('does not have role="button" on the img when onClick is not provided', () => {
     render(<AvatarImage alt="A" />);
-    // The img should not have role button
     const img = screen.getByAltText('A');
     expect(img).not.toHaveAttribute('role', 'button');
   });
 
   it('opens the file picker when "Change Photo" is clicked', async () => {
     render(<AvatarImage alt="A" editable />);
-    // The hidden <input type="file"> doesn't expose a friendly query, so
-    // grab it via querySelector and spy on its click().
     const fileInput = document.querySelector(
       'input[type="file"]'
     ) as HTMLInputElement;

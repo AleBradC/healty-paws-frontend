@@ -40,10 +40,6 @@ export const AuthenticationProvider = ({
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  // On mount, ask the server about the current session. The endpoint is
-  // state-inquiry: it always returns 200 with `data` set to the user when
-  // there is a valid session and null otherwise. The server itself evicts
-  // stale cookies, so the client just reads the answer.
   useEffect(() => {
     let cancelled = false;
 
@@ -65,7 +61,6 @@ export const AuthenticationProvider = ({
         });
         setIsLoggedIn(true);
       } catch {
-        // Network failure — stay silent, treat as logged-out.
       } finally {
         if (!cancelled) setIsLoading(false);
       }
@@ -76,15 +71,11 @@ export const AuthenticationProvider = ({
     };
   }, []);
 
-  // Called after a successful POST /login — cookie is already set by the server.
   const login = (id: string, role: string) => {
     setUser({ id, username: "", role });
     setIsLoggedIn(true);
   };
 
-  // Clears the httpOnly cookie server-side, drops Apollo's in-memory cache
-  // so the next user can't read the previous session's data from a cache
-  // hit, then resets React state.
   const logout = () => {
     fetch(`${API_BASE_URL}${logoutEndpoint}`, {
       method: "POST",

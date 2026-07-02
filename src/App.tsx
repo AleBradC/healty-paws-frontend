@@ -10,7 +10,6 @@ import { PublicRoute } from "./router/PublicRoute/PublicRoute";
 
 const HomePage = lazy(() => import("./pages/home/HomePage"));
 const DoctorsPage = lazy(() => import("./pages/doctors/DoctorsPage"));
-// Auth Pages
 const LoginPage = lazy(() => import("./pages/auth/login/LoginPage"));
 const RegisterRolePage = lazy(
   () => import("./pages/auth/register/RegisterRolePage"),
@@ -25,7 +24,6 @@ const RegisterOwnerPage = lazy(
 const ResetPasswordPage = lazy(
   () => import("./pages/auth/register/ResetPasswordPage"),
 );
-// Dashboard Pages
 const DoctorDashboardPage = lazy(
   () => import("./pages/dashboard/doctor/DoctorDashboardPage"),
 );
@@ -33,7 +31,6 @@ const OwnerDashboardPage = lazy(
   () => import("./pages/dashboard/owner/OwnerDashboardPage"),
 );
 
-// Appointment & Patient Pages
 const AppointmentDetailsPage = lazy(
   () => import("./pages/appointment-details/AppointmentDetailsPage"),
 );
@@ -82,7 +79,7 @@ function App() {
                   />
                 </Route>
 
-                {/* Any authenticated user — both owners and doctors. */}
+                {}
                 <Route element={<ProtectedRoute />}>
                   <Route
                     path="/appointment-summary/:appointmentId"
@@ -90,7 +87,7 @@ function App() {
                   />
                 </Route>
 
-                {/* Owner-only. */}
+                {}
                 <Route element={<ProtectedRoute allowedRoles={["owner"]} />}>
                   <Route path="/doctors" element={<DoctorsPage />} />
                   <Route
@@ -99,7 +96,7 @@ function App() {
                   />
                 </Route>
 
-                {/* Doctor-only. */}
+                {}
                 <Route element={<ProtectedRoute allowedRoles={["doctor"]} />}>
                   <Route
                     path="/dashboard/doctor"

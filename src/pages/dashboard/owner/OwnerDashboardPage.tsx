@@ -1,9 +1,4 @@
-import {
-  useState,
-  useEffect,
-  type ChangeEvent,
-  type FormEvent,
-} from "react";
+import { useState, useEffect, type ChangeEvent, type FormEvent } from "react";
 import { useNavigate } from "react-router-dom";
 import { AppointmentCard } from "../../../components/features/AppointmentCard/AppointmentCard";
 import { BookingModal } from "../../../components/features/BookingModal/BookingModal";
@@ -48,8 +43,6 @@ interface Appointment {
 export default function OwnerDashboardPage() {
   const navigate = useNavigate();
   const { user } = useAuthentication();
-
-  // --- STATE: UI & Tabs ---
   const [activeTab, setActiveTab] = useState(() => {
     return localStorage.getItem("owner_dashboard_active_tab") || "owner";
   });
@@ -57,14 +50,12 @@ export default function OwnerDashboardPage() {
   const [isAddPetModalOpen, setIsAddPetModalOpen] = useState(false);
   const [selectedDoctorId, setSelectedDoctorId] = useState<string | null>(null);
 
-  // --- STATE: Data ---
   const [appointments, setAppointments] = useState<Appointment[]>([]);
   const [ownerDetails, setOwnerDetails] = useState({
     name: "",
   });
   const [ownerError, setOwnerError] = useState<string | null>(null);
 
-  // --- STATE: Pet Forms ---
   const [newPetDetails, setNewPetDetails] = useState({
     name: "",
     type: "",
@@ -83,7 +74,6 @@ export default function OwnerDashboardPage() {
   });
   const [editPetError, setEditPetError] = useState<string | null>(null);
 
-  // --- HOOKS: Data Fetching ---
   const {
     owner,
     error: fetchOwnerError,
@@ -98,7 +88,6 @@ export default function OwnerDashboardPage() {
   const { doctor: detailedDoctor, loading: detailedDoctorLoading } =
     useDoctor(selectedDoctorId);
 
-  // --- EFFECTS ---
   useEffect(() => {
     localStorage.setItem("owner_dashboard_active_tab", activeTab);
   }, [activeTab]);
@@ -111,7 +100,7 @@ export default function OwnerDashboardPage() {
 
       if (owner.pets) {
         const allAppointments = owner.pets.flatMap(
-          (pet) => pet.appointments || []
+          (pet) => pet.appointments || [],
         ) as Appointment[];
         setAppointments(allAppointments);
       }
@@ -138,7 +127,6 @@ export default function OwnerDashboardPage() {
     }
   }, [activeTab, owner?.pets]);
 
-  // -- Handlers & Logic --
   const handleOpenBookingModal = () => {
     setSelectedDoctorId(null);
     setIsBookingModalOpen(true);
@@ -161,13 +149,12 @@ export default function OwnerDashboardPage() {
   const handleAppointmentClick = (
     appointmentId: string | number,
     baseStatus: string | null | undefined,
-    datetime: string
+    datetime: string,
   ) => {
     const displayStatus = getAppointmentDisplayStatus(baseStatus, datetime);
     if (displayStatus === "Completed") {
       navigate(`${appointmentSummaryPath}/${appointmentId}`);
     }
-    // Patients cannot access Appointment Details (Begin/Confirmed/etc.)
   };
 
   const handleDeleteAppointment = async (appointmentId: string) => {
@@ -225,7 +212,13 @@ export default function OwnerDashboardPage() {
   const handleAddNewPet = async (e: FormEvent) => {
     e.preventDefault();
     setNewPetError(null);
-    if (!newPetDetails.name.trim() || !newPetDetails.type.trim() || !newPetDetails.breed.trim() || !newPetDetails.age || !newPetDetails.weight) {
+    if (
+      !newPetDetails.name.trim() ||
+      !newPetDetails.type.trim() ||
+      !newPetDetails.breed.trim() ||
+      !newPetDetails.age ||
+      !newPetDetails.weight
+    ) {
       setNewPetError("Please fill in all required fields.");
       return;
     }
@@ -293,7 +286,9 @@ export default function OwnerDashboardPage() {
     id: pet.id,
     name: pet.name,
   })) as unknown as Pet[];
-  const ownerAvatarStorageKey = user?.id ? `avatar-owner-${user.id}` : undefined;
+  const ownerAvatarStorageKey = user?.id
+    ? `avatar-owner-${user.id}`
+    : undefined;
 
   const ownerHasChanges = owner?.name !== ownerDetails.name;
   const isOwnerDetailsValid = ownerDetails.name.trim().length > 0;
@@ -316,7 +311,7 @@ export default function OwnerDashboardPage() {
   const canSavePetDetails = Boolean(petHasChanges && isPetDetailsValid);
 
   const newPetHasChanges = Object.values(newPetDetails).some(
-    (value) => value.trim() !== ""
+    (value) => value.trim() !== "",
   );
   const isNewPetValid =
     newPetDetails.name.trim().length > 0 &&
@@ -336,7 +331,11 @@ export default function OwnerDashboardPage() {
         />
         <div className="dashboard-content">
           {activeTab === "owner" && (
-            <DashboardSection title="My Details" as="form" className="profile-form">
+            <DashboardSection
+              title="My Details"
+              as="form"
+              className="profile-form"
+            >
               {ownerError && <p className="global-error">{ownerError}</p>}
 
               <div className="profile-layout-grid">
@@ -347,7 +346,10 @@ export default function OwnerDashboardPage() {
                     editable
                     storageKey={ownerAvatarStorageKey}
                   />
-                  <p className="profile-info-text">Update your professional profile picture to personalize your dashboard.</p>
+                  <p className="profile-info-text">
+                    Update your professional profile picture to personalize your
+                    dashboard.
+                  </p>
                 </div>
 
                 <div className="profile-main-info">
@@ -391,18 +393,25 @@ export default function OwnerDashboardPage() {
 
           {pets.map((pet) =>
             activeTab === pet.id ? (
-              <DashboardSection key={pet.id} title={`${pet.name}'s Information`} className="profile-form">
+              <DashboardSection
+                key={pet.id}
+                title={`${pet.name}'s Information`}
+                className="profile-form"
+              >
                 {editPetError && <p className="global-error">{editPetError}</p>}
 
                 <div className="profile-layout-grid">
                   <div className="profile-sidebar">
-                  <AvatarImage
-                    alt="Pet Preview"
-                    size={160}
-                    editable
-                    storageKey={`avatar-pet-${pet.id}`}
-                  />
-                    <p className="profile-info-text">Update {pet.name}'s photo and general information to keep their health records up to date.</p>
+                    <AvatarImage
+                      alt="Pet Preview"
+                      size={160}
+                      editable
+                      storageKey={`avatar-pet-${pet.id}`}
+                    />
+                    <p className="profile-info-text">
+                      Update {pet.name}'s photo and general information to keep
+                      their health records up to date.
+                    </p>
                   </div>
 
                   <div className="profile-main-info">
@@ -456,7 +465,10 @@ export default function OwnerDashboardPage() {
                   </div>
                 </div>
 
-                <DashboardSection title="Health Record" className="health-section">
+                <DashboardSection
+                  title="Health Record"
+                  className="health-section"
+                >
                   <div className="health-record-grid">
                     <div className="health-category stable">
                       <div className="category-header">
@@ -471,7 +483,7 @@ export default function OwnerDashboardPage() {
                               treatment={condition.treatment}
                               variant="stable"
                             />
-                          )
+                          ),
                         )
                       ) : (
                         <p className="no-record-note">
@@ -485,14 +497,16 @@ export default function OwnerDashboardPage() {
                         <h4>Active Treatments</h4>
                       </div>
                       {(pet.active_treatments ?? []).length > 0 ? (
-                        (pet.active_treatments ?? []).map((condition, index) => (
-                          <ConditionSummaryCard
-                            key={index}
-                            disease={condition.condition}
-                            treatment={condition.treatment}
-                            variant="active"
-                          />
-                        ))
+                        (pet.active_treatments ?? []).map(
+                          (condition, index) => (
+                            <ConditionSummaryCard
+                              key={index}
+                              disease={condition.condition}
+                              treatment={condition.treatment}
+                              variant="active"
+                            />
+                          ),
+                        )
                       ) : (
                         <p className="no-record-note">No active treatments.</p>
                       )}
@@ -500,11 +514,14 @@ export default function OwnerDashboardPage() {
                   </div>
                 </DashboardSection>
               </DashboardSection>
-            ) : null
+            ) : null,
           )}
 
           {activeTab === "appointments" && (
-            <DashboardSection title="My Appointments" className="appointments-section">
+            <DashboardSection
+              title="My Appointments"
+              className="appointments-section"
+            >
               <div className="appointments-header">
                 <Button
                   text="Book New Appointment"
@@ -516,7 +533,9 @@ export default function OwnerDashboardPage() {
               <div className="appointments-list">
                 {(() => {
                   const visibleAppointments = appointments.filter(
-                    (app) => getAppointmentDisplayStatus(app.status, app.datetime) !== "Start"
+                    (app) =>
+                      getAppointmentDisplayStatus(app.status, app.datetime) !==
+                      "Start",
                   );
                   if (visibleAppointments.length > 0) {
                     return visibleAppointments.map((app) => {
@@ -540,7 +559,11 @@ export default function OwnerDashboardPage() {
                           })}
                           datetime={app.datetime}
                           onClick={() =>
-                            handleAppointmentClick(app.id, app.status, app.datetime)
+                            handleAppointmentClick(
+                              app.id,
+                              app.status,
+                              app.datetime,
+                            )
                           }
                           onDelete={
                             canCancel
@@ -595,7 +618,9 @@ export default function OwnerDashboardPage() {
                   onClick={handleAddNewPet}
                   form="add-pet-form"
                   type="submit"
-                  disabled={!newPetHasChanges || !isNewPetValid || isCreatingPet}
+                  disabled={
+                    !newPetHasChanges || !isNewPetValid || isCreatingPet
+                  }
                 />
               </>
             }

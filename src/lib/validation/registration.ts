@@ -1,8 +1,6 @@
 import { z } from "zod";
 import { strongPasswordSchema } from "./auth";
 
-// Mirrors healthy-paws-service/src/features/registration/registration.validation.ts.
-// See the note at the top of ./auth.ts about long-term consolidation.
 
 const credentialsBlock = {
   name: z.string().trim().min(1, "Name is required."),
@@ -21,9 +19,6 @@ export const ownerCredentialsSchema = z
     message: "Passwords do not match.",
   });
 
-// Number inputs are registered with `valueAsNumber: true` so RHF hands the
-// resolver a real number (NaN when empty). We use a custom error so the
-// "required" message reads naturally instead of "Expected number, received NaN".
 const requiredNumber = (label: string, opts: { integer?: boolean } = {}) =>
   z
     .number({ error: `${label} is required.` })

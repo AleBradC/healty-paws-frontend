@@ -12,11 +12,9 @@ export default function ResetPasswordPage() {
   const token = searchParams.get("token");
 
   const goToLogin = useCallback(() => navigate(authLoginPath), [navigate]);
-  // Restart the flow at the bare /auth/reset-password URL — replace so the
-  // expired ?token=... doesn't sit in history for the user to navigate back to.
   const restartReset = useCallback(
     () => navigate(authResetPasswordPath, { replace: true }),
-    [navigate]
+    [navigate],
   );
 
   return (

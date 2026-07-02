@@ -3,8 +3,6 @@ import { render, screen } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import { Header } from './Header';
 
-// Re-export the raw context so we can provide custom values
-// We mock the context module
 vi.mock('../../../context/AuthenticationContext', async (importOriginal) => {
   const actual = await importOriginal<typeof import('../../../context/AuthenticationContext')>();
   return {
@@ -89,7 +87,6 @@ describe('Header', () => {
       logout: vi.fn(),
     });
     const { container } = renderHeader();
-    // Loading skeleton is a div, not a button or profile picture
     expect(screen.queryByRole('button', { name: /login/i })).not.toBeInTheDocument();
     expect(container.querySelector('div[style]')).toBeInTheDocument();
   });

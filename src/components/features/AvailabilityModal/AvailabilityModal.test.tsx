@@ -3,7 +3,6 @@ import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { AvailabilityModal } from './AvailabilityModal';
 
-// Mock react-day-picker and date-fns as they require DOM APIs unavailable in jsdom
 vi.mock('react-day-picker', () => ({
   DayPicker: ({ onSelect, selected }: any) => (
     <div data-testid="day-picker">

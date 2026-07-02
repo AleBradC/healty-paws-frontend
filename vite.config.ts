@@ -2,11 +2,8 @@ import { defineConfig } from 'vitest/config'
 import react from '@vitejs/plugin-react'
 import { visualizer } from 'rollup-plugin-visualizer'
 
-// Bundle visualizer runs only when ANALYZE=1 is set so it doesn't bloat the
-// default build. Run with `npm run analyze` (see package.json).
 const shouldAnalyze = process.env.ANALYZE === '1'
 
-// https://vite.dev/config/
 export default defineConfig({
   cacheDir: process.env.VITE_CACHE_DIR || 'node_modules/.vite',
   plugins: [
@@ -23,10 +20,6 @@ export default defineConfig({
       : []),
   ],
   build: {
-    // 'hidden' generates source maps but doesn't reference them from the
-    // bundle so they aren't auto-fetched by the browser. Upload them to
-    // Sentry / your error tracker so stack traces stay readable while
-    // shipping nothing extra to end users.
     sourcemap: 'hidden',
   },
   server: {
@@ -47,8 +40,6 @@ export default defineConfig({
     coverage: {
       provider: 'v8',
       reportsDirectory: './coverage',
-      // Auth and routing carry the highest weight because regressions there
-      // become user-visible breakage or security issues.
       thresholds: {
         lines: 60,
         functions: 60,
@@ -73,19 +64,10 @@ export default defineConfig({
         'src/**/*.d.ts',
         'src/test/**',
         'src/generated/**',
-        // Bootstrap/composition root — meaningful coverage requires
-        // integration tests, not unit tests. Route wiring is verified
-        // implicitly via the page-level tests.
         'src/main.tsx',
         'src/App.tsx',
         'src/ApolloProviderWrapper.tsx',
-        // Thin Apollo glue (one-line hooks wrapping useQuery/useMutation
-        // around codegen-produced documents). Treated like the already-
-        // excluded `src/generated/**` — there is no business logic here
-        // to assert beyond what Apollo itself already tests.
         'src/lib/graphql/**',
-        // Static endpoint constants and shared TypeScript types. Type-only
-        // modules report as 0% in v8 because they emit no runtime code.
         'src/api/**',
         'src/types.ts',
         'src/**/types.ts',

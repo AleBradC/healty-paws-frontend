@@ -1,4 +1,4 @@
-// Payload types for registration
+
 export interface DoctorServicePayload {
   name: string;
   price: number;
@@ -45,7 +45,6 @@ export type UnifiedRegisterPayload =
   | RegisterDoctorPayload
   | RegisterOwnerPayload;
 
-// User and domain entities
 export interface Users {
   id: string | undefined;
   email: string;
@@ -85,7 +84,6 @@ export interface ActiveTreatment {
   end_date: string;
 }
 
-// Owner, Pet, Doctor entities with relationships
 export interface Owner {
   id: string | undefined;
   name: string;
@@ -122,7 +120,6 @@ export interface Doctor {
   patients?: Pet[];
 }
 
-// Appointment entity with nested relations
 export interface Appointment {
   id: string;
   datetime: string;
@@ -152,7 +149,6 @@ export interface Appointment {
   };
 }
 
-// Utility types
 export interface Slot {
   date: string;
   time: string;
@@ -181,10 +177,6 @@ export interface ActiveTreatmentInput {
   end_date: string;
 }
 
-// Mirrors healthy-paws-service/src/types.ts ApiResponse. Keep in sync — these
-// two are the contract between the REST endpoints and the SPA. `unknown`
-// (not `any`) forces unwrapping through the generic so the payload shape is
-// declared at the call site.
 export interface ApiResponse<T = unknown> {
   status: "success" | "error";
   message?: string;

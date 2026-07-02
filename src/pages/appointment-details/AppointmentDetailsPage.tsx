@@ -104,7 +104,6 @@ export default function AppointmentDetailsPage() {
     }
   }, [fetchedAppointment]);
 
-  // --- Handlers ---
   const handlePatientDetailChange = (e: ChangeEvent<HTMLInputElement>) => {
     setHasUnsavedChanges(true);
     setPatientDetails((prev) =>
@@ -236,7 +235,6 @@ export default function AppointmentDetailsPage() {
     });
   };
 
-  // --- CHECK FOR CHANGES ---
   const hasChanges = () => {
     if (!initialSnapshot) return false;
 

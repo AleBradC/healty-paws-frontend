@@ -48,14 +48,14 @@ const DoctorsPage = () => {
   useEffect(() => {
     const handler = setTimeout(() => {
       setDebouncedSearch(search);
-      setCurrentPage(1); // Reset to first page on search
+      setCurrentPage(1);
     }, 300);
 
     return () => clearTimeout(handler);
   }, [search]);
 
   const handleSpecializationChange = (
-    e: React.ChangeEvent<HTMLSelectElement>
+    e: React.ChangeEvent<HTMLSelectElement>,
   ) => {
     setSelectedSpecialization(e.target.value);
     setCurrentPage(1);
@@ -66,7 +66,12 @@ const DoctorsPage = () => {
     doctors: doctorsList,
     loading: doctorsLoading,
     error: doctorsError,
-  } = useDoctors(DOCTORS_PER_PAGE, skip, debouncedSearch, selectedSpecialization);
+  } = useDoctors(
+    DOCTORS_PER_PAGE,
+    skip,
+    debouncedSearch,
+    selectedSpecialization,
+  );
 
   const [selectedDoctorId, setSelectedDoctorId] = useState<string | null>(null);
   const { doctor: detailedDoctor, loading: detailedDoctorLoading } =
@@ -84,11 +89,11 @@ const DoctorsPage = () => {
   }
 
   const totalPages = Math.ceil(
-    ((doctorsList as any)?.totalCount || 0) / DOCTORS_PER_PAGE
+    ((doctorsList as any)?.totalCount || 0) / DOCTORS_PER_PAGE,
   );
   const visibleDoctors =
     (doctorsList as any)?.items?.filter(
-      (doctor: any) => (doctor.specializations?.length ?? 0) > 0
+      (doctor: any) => (doctor.specializations?.length ?? 0) > 0,
     ) ?? [];
 
   const handleSelectDoctor = (doctorId: string) => {
@@ -110,7 +115,7 @@ const DoctorsPage = () => {
       <div className="doctors-page-wrapper">
         <h1 className="doctors-page-title">Our Doctors</h1>
 
-         <div className="filters-container">
+        <div className="filters-container">
           <div className="search-wrapper">
             <Input
               name="search"
@@ -156,28 +161,26 @@ const DoctorsPage = () => {
           <div
             className={`doctors-list ${doctorsLoading ? "content-dimmed" : ""}`}
           >
-            {visibleDoctors.length > 0 ? (
-              visibleDoctors.map((doctor: any) => (
-                <DoctorCard
-                  key={doctor.id}
-                  id={doctor.id}
-                  name={doctor.name}
-                  specializations={formatSpecializationsForDisplay(
-                    doctor as DoctorSummary
-                  )}
-                  clinic={doctor.clinic_name ?? ""}
-                  address={doctor.clinic_address ?? ""}
-                  imageUrl={"/profile-placeholder.jpg"}
-                  onSelect={() => handleSelectDoctor(doctor.id)}
-                />
-              ))
-            ) : (
-              !doctorsLoading && (
-                <div className="no-results-message">
-                  <p>No results found.</p>
-                </div>
-              )
-            )}
+            {visibleDoctors.length > 0
+              ? visibleDoctors.map((doctor: any) => (
+                  <DoctorCard
+                    key={doctor.id}
+                    id={doctor.id}
+                    name={doctor.name}
+                    specializations={formatSpecializationsForDisplay(
+                      doctor as DoctorSummary,
+                    )}
+                    clinic={doctor.clinic_name ?? ""}
+                    address={doctor.clinic_address ?? ""}
+                    imageUrl={"/profile-placeholder.jpg"}
+                    onSelect={() => handleSelectDoctor(doctor.id)}
+                  />
+                ))
+              : !doctorsLoading && (
+                  <div className="no-results-message">
+                    <p>No results found.</p>
+                  </div>
+                )}
           </div>
         </div>
 

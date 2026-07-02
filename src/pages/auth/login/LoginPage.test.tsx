@@ -4,7 +4,6 @@ import userEvent from '@testing-library/user-event';
 import { MemoryRouter } from 'react-router-dom';
 import LoginPage from './LoginPage';
 
-// Mock axios
 vi.mock('axios', () => ({
   default: {
     post: vi.fn(),
@@ -12,12 +11,10 @@ vi.mock('axios', () => ({
   },
 }));
 
-// Mock auth context
 vi.mock('../../../context/AuthenticationContext', () => ({
   useAuthentication: vi.fn(),
 }));
 
-// Mock PublicRoute to just render children
 vi.mock('../../../router/PublicRoute/PublicRoute', () => ({
   PublicRoute: ({ children }: any) => <>{children}</>,
 }));
@@ -68,16 +65,11 @@ describe('LoginPage', () => {
 
   it('shows validation error for empty fields on submit', async () => {
     renderLoginPage();
-    // Force form submit by bypassing disabled state (directly test validateForm behavior)
     const emailInput = screen.getByLabelText('Email');
     const passwordInput = screen.getByLabelText('Password');
     await userEvent.type(emailInput, 'bad-email');
     await userEvent.type(passwordInput, 'pw');
-    // still disabled because invalid email — let's use valid short pw to trigger different error
-    // Actually let's just verify error messages appear through the validation flow
     await userEvent.clear(emailInput);
-    // The form submit itself is what fires validation, but button may be disabled
-    // so we test canSubmitLogin logic by populating valid values
     await userEvent.type(emailInput, 'test@example.com');
     await userEvent.clear(passwordInput);
     await userEvent.type(passwordInput, 'short');
@@ -92,8 +84,6 @@ describe('LoginPage', () => {
   });
 
   it('calls axios.post and login(), then navigates to /dashboard/owner for owner role', async () => {
-    // Server now sets the JWT as an httpOnly cookie and returns { id, role }
-    // in the body. The client never sees the token.
     (axios.post as any).mockResolvedValue({
       data: { data: { id: '1', role: 'owner' } },
     });

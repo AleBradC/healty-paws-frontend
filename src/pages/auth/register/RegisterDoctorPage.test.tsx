@@ -80,8 +80,6 @@ describe("RegisterDoctorPage", () => {
     renderPage();
     await userEvent.click(screen.getByRole("button", { name: /next/i }));
 
-    // Instead of an empty act, use waitFor to let async validation run
-    // and confirm the transition didn't occur.
     await waitFor(() => {
       expect(
         screen.getByRole("heading", {
@@ -131,8 +129,6 @@ describe("RegisterDoctorPage", () => {
       screen.getByRole("button", { name: /create account/i }),
     );
 
-    // Explicitly wait for the side effects using waitFor
-    // rather than relying on un-targeted empty acts.
     await waitFor(() => {
       expect(post).toHaveBeenCalledTimes(1);
     });
@@ -161,7 +157,6 @@ describe("RegisterDoctorPage", () => {
     ).toBeInTheDocument();
 
     await userEvent.clear(priceInputs[0]);
-    // Simulate blur via userEvent.tab() to preserve async act boundary
     await userEvent.tab();
 
     expect(await screen.findByText(/Price is required/i)).toBeInTheDocument();
@@ -183,7 +178,6 @@ describe("RegisterDoctorPage", () => {
       screen.getByRole("button", { name: /create account/i }),
     );
 
-    // findByText loops inside proper `act` bindings on its own
     expect(
       await screen.findByText(/email already exists/i),
     ).toBeInTheDocument();

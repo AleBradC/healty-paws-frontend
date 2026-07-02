@@ -61,9 +61,6 @@ export function useResetPasswordWithToken() {
         return { ok: true };
       } catch (err) {
         const { status, message } = extractError(err);
-        // The server returns 400 INVALID_RESET_TOKEN for unknown, expired, or
-        // already-used tokens. Branch the UI on that specific case instead of
-        // surfacing it as a generic form error.
         if (status === 400) {
           setIsTokenInvalid(true);
         } else {
@@ -74,7 +71,7 @@ export function useResetPasswordWithToken() {
         setIsLoading(false);
       }
     },
-    []
+    [],
   );
 
   const clearError = useCallback(() => setError(undefined), []);

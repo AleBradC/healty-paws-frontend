@@ -62,17 +62,13 @@ export default function RegisterDoctorPage() {
   const specialization = useWatch({ control, name: "specialization" });
   const servicesWatch = useWatch({ control, name: "services" });
 
-  // Replace the services array whenever specialization changes. This keeps
-  // the visible service prompts in sync with the selected specialty and
-  // wipes any prior prices (the prior services don't belong to the new
-  // specialty).
   useEffect(() => {
     if (!specialization) {
       replace([]);
       return;
     }
     const selected = specializationsData.find(
-      (spec) => spec.name === specialization
+      (spec) => spec.name === specialization,
     );
     if (!selected) {
       replace([]);
@@ -81,10 +77,8 @@ export default function RegisterDoctorPage() {
     replace(
       selected.services.map((service) => ({
         name: service.name,
-        // NaN gets surfaced as a "required" message by the schema; using
-        // 0 would let an empty form silently pass the >0 check on bypass.
         price: NaN,
-      }))
+      })),
     );
   }, [specialization, replace]);
 
@@ -94,7 +88,8 @@ export default function RegisterDoctorPage() {
 
   const step1Values = watch(STEP_1_FIELDS);
   const isStep1Complete = step1Values.every(Boolean);
-  const hasStep1Errors = STEP_1_FIELDS.some((field) => !!errors[field]) || isMismatch;
+  const hasStep1Errors =
+    STEP_1_FIELDS.some((field) => !!errors[field]) || isMismatch;
   const canProceedToStep2 = isStep1Complete && !hasStep1Errors;
 
   const handleNext = async () => {
@@ -124,7 +119,7 @@ export default function RegisterDoctorPage() {
     try {
       const response = await axios.post(
         `${API_BASE_URL}${registerDoctorEndpoint}`,
-        payload
+        payload,
       );
       if (response.status === 201) {
         navigate(authLoginPath);
@@ -178,7 +173,11 @@ export default function RegisterDoctorPage() {
                   label="Confirm Password"
                   type="password"
                   showToggle
-                  error={isMismatch ? "Passwords do not match." : errors.confirmPassword?.message}
+                  error={
+                    isMismatch
+                      ? "Passwords do not match."
+                      : errors.confirmPassword?.message
+                  }
                   {...register("confirmPassword")}
                 />
               </section>
@@ -234,7 +233,8 @@ export default function RegisterDoctorPage() {
                         error={
                           touchedFields.services?.[index]?.price ||
                           isSubmitted ||
-                          (servicesWatch && !Number.isNaN(servicesWatch[index]?.price))
+                          (servicesWatch &&
+                            !Number.isNaN(servicesWatch[index]?.price))
                             ? errors.services?.[index]?.price?.message
                             : undefined
                         }

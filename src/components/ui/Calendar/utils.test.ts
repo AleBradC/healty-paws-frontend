@@ -9,7 +9,6 @@ describe('generateTimeSlots', () => {
 
   it('generates correct slots for 9–17 with 30-min interval (workday)', () => {
     const slots = generateTimeSlots(9, 17, 30);
-    // 8 hours × 2 slots/hour = 16
     expect(slots).toHaveLength(16);
     expect(slots[0]).toBe('09:00');
     expect(slots[slots.length - 1]).toBe('16:30');

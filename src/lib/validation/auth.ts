@@ -1,18 +1,6 @@
 import { z } from "zod";
 
-// These schemas mirror the server-side definitions in
-// healthy-paws-service/src/features/registration/registration.validation.ts
-// and authentication.helpers.ts. Keep them in sync — the backend re-validates
-// every request, so a frontend drift just means the user sees a worse error
-// than a clean inline one.
-//
-// Long-term: replace this file with a shared workspace package
-// (e.g. `@healthy-paws/contracts`) consumed by both repos.
 
-// Looser than the registration schema (the backend enforces strict
-// complexity at create time and authenticates login by hash comparison).
-// The 6-char minimum is a UX gate — saves a round trip for obviously-empty
-// or single-character typos. Real credential checking is the server's job.
 export const loginSchema = z.object({
   email: z.string().email("Please enter a valid email address."),
   password: z.string().min(6, "Password must be at least 6 characters."),
@@ -20,9 +8,6 @@ export const loginSchema = z.object({
 
 export type LoginFormValues = z.infer<typeof loginSchema>;
 
-// Reused across registration and reset-password — the regex literally
-// matches the backend's, so a passing client validation guarantees a
-// passing server validation for this rule.
 export const PASSWORD_REGEX =
   /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()\-_=+[\]{};':"\\|,.<>/?]).{8,}$/;
 

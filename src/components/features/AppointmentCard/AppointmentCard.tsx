@@ -32,7 +32,6 @@ export const AppointmentCard: FC<AppointmentCardProps> = ({
 }) => {
   const displayStatus = getAppointmentDisplayStatus(baseStatus, datetime);
   
-  // Terminal states (Cancel, Declined) or waiting states (Upcoming, Confirmed) are disabled for consultation access.
   const isPending = baseStatus === "Pending";
   const isUpcoming = displayStatus === "Upcoming";
   const isConfirmed = displayStatus === "Confirmed";
@@ -56,7 +55,6 @@ export const AppointmentCard: FC<AppointmentCardProps> = ({
     action?.();
   };
 
-  // Only show delete button if it's NOT in 'Start' phase and not currently in action phase
   const showDelete = onDelete && displayStatus !== "Start" && !onAccept && !onDeny;
 
   return (
@@ -70,12 +68,12 @@ export const AppointmentCard: FC<AppointmentCardProps> = ({
         <span>{time}</span>
       </div>
       <div className="appointment-status-wrapper">
-        {/* Hide the status badge when doctor lifecycle actions are visible */}
+        {}
         {!(isPending && (onAccept || onDeny)) && (
           <span className="appointment-status">{displayStatus}</span>
         )}
         
-        {/* Approve/Deny Buttons for Doctors on Pending status */}
+        {}
         {isPending && (onAccept || onDeny) && (
           <div className="lifecycle-actions">
             {onAccept && (

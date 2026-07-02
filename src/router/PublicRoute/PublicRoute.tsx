@@ -4,8 +4,6 @@ import { Outlet, useNavigate } from "react-router-dom";
 import { homePath } from "../../utils/path";
 
 interface PublicRouteProps {
-  // Optional so the component works both as a per-page wrapper and as a
-  // route-level layout via <Route element={<PublicRoute />}>.
   children?: ReactNode;
 }
 

@@ -3,7 +3,6 @@ import { render, screen, act } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { AuthenticationProvider, useAuthentication } from './AuthenticationContext';
 
-// Helper consumer that exposes context state to the DOM and exercises login/logout.
 function AuthConsumer() {
   const { isLoggedIn, user, isLoading, login, logout } = useAuthentication();
   return (
@@ -17,9 +16,6 @@ function AuthConsumer() {
   );
 }
 
-// Minimal mock of the global fetch API. Each test sets a per-call queue of
-// responses so the session-restore call on mount and any logout call can be
-// validated independently.
 type MockResponse = {
   ok: boolean;
   status: number;
@@ -47,8 +43,6 @@ describe('AuthenticationContext', () => {
   });
 
   it('starts with isLoggedIn=false and user=null when /session returns data:null', async () => {
-    // /session is a state-inquiry endpoint: always 200, data is null when
-    // there is no valid session.
     queueResponse({
       ok: true,
       status: 200,
@@ -124,7 +118,6 @@ describe('AuthenticationContext', () => {
   });
 
   it('logout() calls the logout endpoint and resets state', async () => {
-    // Hydrate logged-in first
     queueResponse({
       ok: true,
       status: 200,
@@ -133,7 +126,6 @@ describe('AuthenticationContext', () => {
         data: { id: '1', email: 'testuser@example.com', role: 'owner' },
       }),
     });
-    // Logout call when the user clicks "Logout"
     queueResponse({ ok: true, status: 200 });
 
     render(
@@ -149,7 +141,6 @@ describe('AuthenticationContext', () => {
     expect(screen.getByTestId('is-logged-in')).toHaveTextContent('false');
     expect(screen.getByTestId('user')).toHaveTextContent('null');
 
-    // Last call should be the POST to the logout endpoint.
     const lastCall = fetchMock.mock.calls.at(-1);
     expect(lastCall?.[0]).toMatch(/\/api\/auth\/logout$/);
     expect(lastCall?.[1]).toMatchObject({ method: 'POST', credentials: 'include' });

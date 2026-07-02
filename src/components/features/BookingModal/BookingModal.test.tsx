@@ -4,7 +4,6 @@ import userEvent from '@testing-library/user-event';
 import { BookingModal } from './BookingModal';
 import type { Pet, Doctor } from '../../../types';
 
-// Mock the GraphQL hook so no Apollo client is needed
 vi.mock('../../../lib/graphql/doctors/useDoctors', () => ({
   useDoctors: vi.fn().mockReturnValue({
     doctors: { items: [], totalCount: 0 },
@@ -13,7 +12,6 @@ vi.mock('../../../lib/graphql/doctors/useDoctors', () => ({
   }),
 }));
 
-// Mock step sub-components for focused unit testing
 vi.mock('./components/StepSelectPet', () => ({
   StepSelectPet: ({ pets, onSelect }: any) => (
     <div data-testid="step-select-pet">
@@ -173,8 +171,6 @@ describe('BookingModal', () => {
         onBookingSave={vi.fn()}
       />
     );
-    // First step will be selectPet (still), so navigate past it
-    // Step 1 is selectPet
     expect(screen.getByTestId('step-select-pet')).toBeInTheDocument();
   });
 });

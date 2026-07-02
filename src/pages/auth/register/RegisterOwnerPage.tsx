@@ -14,15 +14,7 @@ import {
 import { PASSWORD_RULE_TEXT } from "../../../lib/validation/auth";
 import "../styles.css";
 
-// Field groups for per-step validation. Using `Path<...>` would be more
-// strict but the literal tuples are clearer at the call site and the
-// schema is small.
-const STEP_1_FIELDS = [
-  "name",
-  "email",
-  "password",
-  "confirmPassword",
-] as const;
+const STEP_1_FIELDS = ["name", "email", "password", "confirmPassword"] as const;
 
 const STEP_2_FIELDS = [
   "pet.name",
@@ -55,9 +47,6 @@ export default function RegisterOwnerPage() {
         name: "",
         type: "",
         breed: "",
-        // RHF + `valueAsNumber: true` turn an empty text input into NaN at
-        // submit time; the schema's refine catches that and surfaces a
-        // "required" message instead of a misleading type error.
         age: NaN,
         weight: NaN,
       },
@@ -70,7 +59,8 @@ export default function RegisterOwnerPage() {
 
   const step1Values = watch(STEP_1_FIELDS);
   const isStep1Complete = step1Values.every(Boolean);
-  const hasStep1Errors = STEP_1_FIELDS.some((field) => !!errors[field]) || isMismatch;
+  const hasStep1Errors =
+    STEP_1_FIELDS.some((field) => !!errors[field]) || isMismatch;
   const canProceedToStep2 = isStep1Complete && !hasStep1Errors;
 
   const handleNext = async () => {
@@ -92,7 +82,7 @@ export default function RegisterOwnerPage() {
             confirmPassword: values.confirmPassword,
           },
           pet: values.pet,
-        }
+        },
       );
       if (response.status === 201) {
         navigate(authLoginPath);
@@ -143,7 +133,11 @@ export default function RegisterOwnerPage() {
                 label="Confirm Password"
                 type="password"
                 showToggle
-                error={isMismatch ? "Passwords do not match." : errors.confirmPassword?.message}
+                error={
+                  isMismatch
+                    ? "Passwords do not match."
+                    : errors.confirmPassword?.message
+                }
                 {...register("confirmPassword")}
               />
               <div className="auth-actions align-end">

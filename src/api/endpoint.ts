@@ -1,6 +1,3 @@
-// Empty default → relative URLs that resolve against the current origin via
-// the gateway (healthy-paws-wrapper). Override with VITE_API_BASE_URL only
-// when the dev frontend is talking directly to a backend on a different origin.
 export const API_BASE_URL: string = import.meta.env.VITE_API_BASE_URL ?? "";
 
 export const registerOwnerEndpoint = "/api/auth/register/owner";

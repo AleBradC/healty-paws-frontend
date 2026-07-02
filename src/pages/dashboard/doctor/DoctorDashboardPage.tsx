@@ -1,9 +1,4 @@
-import {
-  useState,
-  useEffect,
-  type ChangeEvent,
-  type FormEvent,
-} from "react";
+import { useState, useEffect, type ChangeEvent, type FormEvent } from "react";
 import { useNavigate } from "react-router-dom";
 import { format } from "date-fns";
 import { getAppointmentDisplayStatus } from "../../../utils/appointment-status";
@@ -50,8 +45,6 @@ const doctorTabs = [
 export default function DoctorDashboardPage() {
   const navigate = useNavigate();
   const { user } = useAuthentication();
-
-  // --- HOOKS: Data Fetching ---
   const {
     doctor,
     error: doctorError,
@@ -72,22 +65,16 @@ export default function DoctorDashboardPage() {
   const { removeDoctorAvailability } = useRemoveDoctorAvailability();
   const { removeAppointment } = useRemoveAppointment();
   const { updateAppointmentDetails } = useUpdateAppointment();
-
-  // --- STATE: UI & Tabs ---
   const [activeTab, setActiveTab] = useState(() => {
     return localStorage.getItem("doctor_dashboard_active_tab") || "profile";
   });
   const [isAvailabilityModalOpen, setIsAvailabilityModalOpen] = useState(false);
-
-  // --- STATE: Profile Details ---
   const [profileDetails, setProfileDetails] = useState({
     name: "",
     clinicName: "",
     clinicAddress: "",
   });
   const [profileError, setProfileError] = useState<string | null>(null);
-
-  // --- STATE: Services ---
   const [isAddingSpecialization, setIsAddingSpecialization] = useState(false);
   const [newSpecializationSelectionId, setNewSpecializationSelectionId] =
     useState("");
@@ -98,13 +85,10 @@ export default function DoctorDashboardPage() {
     Specialization[]
   >([]);
   const [servicesError, setServicesError] = useState<string | null>(null);
-
-  // --- STATE: Availability ---
   const [doctorAvailability, setDoctorAvailability] = useState<
     Record<string, string[]>
   >({});
 
-  // --- EFFECTS ---
   useEffect(() => {
     localStorage.setItem("doctor_dashboard_active_tab", activeTab);
   }, [activeTab]);
@@ -121,7 +105,7 @@ export default function DoctorDashboardPage() {
           availabilityMap[date] = [];
         }
         availabilityMap[date].push(time);
-      }
+      },
     );
     setDoctorAvailability(availabilityMap);
 
@@ -160,24 +144,24 @@ export default function DoctorDashboardPage() {
     (spec) =>
       spec.name.trim().length === 0 ||
       spec.services.some(
-        (service) => !service.name.trim() || Number(service.price) <= 0
-      )
+        (service) => !service.name.trim() || Number(service.price) <= 0,
+      ),
   );
   const canSaveServices = servicesHaveChanges && !hasEmptyServiceData;
 
   const existingSpecNames = draftSpecializations?.map((ds) => ds.name);
   const availableSpecsToAdd = specializationsData?.filter(
-    (spec) => !existingSpecNames?.includes(spec?.name)
+    (spec) => !existingSpecNames?.includes(spec?.name),
   );
   const appointments = doctor?.appointments ?? [];
   const completedPatientIds = new Set(
     appointments
       .filter((app) => app.status === "Completed")
       .map((app) => app.patient?.id)
-      .filter((id): id is string => Boolean(id))
+      .filter((id): id is string => Boolean(id)),
   );
   const patientsWithCompletedConsultation = (doctor?.patients ?? []).filter(
-    (patient) => completedPatientIds.has(patient.id)
+    (patient) => completedPatientIds.has(patient.id),
   );
   const doctorAvatarStorageKey = user?.id
     ? `avatar-doctor-${user.id}`
@@ -243,7 +227,7 @@ export default function DoctorDashboardPage() {
     if (!newSpecializationSelectionId) return;
 
     const selectedSpecializationData = specializationsData?.find(
-      (spec) => spec?.id === newSpecializationSelectionId
+      (spec) => spec?.id === newSpecializationSelectionId,
     );
 
     if (!selectedSpecializationData) {
@@ -269,14 +253,16 @@ export default function DoctorDashboardPage() {
   const handleUpdateDraftSpecialization = (updatedSpec: Specialization) => {
     setDraftSpecializations((prev) =>
       prev.map((existingSpec) =>
-        existingSpec.id === updatedSpec.id ? updatedSpec : existingSpec
-      )
+        existingSpec.id === updatedSpec.id ? updatedSpec : existingSpec,
+      ),
     );
     if (servicesError) setServicesError(null);
   };
 
   const handleRemoveSpecialization = async (specId: string) => {
-    setDraftSpecializations((prev) => prev.filter((spec) => spec.id !== specId));
+    setDraftSpecializations((prev) =>
+      prev.filter((spec) => spec.id !== specId),
+    );
     if (servicesError) setServicesError(null);
   };
 
@@ -285,7 +271,7 @@ export default function DoctorDashboardPage() {
       for (const service of spec.services) {
         if (service.price <= 0) {
           setServicesError(
-            `Price for "${service.name}" in ${spec.name} must be greater than 0.`
+            `Price for "${service.name}" in ${spec.name} must be greater than 0.`,
           );
           return false;
         }
@@ -310,7 +296,7 @@ export default function DoctorDashboardPage() {
             removeDoctorSpecialization({
               doctorId: doctor.id,
               specializationId: savedSpec.id,
-            })
+            }),
           );
         }
       }
@@ -325,11 +311,11 @@ export default function DoctorDashboardPage() {
                 name: s.name,
                 price: s.price,
               })),
-            })
+            }),
           );
         } else {
           const originalSpec = savedSpecializations.find(
-            (s) => s.id === draftSpec.id
+            (s) => s.id === draftSpec.id,
           );
           if (
             originalSpec &&
@@ -344,7 +330,7 @@ export default function DoctorDashboardPage() {
                   name: s.name,
                   price: s.price,
                 })),
-              })
+              }),
             );
           }
         }
@@ -361,7 +347,7 @@ export default function DoctorDashboardPage() {
   };
 
   const handleSaveAvailability = async (
-    newAvailability: Record<string, string[]>
+    newAvailability: Record<string, string[]>,
   ) => {
     if (
       JSON.stringify(newAvailability) === JSON.stringify(doctorAvailability)
@@ -372,7 +358,7 @@ export default function DoctorDashboardPage() {
 
     const availabilitiesAsISOStrings = Object.entries(newAvailability).flatMap(
       ([date, times]) =>
-        times.map((time) => new Date(`${date}T${time}:00`).toISOString())
+        times.map((time) => new Date(`${date}T${time}:00`).toISOString()),
     );
 
     const input: AddDoctorAvailabilityInput = {
@@ -392,7 +378,7 @@ export default function DoctorDashboardPage() {
   const handleDeleteAvailabilitySlot = async (date: string, time: string) => {
     const slotToDeleteISO = new Date(`${date}T${time}:00`).toISOString();
     const availabilityObject = doctor?.availabilities?.find(
-      (availability) => availability.available_datetime === slotToDeleteISO
+      (availability) => availability.available_datetime === slotToDeleteISO,
     );
 
     if (!availabilityObject) return;
@@ -432,7 +418,7 @@ export default function DoctorDashboardPage() {
   const handleAppointmentClick = (
     appointmentId: string | number,
     baseStatus: string | null | undefined,
-    datetime: string
+    datetime: string,
   ) => {
     const displayStatus = getAppointmentDisplayStatus(baseStatus, datetime);
 
@@ -466,10 +452,10 @@ export default function DoctorDashboardPage() {
         />
         <div className="dashboard-content">
           {activeTab === "profile" && (
-            <DashboardSection 
-              title="My details" 
-              as="form" 
-              className="profile-form" 
+            <DashboardSection
+              title="My details"
+              as="form"
+              className="profile-form"
               onSubmit={handleSaveDetails}
             >
               {profileError && <p className="global-error">{profileError}</p>}
@@ -482,7 +468,10 @@ export default function DoctorDashboardPage() {
                     editable
                     storageKey={doctorAvatarStorageKey}
                   />
-                  <p className="profile-info-text">Update your professional profile picture for your clinic profile.</p>
+                  <p className="profile-info-text">
+                    Update your professional profile picture for your clinic
+                    profile.
+                  </p>
                 </div>
 
                 <div className="profile-main-info">
@@ -517,7 +506,7 @@ export default function DoctorDashboardPage() {
                       />
                     </div>
                   </div>
-                  
+
                   <div className="profile-actions">
                     <Button
                       text="Save changes"
@@ -533,7 +522,10 @@ export default function DoctorDashboardPage() {
           )}
 
           {activeTab === "services" && (
-            <DashboardSection title="My Specializations & Services" className="services-section-wrapper">
+            <DashboardSection
+              title="My Specializations & Services"
+              className="services-section-wrapper"
+            >
               {servicesError && <p className="global-error">{servicesError}</p>}
 
               <div className="add-specialization-controls">
@@ -604,8 +596,10 @@ export default function DoctorDashboardPage() {
             </DashboardSection>
           )}
           {activeTab === "availability" && (
-            <DashboardSection title="My Availability" className="availability-section-wrapper">
-
+            <DashboardSection
+              title="My Availability"
+              className="availability-section-wrapper"
+            >
               <div className="availability-controls">
                 <Button
                   text="Manage Availability"
@@ -647,12 +641,16 @@ export default function DoctorDashboardPage() {
           )}
 
           {activeTab === "appointments" && (
-            <DashboardSection title="My Appointments" className="appointments-section">
+            <DashboardSection
+              title="My Appointments"
+              className="appointments-section"
+            >
               <div className="appointments-list">
                 {appointments.length > 0 ? (
-                  appointments.map((app) => (
+                  appointments.map((app) =>
                     (() => {
-                      const appointmentStatus: string = app.status ?? "Upcoming";
+                      const appointmentStatus: string =
+                        app.status ?? "Upcoming";
                       const isPending = appointmentStatus === "Pending";
                       const isCompleted = appointmentStatus === "Completed";
                       const isCancelled = appointmentStatus === "Cancelled";
@@ -664,7 +662,9 @@ export default function DoctorDashboardPage() {
                           key={app.id}
                           id={app.id}
                           status={appointmentStatus}
-                          doctorName={app.patient?.owner?.name ?? "Unknown Owner"}
+                          doctorName={
+                            app.patient?.owner?.name ?? "Unknown Owner"
+                          }
                           petName={app.patient?.name ?? "Unknown Pet"}
                           date={new Date(app.datetime).toLocaleDateString()}
                           time={new Date(app.datetime).toLocaleTimeString([], {
@@ -680,7 +680,7 @@ export default function DoctorDashboardPage() {
                                   handleAppointmentClick(
                                     app.id,
                                     appointmentStatus,
-                                    app.datetime
+                                    app.datetime,
                                   )
                           }
                           onDelete={
@@ -700,8 +700,8 @@ export default function DoctorDashboardPage() {
                           }
                         />
                       );
-                    })()
-                  ))
+                    })(),
+                  )
                 ) : (
                   <p>You have no upcoming appointments.</p>
                 )}
@@ -710,26 +710,45 @@ export default function DoctorDashboardPage() {
           )}
 
           {activeTab === "patients" && (
-            <DashboardSection title="My Patients" className="patients-list-section">
+            <DashboardSection
+              title="My Patients"
+              className="patients-list-section"
+            >
               <div className="patient-list">
                 {patientsWithCompletedConsultation.length > 0 ? (
-                  patientsWithCompletedConsultation.map((patient: { id: string; name: string; owner?: { name: string } | null }) => (
-                    <div
-                      key={patient.id}
-                      className="patient-card"
-                      onClick={() => handlePatientClick(patient.id)}
-                    >
-                      <div className="patient-info">
-                        <span className="patient-name">
-                          {patient.owner?.name}
-                        </span>
-                        <span className="pet-info"> (Pet: {patient.name})</span>
+                  patientsWithCompletedConsultation.map(
+                    (patient: {
+                      id: string;
+                      name: string;
+                      owner?: { name: string } | null;
+                    }) => (
+                      <div
+                        key={patient.id}
+                        className="patient-card"
+                        onClick={() => handlePatientClick(patient.id)}
+                      >
+                        <div className="patient-info">
+                          <span className="patient-name">
+                            {patient.owner?.name}
+                          </span>
+                          <span className="pet-info">
+                            {" "}
+                            (Pet: {patient.name})
+                          </span>
+                        </div>
+                        <Button
+                          text="View Details"
+                          color="secondary"
+                          size="sm"
+                        />
                       </div>
-                      <Button text="View Details" color="secondary" size="sm" />
-                    </div>
-                  ))
+                    ),
+                  )
                 ) : (
-                  <p>You don't have any patients yet. Patients will appear here after their consultation is completed.</p>
+                  <p>
+                    You don't have any patients yet. Patients will appear here
+                    after their consultation is completed.
+                  </p>
                 )}
               </div>
             </DashboardSection>

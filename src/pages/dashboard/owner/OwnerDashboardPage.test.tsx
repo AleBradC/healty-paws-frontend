@@ -63,7 +63,6 @@ vi.mock('../../../lib/graphql/owner/useUpdateOwner', () => ({
   useUpdateOwner: () => ({ updateOwner: vi.fn(), loading: false }),
 }));
 
-// Mock BookingModal to avoid complexity
 vi.mock('../../../components/features/BookingModal/BookingModal', () => ({
   BookingModal: ({ onClose }: any) => (
     <div data-testid="booking-modal">

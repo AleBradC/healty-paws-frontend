@@ -302,7 +302,6 @@ describe('StepCalendar', () => {
     const { container } = render(
       <StepCalendar doctor={doctor} selectedSlot={null} onSelect={vi.fn()} />
     );
-    // Calendar always renders a root element — just assert it's present.
     expect(container.firstChild).not.toBeNull();
   });
 
@@ -311,7 +310,7 @@ describe('StepCalendar', () => {
       id: 'd1',
       name: 'Dr Strange',
       availabilities: [
-        { id: 'a1', available_datetime: '2000-01-01T10:00:00Z' }, // past
+        { id: 'a1', available_datetime: '2000-01-01T10:00:00Z' },
       ],
       appointments: [
         {
@@ -340,8 +339,6 @@ describe('StepCalendar', () => {
     const { container } = render(
       <StepCalendar doctor={doctor} selectedSlot={null} onSelect={vi.fn()} />
     );
-    // Smoke test only — verify the component renders without throwing for the
-    // edge cases above (no future availability, declined-style filter).
     expect(container.firstChild).not.toBeNull();
   });
 });

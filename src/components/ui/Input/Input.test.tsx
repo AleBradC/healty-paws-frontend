@@ -45,7 +45,6 @@ describe('Input', () => {
     const input = container.querySelector('input')!;
     const toggle = screen.getByRole('button', { name: /show password/i });
 
-    // Initially password type
     expect(document.querySelector('input')).toHaveAttribute('type', 'password');
     await userEvent.click(toggle);
     expect(document.querySelector('input')).toHaveAttribute('type', 'text');
